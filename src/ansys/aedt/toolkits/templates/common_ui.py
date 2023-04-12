@@ -4,21 +4,25 @@ import time
 
 from PySide6 import QtCore
 import psutil
-from pyaedt import Hfss
-from pyaedt import settings
+from pyaedt import Hfss, settings
 
 logger = logging.getLogger("Global")
 line_colors = ["g", "b", "r", "y", "w"]
 
 
 class RunnerSignals(QtCore.QObject):
+    """Trigger."""
+
     progressed = QtCore.Signal(int)
     messaged = QtCore.Signal(str)
     completed = QtCore.Signal()
 
 
 class RunnerHfss(QtCore.QRunnable):
+    """Hfss launcher."""
+
     def __init__(self):
+        """Init."""
         super(RunnerHfss, self).__init__()
         self.signals = RunnerSignals()
         self.hfss_args = {
@@ -30,6 +34,7 @@ class RunnerHfss(QtCore.QRunnable):
         }
 
     def run(self):
+        """Launch Hfss."""
         self.signals.progressed.emit(int(25))
         self.signals.messaged.emit(str(25))
         selected_process = self.hfss_args["selected_process"]
@@ -75,13 +80,17 @@ class RunnerHfss(QtCore.QRunnable):
 
 
 class RunnerAnalsysis(QtCore.QRunnable):
+    """Launch and manage analysis."""
+
     def __init__(self):
+        """Init."""
         super(RunnerAnalsysis, self).__init__()
         self.signals = RunnerSignals()
         self.logger_file = ""
         self.lines = []
 
     def run(self):
+        """Run simulation."""
         finished = False
         while not finished:
             with open(self.logger_file, "r") as f:
@@ -99,10 +108,14 @@ class RunnerAnalsysis(QtCore.QRunnable):
 
 
 class QtHandler(logging.Handler):
+    """Message streamer."""
+
     def __init__(self):
+        """Init."""
         logging.Handler.__init__(self)
 
     def emit(self, record):
+        """Emit message."""
         record = self.format(record)
         XStream.stdout().write("{}\n".format(record))
 
@@ -166,23 +179,29 @@ def active_sessions(version=None):
 
 
 class XStream(QtCore.QObject):
+    """Message streamer."""
+
     _stdout = None
     _stderr = None
 
     messageWritten = QtCore.Signal(str)
 
     def flush(self):
+        """Pass."""
         pass
 
     def fileno(self):
+        """File."""
         return -1
 
     def write(self, msg):
+        """Write a message."""
         if not self.signalsBlocked():
             self.messageWritten.emit(msg)
 
     @staticmethod
     def stdout():
+        """Info logger."""
         if not XStream._stdout:
             XStream._stdout = XStream()
             sys.stdout = XStream._stdout
@@ -190,6 +209,7 @@ class XStream(QtCore.QObject):
 
     @staticmethod
     def stderr():
+        """Error logger."""
         if not XStream._stderr:
             XStream._stderr = XStream()
             sys.stderr = XStream._stderr
