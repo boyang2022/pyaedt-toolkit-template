@@ -1,4 +1,8 @@
-"""aedt.toolkits.templates"""
+"""
+pyaedt-toolkits.
+
+ansys.aedt.toolkits.template
+"""
 
 try:
     import importlib.metadata as importlib_metadata
