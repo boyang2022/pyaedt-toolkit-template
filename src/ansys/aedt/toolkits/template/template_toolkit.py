@@ -2,14 +2,14 @@
 import os
 from pathlib import Path
 import sys
-import json
 
-import ansys.aedt.toolkits.templates.common_ui
-from ansys.aedt.toolkits.templates.common_ui import RunnerHfss
-from ansys.aedt.toolkits.templates.common_ui import XStream
-from ansys.aedt.toolkits.templates.common_ui import active_sessions
-from ansys.aedt.toolkits.templates.common_ui import handler
-from ansys.aedt.toolkits.templates.common_ui import logger
+sys.path.append(str(Path(os.path.dirname(os.path.realpath(__file__))).parents[3]))
+import ansys.aedt.toolkits.template.common_ui
+from ansys.aedt.toolkits.template.common_ui import RunnerDesktop
+from ansys.aedt.toolkits.template.common_ui import XStream
+from ansys.aedt.toolkits.template.common_ui import active_sessions
+from ansys.aedt.toolkits.template.common_ui import handler
+from ansys.aedt.toolkits.template.common_ui import logger
 
 current_path = Path(os.path.dirname(os.path.realpath(__file__)))
 package_path = current_path.parents[3]
@@ -17,12 +17,13 @@ sys.path.append(os.path.abspath(package_path))
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
+from pyaedt import Desktop
 from pyaedt import Hfss
 from pyaedt.misc import list_installed_ansysem
 import qdarkstyle
 
-
-from ansys.aedt.toolkits.templates.ui.ui_main import Ui_MainWindow
+from ansys.aedt.toolkits.template.backend.template_script import TemplateBackend
+from ansys.aedt.toolkits.template.ui.ui_main import Ui_MainWindow
 
 images_path = os.path.join(os.path.dirname(__file__), "ui", "images")
 os.environ["QT_API"] = "pyside6"
@@ -35,6 +36,7 @@ logger.addHandler(handler)
 
 class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, desktop_pid=None, desktop_version=None):
+        # Initial configuration
         super(ApplicationWindow, self).__init__()
         self.__thread = QtCore.QThreadPool()
         self.__thread.setMaxThreadCount(4)
@@ -43,7 +45,6 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._font = QtGui.QFont()
         self._font.setPointSize(12)
         self.setFont(self._font)
-
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api="pyside6"))
         icon = QtGui.QIcon()
         icon.addFile(
@@ -58,25 +59,30 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             QtGui.QIcon.Normal,
             QtGui.QIcon.On,
         )
+
+        # Settings configuration
+
         self.setWindowIcon(icon)
-
-        self.menubar.setFont(self._font)
+        self.top_menu_bar.setFont(self._font)
         self.setWindowTitle("PyAEDT Toolkit Template Wizard")
-        self.length_unit = ""
-        self.create_button = None
-
+        # Close toolkit and release AEDT button
         self.release_and_exit_button.clicked.connect(self.release_and_close)
+        # Close toolkit button
         self.release_button.clicked.connect(self.release_only)
-        self.hfss = None
-        self.connect_hfss.clicked.connect(self.launch_hfss)
+        # Detect existing AEDT installation
         for ver in list_installed_ansysem():
             ver = "20{}.{}".format(
                 ver.replace("ANSYSEM_ROOT", "")[:2], ver.replace("ANSYSEM_ROOT", "")[-1]
             )
             self.aedt_version_combo.addItem(ver)
+        # Find active AEDT sessions
         self.aedt_version_combo.currentTextChanged.connect(self.find_process_ids)
+        # Browse AEDT project if needed
         self.browse_project.clicked.connect(self.browse_for_project)
-
+        # Launch AEDT or connect to existing AEDT project
+        self.aedtapp = None
+        self.connect_aedtapp.clicked.connect(self.launch_aedtapp)
+        # Send message to the log
         tc = self.log_text.textCursor()
         tc.setPosition(self.log_text.document().characterCount())
         self.log_text.setTextCursor(tc)
@@ -84,12 +90,16 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         XStream.stderr().messageWritten.connect(lambda value: self.write_log_line(value))
         self.find_process_ids()
 
+        # Design configuration
+
+        # Push button action
+        self.create_geometry_buttom.clicked.connect(self.crate_geometry)
+
+        # Detect existing AEDT installation
         if desktop_pid or desktop_version:
-            self.launch_hfss(desktop_pid, desktop_version)
+            self.launch_aedtapp(desktop_pid, desktop_version)
 
-
-    def value_changed(self):
-        self.slider_value.setText(str(self.sweep_slider.value()))
+    # General methods
 
     def write_log_line(self, value):
         self.log_text.insertPlainText(value)
@@ -106,8 +116,6 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             return
         if self.hfss and sel and key in self.hfss.variable_manager.independent_variable_names:
-            if self.oantenna.length_unit not in val:
-                val = val + self.oantenna.length_unit
             self.hfss[key] = val
             ansys.aedt.toolkits.antennas.common_ui.logger.info(
                 "Key {} updated to value {}.".format(key, val)
@@ -141,7 +149,7 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     "Process {} on Grpc {}".format(session[0], session[1])
                 )
 
-    def launch_hfss(self, pid=None, version=None):
+    def launch_aedtapp(self, pid=None, version=None):
         non_graphical = eval(self.non_graphical_combo.currentText())
         if version is None:
             version = self.aedt_version_combo.currentText()
@@ -158,26 +166,25 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             "projectname": projectname,
             "process_id_combo_splitted": process_id_combo_splitted,
         }
-        print(args)
-        if self.hfss:
+        if self.aedtapp:
             try:
-                self.hfss.release_desktop(False, False)
+                self.aedtapp.release_desktop(False, False)
             except:
                 pass
-        worker_1 = RunnerHfss()
-        worker_1.hfss_args = args
+        worker_1 = RunnerDesktop()
+        worker_1.aedtapp_args = args
         worker_1.signals.progressed.connect(lambda value: self.update_progress(value))
-        worker_1.signals.completed.connect(lambda: self.update_hfss(worker_1, version))
+        worker_1.signals.completed.connect(lambda: self.update_aedtapp(worker_1, version))
 
         self.__thread.start(worker_1)
         pass
 
     def update_progress(self, value):
-        self.progressBar.setValue(value)
-        if self.progressBar.isHidden():
-            self.progressBar.setVisible(True)
+        self.progress_bar.setValue(value)
+        if self.progress_bar.isHidden():
+            self.progress_bar.setVisible(True)
 
-    def update_hfss(
+    def update_aedtapp(
         self,
         worker_1,
         version=None,
@@ -203,14 +210,13 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if version is None:
                 version = self.aedt_version_combo.currentText()
 
-            self.hfss = Hfss(
+            self.aedtapp = Desktop(
                 specified_version=version,
-                projectname=worker_1.projectname,
-                designname=worker_1.designname,
                 aedt_process_id=worker_1.pid,
+                new_desktop_session=False,
             )
         else:
-            self.hfss = worker_1.hfss
+            self.aedtapp = worker_1.aedtapp
         self.update_progress(100)
 
     def add_status_bar_message(self, message):
@@ -226,15 +232,15 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setStatusBar(myStatus)
 
     def release_only(self):
-        """Release Desktop."""
-        if self.hfss:
-            self.hfss.release_desktop(False, False)
+        """Release desktop."""
+        if self.aedtapp:
+            self.aedtapp.release_desktop(False, False)
         self.close()
 
     def release_and_close(self):
-        """Release Desktop."""
-        if self.hfss:
-            self.hfss.release_desktop(True, True)
+        """Release and close desktop."""
+        if self.aedtapp:
+            self.aedtapp.release_desktop(True, True)
         self.close()
 
     def closeEvent(self, event):
@@ -248,7 +254,40 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             event.ignore()
 
+    # Toolkit specific methods
 
+    def crate_geometry(self):
+        """Create a box or sphere in a random position."""
+        if self.progress_bar.value() < 100:
+            self.add_status_bar_message("Waiting for the previous process to terminate.")
+            return
+        self.progress_bar.setValue(0)
+        if isinstance(self.aedtapp, type(Desktop())):
+            if not self.aedtapp.design_list():
+                # If no design exist then create a new HFSS design
+                self.add_status_bar_message("Adding an HFSS design to the project.")
+                self.aedtapp = Hfss(
+                    specified_version=self.aedtapp.aedt_version_id,
+                    aedt_process_id=self.aedtapp.aedt_process_id,
+                    new_desktop_session=False,
+                )
+            else:
+                oproject = self.aedtapp.odesktop.GetActiveProject()
+                projectname = oproject.GetName()
+                activedesign = oproject.GetActiveDesign().GetName()
+                self.aedtapp = self.aedtapp[[projectname, activedesign]]
+
+        multiplier = self.multiplier.text()
+        if not multiplier.isdigit():
+            multiplier = 1.0
+
+        app = TemplateBackend(self.aedtapp, dimension_multiplier=float(multiplier))
+        if self.geometry_combo.currentText() == "Box":
+            comp = app.draw_box()
+        else:
+            comp = app.draw_sphere()
+        self.write_log_line("Component {} added.".format(comp.name))
+        self.update_progress(100)
 
 
 if __name__ == "__main__":

@@ -4,7 +4,8 @@ import time
 
 from PySide6 import QtCore
 import psutil
-from pyaedt import Hfss, settings
+from pyaedt import Desktop
+from pyaedt import settings
 
 logger = logging.getLogger("Global")
 line_colors = ["g", "b", "r", "y", "w"]
@@ -18,73 +19,74 @@ class RunnerSignals(QtCore.QObject):
     completed = QtCore.Signal()
 
 
-class RunnerHfss(QtCore.QRunnable):
-    """Hfss launcher."""
+class RunnerDesktop(QtCore.QRunnable):
+    """Desktop launcher."""
 
     def __init__(self):
         """Init."""
-        super(RunnerHfss, self).__init__()
+        super(RunnerDesktop, self).__init__()
         self.signals = RunnerSignals()
-        self.hfss_args = {
+        self.aedtapp_args = {
             "non_graphical": False,
-            "version": "2023.2",
+            "version": "2023.1",
             "selected_process": "Create New Session",
             "projectname": None,
             "process_id_combo_splitted": [],
         }
 
     def run(self):
-        """Launch Hfss."""
+        """Launch Desktop."""
         self.signals.progressed.emit(int(25))
         self.signals.messaged.emit(str(25))
-        selected_process = self.hfss_args["selected_process"]
-        projectname = self.hfss_args["projectname"]
-        version = self.hfss_args["version"]
-        non_graphical = self.hfss_args["non_graphical"]
-        process_id_combo_splitted = self.hfss_args["process_id_combo_splitted"]
+        selected_process = self.aedtapp_args["selected_process"]
+        projectname = self.aedtapp_args["projectname"]
+        version = self.aedtapp_args["version"]
+        non_graphical = self.aedtapp_args["non_graphical"]
+        process_id_combo_splitted = self.aedtapp_args["process_id_combo_splitted"]
         self.signals.progressed.emit(int(50))
         if selected_process == "Create New Session":
             settings.use_grpc_api = True
-            self.hfss = Hfss(
-                projectname=projectname,
+            self.aedtapp = Desktop(
                 specified_version=version,
                 non_graphical=non_graphical,
                 new_desktop_session=True,
             )
         elif len(process_id_combo_splitted) == 5:
             settings.use_grpc_api = True
-            self.hfss = Hfss(
-                projectname=projectname,
+            self.aedtapp = Desktop(
                 specified_version=version,
                 non_graphical=non_graphical,
                 port=int(process_id_combo_splitted[-1]),
+                new_desktop_session=False,
             )
         else:
             settings.use_grpc_api = False
-            self.hfss = Hfss(
-                projectname=projectname,
+            self.aedtapp = Desktop(
                 specified_version=version,
                 non_graphical=non_graphical,
                 aedt_process_id=int(process_id_combo_splitted[1]),
+                new_desktop_session=False,
             )
-        if "non_graphical" in self.hfss_args:
+
+        if projectname:
+            self.aedtapp.odesktop.OpenProject(projectname)
+
+        if "non_graphical" in self.aedtapp_args:
             if not settings.use_grpc_api:
-                self.pid = self.hfss.odesktop.GetProcessID()
-                self.projectname = self.hfss.project_name
-                self.designname = self.hfss.design_name
-                self.hfss.release_desktop(False, False)
+                self.pid = self.aedtapp.odesktop.GetProcessID()
+                self.aedtapp.release_desktop(False, False)
             else:
                 self.pid = -1
         time.sleep(5)
         self.signals.completed.emit()
 
 
-class RunnerAnalsysis(QtCore.QRunnable):
+class RunnerAnalysis(QtCore.QRunnable):
     """Launch and manage analysis."""
 
     def __init__(self):
         """Init."""
-        super(RunnerAnalsysis, self).__init__()
+        super(RunnerAnalysis, self).__init__()
         self.signals = RunnerSignals()
         self.logger_file = ""
         self.lines = []

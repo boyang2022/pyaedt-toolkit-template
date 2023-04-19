@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
-name = "ansys-aedt-toolkit-templates"
+name = "ansys-aedt-toolkit-template"
 dynamic = ["version"]
 description = "A python toolkit to build motor design workflow."
 readme = "README.rst"
@@ -47,7 +47,7 @@ doc = [
 ]
 
 [tool.flit.module]
-name = "ansys.aedt.toolkits.templates"
+name = "ansys.aedt.toolkits.template"
 
 [project.urls]
 Source = "https://github.com/pyansys/pyaedt-toolkit-template.git"
