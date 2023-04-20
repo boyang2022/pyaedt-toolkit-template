@@ -4,7 +4,6 @@ from pathlib import Path
 import sys
 
 sys.path.append(str(Path(os.path.dirname(os.path.realpath(__file__))).parents[3]))
-import ansys.aedt.toolkits.template.common_ui
 from ansys.aedt.toolkits.template.common_ui import RunnerDesktop
 from ansys.aedt.toolkits.template.common_ui import XStream
 from ansys.aedt.toolkits.template.common_ui import active_sessions
@@ -106,21 +105,6 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         tc = self.log_text.textCursor()
         tc.setPosition(self.log_text.document().characterCount())
         self.log_text.setTextCursor(tc)
-
-    def update_project(self):
-        sel = self.property_table.selectedItems()
-        if sel and self.oantenna:
-            sel_key = self.property_table.item(self.property_table.row(sel[0]), 0).text()
-            key = self.oantenna.synthesis_parameters.__getattribute__(sel_key).hfss_variable
-            val = self.property_table.item(self.property_table.row(sel[0]), 1).text()
-        else:
-            return
-        if self.hfss and sel and key in self.hfss.variable_manager.independent_variable_names:
-            self.hfss[key] = val
-            ansys.aedt.toolkits.antennas.common_ui.logger.info(
-                "Key {} updated to value {}.".format(key, val)
-            )
-            self.add_status_bar_message("Project updated.")
 
     def browse_for_project(self):
         dialog = QtWidgets.QFileDialog()
