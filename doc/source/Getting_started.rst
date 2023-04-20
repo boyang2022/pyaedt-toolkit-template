@@ -16,22 +16,20 @@ The toolkit could be installed inside AEDT using
 You could install PyAEDT and all dependencies using the CPython 3.7 base interpreter from AEDT installation,
 PyAEDT installation documentation has a batch file for easy installation.
 
-#. Download and execute the batch file from PyAEDT documentation. `Install from a batch file
- <https://aedt.docs.pyansys.com/version/stable/Getting_started/Installation.html#install-from-a-batch-file>`_.
+#. Download and execute the batch file from PyAEDT documentation. `Install from a batch file <https://aedt.docs.pyansys.com/version/stable/Getting_started/Installation.html#install-from-a-batch-file>`_.
 
 #. Open the console:
 
-.. image:: ./Resources/toolkit.png
-  :width: 800
-  :alt: PyAEDT toolkits in AEDT
+    .. image:: ./_static/toolkits.png
+      :width: 800
+      :alt: PyAEDT toolkits in AEDT
 
-.. image:: ./Resources/console.png
-  :width: 800
-  :alt: PyAEDT console in AEDT
+    .. image:: ./_static/console.png
+      :width: 800
+      :alt: PyAEDT console in AEDT
 
-#. Connect to the desktop and run the `add toolkit method
- <https://aedt.docs.pyansys.com/version/stable/API/_autosummary/
- pyaedt.desktop.Desktop.add_custom_toolkit.html#pyaedt.desktop.Desktop.add_custom_toolkit>`_
+
+#. Connect to the desktop and run the `add toolkit method <https://aedt.docs.pyansys.com/version/stable/API/_autosummary/pyaedt.desktop.Desktop.add_custom_toolkit.html#pyaedt.desktop.Desktop.add_custom_toolkit>`_:
 
     .. code:: python
 
@@ -39,9 +37,9 @@ PyAEDT installation documentation has a batch file for easy installation.
 
 #. Close the console and open the toolkit:
 
-.. image:: ./Resources/toolkit_in_AEDT.png
-  :width: 800
-  :alt: PyAEDT template toolkit in AEDT
+    .. image:: ./_static/toolkit_in_AEDT.png
+      :width: 800
+      :alt: PyAEDT template toolkit in AEDT
 
 
 Install the toolkit inside AEDT and run the UI for any CPython base interpreter
@@ -100,9 +98,9 @@ if you have PyAEDT installed, you can skip step 2.
         # Desktop is released here
         aedtapp.release_desktop()
 
-#. Open AEDT manually, create an HFSS design and run the toolkit:
+#. Open AEDT manually and run the toolkit:
 
-.. image:: ./Resources/toolkit_in_AEDT.png
+.. image:: ./_static/toolkit_in_AEDT.png
   :width: 800
   :alt: PyAEDT template toolkit in AEDT
 
@@ -141,9 +139,9 @@ if you have installed the toolkit in the virtual environment you can skip step 2
 
       python .venv\Lib\site-packages\ansys\aedt\toolkits\template\template_toolkit.py
 
-.. image:: ./Resources/template_toolkit_wizard.png
-  :width: 800
-  :alt: Antenna Toolkit UI, Settings Tab
+    .. image:: ./_static/template_toolkit_wizard.png
+      :width: 800
+      :alt: Antenna Toolkit UI, Settings Tab
 
 Install the toolkit in the console and use the API
 --------------------------------------------------
@@ -179,7 +177,7 @@ if you have installed the toolkit in the virtual environment you can skip step 2
 
       python
 
-#. Open AEDT and create a conical horn antenna by run this command:
+#. Open AEDT and draw a box in a random position by run these commands:
 
     .. code:: python
 

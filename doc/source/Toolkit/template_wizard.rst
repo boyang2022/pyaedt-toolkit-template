@@ -1,43 +1,23 @@
-========================
-Antenna wizard reference
-========================
+================
+Wizard reference
+================
 
-This section describes user interface available in AEDT's **Antenna Wizard**.
-To run **Antenna Wizard**, you must have a licensed copy of Ansys Electronics
+This section describes user interface available in AEDT's **Toolkit Template Wizard**.
+To run **Toolkit Template Wizard**, you must have a licensed copy of Ansys Electronics
 Desktop (AEDT) installed.
 
-Once **Antenna Wizard** is launched user can choose settings from first page and connect to an existing
+Once **Toolkit Template Wizard** is launched user can choose settings from first page and connect to an existing
 Electronics Desktop session or create a new session.
 
-.. image:: ../Resources/antenna_toolkit_p1.png
+.. image:: ../_static/template_toolkit_wizard.png
   :width: 800
   :alt: Antenna Toolkit UI, Settings Tab
 
 
-After Electronics Desktop is launched, user can move to design tab and select one antenna from the menu.
+After Electronics Desktop is launched, user can assign a multiplier value which will be applied to the dimensions of
+the geometry selected in the combo box (box or sphere). The user can push the button **Create geometry** and it will
+create the selected geometry with a randon position and color.
 
-.. image:: ../Resources/antenna_toolkit.png
+.. image:: ../_static/design.png
   :width: 800
   :alt: Antenna Toolkit UI, Design Tab
-
-Once the antenna is loaded the user can click in the synthesis button and generate the antenna parameters
-
-.. image:: ../Resources/antenna_toolkit_synth.png
-  :width: 800
-  :alt: Antenna Toolkit UI, Synthesis Tab
-
-User can then click the Generate button and create the antenna in Electronics Desktop.
-
-.. image:: ../Resources/aedt_antenna.png
-  :width: 800
-  :alt: AEDT Generated Antenna
-
-Moving to Analysis Tab, user can click Analyze Project button. AEDT project is saved, closed and solved.
-At the end of the simulation, results are loaded in UI.
-
-.. image:: ../Resources/results.png
-  :width: 800
-  :alt: Results view
-
-User can now iterate by changing some of the parameters in the Design tab and click Analyze Project button again.
-Results are overlapped.

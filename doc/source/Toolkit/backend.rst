@@ -1,5 +1,5 @@
-bowtie
-======
+Backend Template
+================
 This section list the available bowtie antennas:
 
 .. currentmodule:: ansys.aedt.toolkits.template.backend.template_script
@@ -14,13 +14,25 @@ The API must be used using PyAEDT as in the following example:
 
 .. code:: python
 
+    # Launch AEDT
     from pyaedt import Hfss
-    from ansys.aedt.toolkits.antennas.models.bowtie import BowTie
 
-    aedtapp = Hfss(specified_version="2023.1", non_graphical=False)
-    # Create antenna
-    ohorn = aedtapp.add_from_toolkit(BowTie, draw=True)
-    ...
+    aedtapp = Hfss(
+        specified_version="2023.1",
+        non_graphical=False,
+        new_desktop_session=True,
+        close_on_exit=True,
+    )
+    # Import backend
+    from ansys.aedt.toolkits.template.backend.template_script import TemplateBackend
+
+    # Backend object
+    template = TemplateBackend(aedtapp)
+
+    # Create a box in a random position
+    b = template.draw_box()
+
+    # Desktop is released here
     aedtapp.release_desktop()
 
 

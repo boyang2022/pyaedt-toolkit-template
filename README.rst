@@ -1,5 +1,5 @@
-PyAEDT Antenna toolkit
-======================
+PyAEDT template toolkit
+=======================
 
 |pyansys| |PythonVersion| |GH-CI| |MIT| |black|
 
@@ -37,7 +37,7 @@ documentation provides
 and `Contribute
 <https://aedt.antenna.toolkit.docs.pyansys.com/version/dev/Contributing.html>`_ sections.
 
-On the `PyAEDT Template toolkit Issues <https://github.com/pyansys/pyaedt-toolkit-template/issues>`_ page, you can
+On the `PyAEDT template toolkit issues <https://github.com/pyansys/pyaedt-toolkit-template/issues>`_ page, you can
 create issues to submit questions, report bugs, and request new features.
 
 License

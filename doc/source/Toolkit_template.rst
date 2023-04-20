@@ -2,17 +2,21 @@
 New toolkit implementation
 ==========================
 
-This repository is a template for any new PyAEDT toolkit. It standardizes the way of PyAEDT toolkits implementation, it
-will make these toolkits easier to maintain, improve and understand.
+This repository is a template for any new PyAEDT toolkit. It standardizes PyAEDT toolkits implementation.
+
 The **PyAEDT Toolkit Template** is a working toolkit able to connect to an existing AEDT session, open an existing
-AEDT project or initialize a new AEDT session. There are common parts which should not be modified, and others
-which will be different depending on the new toolkit implementation.
-In the following sections, we will define best practices to implement your own toolkit.
+AEDT project or initialize a new AEDT session, which should be the basic functionality of any toolkit.
+In addition, it creates boxes and spheres in random positions as an example of AEDT control.
+
+There are common parts which should not be modified, and others which will be different depending on
+the new toolkit implementation. In the following sections, we will define best practices to implement your own toolkit.
 
 Create a new repository in GitHub
 ---------------------------------
 
-The first step is to create a new repository, it could be Private at the beginning and then make it Internal or Public.
+The first step is to create a new repository, it could be Private, Internal or Public,
+you could start making it Private.
+
 You could create this repository inside the `PyAnsys organization <https://github.com/pyansys>`_.
 If you're an employee of `Ansys Inc. <https://github.com/pyansys>`_,
 you can join the organization by visiting
@@ -32,7 +36,7 @@ The naming convention for PyAEDT toolkits is **pyaedt-toolkit-new_toolkit_name**
 Duplicate the template repository
 ---------------------------------
 
-Before you can push the template repository to your new repository, you must create the new repository on GitHub.com.
+Duplicate the template in a local repository and then push it in the GitHub repository created in the first step.
 
 #. Open Git Bash.
 
@@ -55,11 +59,6 @@ Before you can push the template repository to your new repository, you must cre
 
       cd ..
       rm -rf OLD-REPOSITORY.git
-
-.. image:: ./Resources/toolkit_in_AEDT.png
-  :width: 800
-  :alt: PyAEDT toolkit installed
-
 
 Modify general settings
 -----------------------

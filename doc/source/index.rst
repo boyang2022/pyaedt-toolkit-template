@@ -9,7 +9,7 @@ PyAEDT toolkit template documentation  |version|
 .. toctree::
    :hidden:
 
-   Toolkit template step by step
+   Toolkit_template
    Getting_started
    Toolkit/template_wizard
    Toolkit/index
