@@ -74,6 +74,14 @@ Create unittest
 
 Create user interface
 ---------------------
+    .. code:: bash
+
+       pyside6-designer
+
+    .. code:: bash
+
+       pyside6-uic ui\toolkit.ui -o ui\ui_main.py
+
 
 Create documentation
 --------------------

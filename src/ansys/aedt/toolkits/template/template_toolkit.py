@@ -94,6 +94,9 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Push button action
         self.create_geometry_buttom.clicked.connect(self.crate_geometry)
 
+        # Push top bar action
+        self.action_export_model.triggered.connect(lambda checked: self.export_model())
+
         # Detect existing AEDT installation
         if desktop_pid or desktop_version:
             self.launch_aedtapp(desktop_pid, desktop_version)
@@ -215,6 +218,50 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         myStatus.showMessage(message, 3000000)
         self.setStatusBar(myStatus)
 
+    def add_image(self, image_path):
+        """Add the image to antenna settings."""
+        line_0 = QtWidgets.QHBoxLayout()
+        line_0.setObjectName("line_0")
+
+        line_0_spacer = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
+
+        line_0.addItem(line_0_spacer)
+
+        antenna_image = QtWidgets.QLabel()
+        antenna_image.setObjectName("image")
+
+        antenna_image.setMaximumHeight(self.centralwidget.height() / 3)
+        antenna_image.setScaledContents(True)
+        _pixmap = QtGui.QPixmap(image_path)
+        _pixmap = _pixmap.scaled(
+            antenna_image.width(),
+            antenna_image.height(),
+            QtCore.Qt.KeepAspectRatio,
+            QtCore.Qt.SmoothTransformation,
+        )
+        antenna_image.setPixmap(_pixmap)
+
+        line_0.addWidget(antenna_image)
+
+        line_0_spacer = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
+        )
+
+        line_0.addItem(line_0_spacer)
+        return line_0
+
+    def add_header(self, image_name):
+        top_spacer = QtWidgets.QSpacerItem(
+            0, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed
+        )
+
+        self.layout_settings.addItem(top_spacer, 2, 0, 1, 1)
+
+        image = self.add_image(os.path.join(images_path, image_name))
+        self.layout_settings.addLayout(image, 0, 0, 1, 1)
+
     def release_only(self):
         """Release desktop."""
         if self.aedtapp:
@@ -271,6 +318,42 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             comp = app.draw_sphere()
         self.write_log_line("Component {} added.".format(comp.name))
+        self.update_progress(100)
+
+    def export_model(self):
+        """Export picture and show in the UI."""
+        if self.progress_bar.value() < 100:
+            self.add_status_bar_message("Waiting for the previous process to terminate.")
+            return
+        self.progress_bar.setValue(0)
+
+        if isinstance(self.aedtapp, type(Desktop())):
+            if not self.aedtapp.design_list():
+                # If no design exist then create a new HFSS design
+                self.add_status_bar_message("Adding an HFSS design to the project.")
+                self.aedtapp = Hfss(
+                    specified_version=self.aedtapp.aedt_version_id,
+                    aedt_process_id=self.aedtapp.aedt_process_id,
+                    new_desktop_session=False,
+                )
+            else:
+                oproject = self.aedtapp.odesktop.GetActiveProject()
+                projectname = oproject.GetName()
+                activedesign = oproject.GetActiveDesign().GetName()
+                self.aedtapp = self.aedtapp[[projectname, activedesign]]
+        # Export picture
+        path = os.path.join(self.aedtapp.working_directory, "picture.png")
+        self.aedtapp.plot(show=False, export_path=path)
+
+        w = self.picture.geometry().width()
+        h = self.picture.geometry().height()
+
+        self.picture.setFixedSize(w, h)
+        pixmap = QtGui.QPixmap(path)
+        pixmap = pixmap.scaled(w, h)
+        self.picture.setPixmap(pixmap)
+        self.picture.resize(w, h)
+
         self.update_progress(100)
 
 
