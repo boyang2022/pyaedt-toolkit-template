@@ -49,7 +49,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.9']
+        python-version: [ '3.9' ]
     steps:
       - uses: pyansys/actions/build-wheelhouse@v4
         with:
@@ -60,7 +60,7 @@ jobs:
 
   tests:
     name: "Tests"
-    runs-on: [self-hosted, pyaedt-toolkits]
+    runs-on: [ self-hosted, pyaedt-toolkits ]
     # needs: [smoke-tests]
     steps:
       - uses: actions/checkout@v3
