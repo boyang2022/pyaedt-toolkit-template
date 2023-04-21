@@ -1,4 +1,4 @@
-from ansys.product.library import __version__
+from ansys.aedt.toolkits.template import __version__
 
 
 def test_pkg_version():
