@@ -10,3 +10,4 @@ CPython
 
 draw_box
 draw_sphere
+new_toolkit_name

@@ -1,6 +1,6 @@
 Backend template
 ================
-This section list the available bowtie antennas:
+This section list the available classes in the backend:
 
 .. currentmodule:: ansys.aedt.toolkits.template.backend.template_script
 

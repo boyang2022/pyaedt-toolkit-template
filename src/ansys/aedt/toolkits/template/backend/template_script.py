@@ -34,7 +34,7 @@ class TemplateBackend(object):
     """
 
     _default_input = {
-        "dimension_multiplier": 1.0,
+        "multiplier": 1.0,
     }
 
     def __init__(self, *args, **kwargs):
@@ -61,7 +61,7 @@ class TemplateBackend(object):
 
     @multiplier.setter
     def multiplier(self, value):
-        self._input_parameters["dimension_multiplier"] = value
+        self._input_parameters["multiplier"] = value
 
     @pyaedt_function_handler()
     def _comp_props(self):

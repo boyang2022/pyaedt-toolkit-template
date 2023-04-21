@@ -14,7 +14,7 @@ class TestClass(BasisTest, object):
         BasisTest.my_teardown(self)
 
     def test_01_draw_box(self):
-        self.template.dimension_multiplier = 5.0
+        self.template.multiplier = 5.0
         box = self.template.draw_box()
         assert box.volume - 124.99999999999993 < 1e-6
 
