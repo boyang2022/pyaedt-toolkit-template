@@ -45,7 +45,7 @@ Duplicate the template in a local repository and then push it in the GitHub repo
 
       git clone --bare https://github.com/pyansys/pyaedt-toolkit-template.git
 
-#. Mirror-push to the new repository (in this case called *new_toolkit_name*):
+#. Mirror-push to the new repository:
 
     .. code:: bash
 
