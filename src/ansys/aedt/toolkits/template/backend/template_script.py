@@ -50,17 +50,17 @@ class TemplateBackend(object):
                 self._input_parameters[k] = v
 
     @property
-    def dimension_multiplier(self):
+    def multiplier(self):
         """Object dimension multiplier.
 
         Returns
         -------
         list
         """
-        return self._input_parameters["dimension_multiplier"]
+        return self._input_parameters["multiplier"]
 
-    @dimension_multiplier.setter
-    def dimension_multiplier(self, value):
+    @multiplier.setter
+    def multiplier(self, value):
         self._input_parameters["dimension_multiplier"] = value
 
     @pyaedt_function_handler()
@@ -86,7 +86,7 @@ class TemplateBackend(object):
         pos_y = props[0][1]
         pos_z = props[0][2]
 
-        multiplier = self.dimension_multiplier
+        multiplier = self.multiplier
         box = self._app.modeler.create_box(
             position=[pos_x, pos_y, pos_z],
             dimensions_list=[1 * multiplier, 1 * multiplier, 1 * multiplier],
@@ -110,7 +110,7 @@ class TemplateBackend(object):
         pos_y = props[0][1]
         pos_z = props[0][2]
 
-        multiplier = self.dimension_multiplier
+        multiplier = self.multiplier
 
         sp = self._app.modeler.create_sphere(
             position=[pos_x, pos_y, pos_z],
