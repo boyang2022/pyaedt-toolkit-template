@@ -37,15 +37,15 @@ documentation provides
 and `Contribute
 <https://aedt.antenna.toolkit.docs.pyansys.com/version/dev/Contributing.html>`_ sections.
 
-On the `PyAEDT template toolkit issues <https://github.com/pyansys/pyaedt-toolkit-template/issues>`_ page, you can
+On the `Toolkit issues <https://github.com/pyansys/pyaedt-toolkit-template/issues>`_ page, you can
 create issues to submit questions, report bugs, and request new features.
 
 License
 ~~~~~~~
-PyAEDT Antenna toolkit is licensed under the MIT license.
+This toolkit is licensed under the MIT license.
 
 This module makes no commercial claim over Ansys whatsoever.
-The use of the interactive control of PyAEDT Antenna toolkit requires a legally licensed
+The use of the interactive control of this toolkit requires a legally licensed
 local copy of AEDT. For more information about AEDT,
 visit the `AEDT page <https://www.ansys.com/products/electronics>`_
 on the Ansys website.
