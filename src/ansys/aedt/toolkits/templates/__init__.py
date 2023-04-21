@@ -1,4 +1,4 @@
-"""aedt.toolkits.templates"""
+"""Template for AEDT toolkits."""
 
 try:
     import importlib.metadata as importlib_metadata
