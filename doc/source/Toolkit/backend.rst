@@ -1,4 +1,4 @@
-Backend Template
+Backend template
 ================
 This section list the available bowtie antennas:
 

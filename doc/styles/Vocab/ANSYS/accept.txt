@@ -5,4 +5,8 @@ AEDT
 AEDT's
 PyAEDT
 toolkits
-bowtie
+pyaedt
+CPython
+
+draw_box
+draw_sphere
