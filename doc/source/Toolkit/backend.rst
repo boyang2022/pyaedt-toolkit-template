@@ -6,7 +6,6 @@ This section list the available classes in the backend:
 
 .. autosummary::
    :toctree: _autosummary
-   :nosignatures:
 
    TemplateBackend
 

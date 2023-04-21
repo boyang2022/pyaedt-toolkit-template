@@ -312,7 +312,7 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if not multiplier.isdigit():
             multiplier = 1.0
 
-        app = TemplateBackend(self.aedtapp, dimension_multiplier=float(multiplier))
+        app = TemplateBackend(self.aedtapp, multiplier=float(multiplier))
         if self.geometry_combo.currentText() == "Box":
             comp = app.draw_box()
         else:
