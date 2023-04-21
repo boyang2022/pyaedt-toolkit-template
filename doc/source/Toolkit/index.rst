@@ -8,6 +8,3 @@ This section describes all classes for antenna types available in the toolkit:
    :maxdepth: 2
 
    backend
-
-
-

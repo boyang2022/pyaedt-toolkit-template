@@ -14,9 +14,9 @@ Electronics Desktop session or create a new session.
   :alt: Antenna Toolkit UI, Settings Tab
 
 
-After Electronics Desktop is launched, user can assign a multiplier value which will be applied to the dimensions of
-the geometry selected in the combo box (box or sphere). The user can push the button **Create geometry** and it will
-create the selected geometry with a randon position and color.
+After Electronics Desktop is launched, user can assign a multiplier value which is applied to the dimensions of
+the geometry selected in the combo box (box or sphere). The user can push the button **Create geometry** and it
+creates the selected geometry with a random position and color.
 
 .. image:: ../_static/design.png
   :width: 800
