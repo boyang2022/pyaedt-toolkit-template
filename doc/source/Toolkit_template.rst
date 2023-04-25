@@ -135,7 +135,7 @@ General guidelines for user interface implementation are:
 
        pyside6-designer
 
-#. Open the ui template in src/ansys/aedt/toolkits/new_toolkit_name/ui/toolkit.ui.
+#. Open the user interface template in src/ansys/aedt/toolkits/new_toolkit_name/ui/toolkit.ui.
 
 #. Modify it and save it.
 

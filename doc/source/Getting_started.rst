@@ -35,7 +35,7 @@ You could install PyAEDT and all dependencies using the CPython 3.7 base interpr
       desktop.add_custom_toolkit("TemplateToolkit")
       exit()
 
-#. Close the console and open the toolkit, if you do not close AEDT, you will need to Update the Menu:
+#. Close the console and open the toolkit, if you do not close AEDT, you need to Update the Menu:
 
     .. image:: ./_static/toolkit_in_AEDT.png
       :width: 800
