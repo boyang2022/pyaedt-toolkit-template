@@ -21,3 +21,10 @@ creates the selected geometry with a random position and color.
 .. image:: ../_static/design.png
   :width: 800
   :alt: Antenna Toolkit UI, Design Tab
+
+Once the geometry is created, the user can export the model picture, File>Export 3D Plot.
+This picture can be visualize in the wizard.
+
+.. image:: ../_static/wizard_export_model.png
+  :width: 800
+  :alt: Antenna Toolkit UI, Design Tab, Export picture

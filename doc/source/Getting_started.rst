@@ -13,8 +13,7 @@ Install the toolkit inside AEDT and run the UI using CPython 3.7 from AEDT insta
 The toolkit could be installed inside AEDT using
 `PyAEDT <https://aedt.docs.pyansys.com/version/stable//>`_.
 
-You could install PyAEDT and all dependencies using the CPython 3.7 base interpreter from AEDT installation,
-PyAEDT installation documentation has a batch file for easy installation.
+You could install PyAEDT and all dependencies using the CPython 3.7 base interpreter from AEDT installation.
 
 #. Download and execute the batch file from PyAEDT documentation. `Install PyAEDT from a batch file <https://aedt.docs.pyansys.com/version/stable/Getting_started/Installation.html#install-from-a-batch-file>`_.
 
@@ -36,7 +35,7 @@ PyAEDT installation documentation has a batch file for easy installation.
       desktop.add_custom_toolkit("TemplateToolkit")
       exit()
 
-#. Close the console and open the toolkit:
+#. Close the console and open the toolkit, if you do not close AEDT, you need to Update the Menu:
 
     .. image:: ./_static/toolkit_in_AEDT.png
       :width: 800
