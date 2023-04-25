@@ -28,38 +28,18 @@ please open an issue on `PyAEDT <https://aedt.docs.pyansys.com/version/stable//>
 
 The naming convention for PyAEDT toolkits is **pyaedt-toolkit-new_toolkit_name**.
 
+Choose the PyAEDT toolkit template as the repository template and include all branches.
+
 .. image:: ./_static/new_repo.png
   :width: 800
   :alt: New PyAnsys repository
 
-Duplicate the template repository
----------------------------------
+Clone the repository locally
+----------------------------
 
-Duplicate the template in a local repository and then push it in the GitHub repository created in the first step.
+Duplicate the new repository in a local repository.
 
 #. Open Git Bash.
-
-#. Create a bare clone of the repository:
-
-   .. code:: bash
-
-      git clone --bare https://github.com/pyansys/pyaedt-toolkit-template.git
-
-#. Mirror-push to the new repository:
-
-    .. code:: bash
-
-      cd OLD-REPOSITORY.git
-      git push --mirror https://github.com/pyansys/pyaedt-toolkit-new_toolkit_name.git
-
-#. Remove the temporary local repository you created earlier:
-
-    .. code:: bash
-
-      cd ..
-      rm -rf OLD-REPOSITORY.git
-
-#. Create a clone of the new repository:
 
     .. code:: bash
 
@@ -86,6 +66,7 @@ src/ansys/aedt/toolkits/toolkit_name/new_toolkit_name
 #. Modify pyproject.toml file, line 57, with the corresponding toolkit name.
 
 #. Modify pyproject.toml file, from line 60 to 61, with the corresponding toolkit name.
+
 
 Install default dependencies
 ----------------------------
