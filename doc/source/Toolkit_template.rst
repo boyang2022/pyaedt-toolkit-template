@@ -106,19 +106,19 @@ Create backend
 
 The backend part controls all related to AEDT. It should contain code which could be launched without a user interface.
 
-On this repository you have a simple example, you will find in other toolkits more examples of how to develop a backend.
+On this repository you have a simple example, you can find in other toolkits more examples of how to develop a backend.
 It should be created in src/ansys/aedt/toolkits/new_toolkit_name/backend.
 
 Create unit test
 ----------------
 
-If the repository has a backend, you should create unit test for each different method, this will increase
-the maintainability of your code. File tests/test_00_template.py contains unittest for the backend methods.
+If the repository has a backend, you should create unit test for each different method, this increase
+the maintainability of your code. File tests/test_00_template.py contains unit test for the backend methods.
 
 Depending on the complexity of the unit tests, it could need AEDT or not to run the tests.
 
-If AEDT needs to be run, the GitHub actions will try to connect to a runner called *pyaedt-toolkits*, please submit an issue
-on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page and PyAnsys organizers will give access to this toolkit.
+If AEDT needs to be run, the GitHub actions try to connect to a runner called *pyaedt-toolkits*, please submit an issue
+on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page.
 
 If the unit tests do not need AEDT, then you could modify the .github/workflows/ci_cd.yml and remove line 63.
 
@@ -168,11 +168,10 @@ The documentation is created automatically using Sphinx. You need to define the 
         cd doc\source
         create_documentation.bat
 
-#. To publish the documentation online, you will need to submit an issue on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page and PyAnsys organizers will add the URL to the Ansys servers.
+#. To publish the documentation online, you need to submit an issue on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page.
 
 
 Add toolkit in PyAEDT
 ---------------------
 
-Create an issue on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page,
-and PyAEDT contributors will add it to the method *add_custom_toolkit*.
+Create an issue on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page.

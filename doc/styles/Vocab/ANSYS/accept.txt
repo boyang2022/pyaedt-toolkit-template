@@ -1,9 +1,11 @@
 ANSYS
 Ansys
 ansys
+aedt
 AEDT
 AEDT's
 PyAEDT
 toolkits
 pyaedt
 CPython
+rst
