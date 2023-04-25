@@ -9,4 +9,3 @@ toolkits
 pyaedt
 CPython
 rst
-ui
