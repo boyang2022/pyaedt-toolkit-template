@@ -1,0 +1,12 @@
+{
+  "Global":
+  {
+    "version": "2022.2",
+    "non_graphical": false
+  },
+  "Local":
+  {
+    "frequency_units": "GHz",
+    "units": "mm"
+  }
+}
