@@ -1,4 +1,4 @@
-from ansys.aedt.toolkits.template.backend.template_script import TemplateBackend
+from ansys.aedt.toolkits.template.old.template_script import TemplateBackend
 from conftest import BasisTest
 
 test_project_name = "Template_test"

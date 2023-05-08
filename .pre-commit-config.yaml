@@ -1,6 +1,6 @@
 exclude: |
     (?x)(
-        src/ansys/aedt/toolkits/template/ui/ui_main.py
+        src/ansys/aedt/toolkits/template/ui/frontend_ui.py
     )
 
 repos:

@@ -9,9 +9,10 @@ _default_properties = {}
 # put here below the properties
 
 # general settings
-_default_properties["project_name"] = False
-_default_properties["design_name"] = False
-_default_properties["units"] = False
+_default_properties["aedt_version"] = "2022.2"
+_default_properties["non_graphical"] = False
+_default_properties["debug"] = True
+
 
 #############################
 # don't touch the lines below
