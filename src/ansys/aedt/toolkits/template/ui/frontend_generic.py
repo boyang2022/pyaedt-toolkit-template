@@ -1,11 +1,22 @@
+import logging
 import os
 import sys
+import time
 
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
 import qdarkstyle
 import requests
+
+logger = logging.getLogger(__name__)
+
+# Create a handler and set logging level for the handler
+c_handler = logging.StreamHandler()
+c_handler.setLevel(logging.DEBUG)
+
+# link handler to logger
+logger.addHandler(c_handler)
 
 
 class ui_common(object):
@@ -15,7 +26,7 @@ class ui_common(object):
         self.main_window.setupUi(self.main_window)
 
         # Load toolkit icon
-        self.images_path = os.path.join(os.path.dirname(__file__), "images")
+        self.images_path = os.path.join(os.path.dirname(__file__), "common/images")
         icon = self._load_icon(self.images_path)
         self.main_window.setWindowIcon(icon)
 
@@ -40,20 +51,43 @@ class ui_common(object):
 
     def check_connection(self):
         try:
-            response = requests.get(self.url + "/health")
+            count = 0
+            response = False
+            while not response and count < 2:
+                time.sleep(1)
+                response = requests.get(self.url + "/health")
+                count += 1
             if response.ok:
                 self.write_log_line(f"Backend running: {self.url}")
                 return True
         except requests.exceptions.RequestException as e:
-            self.write_log_line(f"An error occurred: {e}")
+            logger.error("Backend not running")
             return False
 
     def installed_versions(self):
         try:
             response = requests.get(self.url + "/installed_versions")
             if response.ok:
-                versions = eval(response.json())
+                versions = response.json()
                 return versions
+        except requests.exceptions.RequestException:
+            return False
+
+    def get_properties(self):
+        try:
+            response = requests.get(self.url + "/get_properties")
+            if response.ok:
+                properties = response.json()
+                return properties
+        except requests.exceptions.RequestException:
+            return False
+
+    def set_properties(self, data):
+        try:
+            response = requests.put(self.url + "/set_properties", json=data)
+            if response.ok:
+                response.json()
+                return True
         except requests.exceptions.RequestException:
             return False
 
@@ -72,16 +106,37 @@ class ui_common(object):
         if fileName:
             self.main_window.project_name.setText(fileName)
 
+    def find_process_ids(self):
+        self.main_window.process_id_combo.clear()
+        self.main_window.process_id_combo.addItem("Create New Session")
+        try:
+            # Modify selected version
+            properties = self.get_properties()
+            properties["aedt_version"] = self.main_window.aedt_version_combo.currentText()
+            self.set_properties(properties)
+
+            response = requests.get(self.url + "/aedt_sessions")
+            if response.ok:
+                sessions = response.json()
+                for session in sessions:
+                    if session[1] == -1:
+                        self.main_window.process_id_combo.addItem(
+                            "Process {}".format(session[0], session[1])
+                        )
+                    else:
+                        self.main_window.process_id_combo.addItem(
+                            "Process {} on Grpc {}".format(session[0], session[1])
+                        )
+                return True
+        except requests.exceptions.RequestException:
+            return False
+
     def on_cancel_clicked(self):
         self.main_window.close()
 
-    def release_only(self, event):
+    def release_only(self):
         """Release desktop."""
         self.main_window.close()
-
-    def on_finished(self):
-        event = QtGui.QCloseEvent()
-        self.closeEvent(event)
 
     def closeEvent(self, event):
         """Close UI."""
@@ -124,7 +179,7 @@ class ui_common(object):
 
 
 class XStream(QtCore.QObject):
-    """Message streamer."""
+    """User interface message streamer."""
 
     _stdout = None
     _stderr = None
@@ -159,11 +214,3 @@ class XStream(QtCore.QObject):
             XStream._stderr = XStream()
             sys.stderr = XStream._stderr
         return XStream._stderr
-
-
-class RunnerSignals(QtCore.QObject):
-    """Trigger."""
-
-    progressed = QtCore.Signal(int)
-    messaged = QtCore.Signal(str)
-    completed = QtCore.Signal()

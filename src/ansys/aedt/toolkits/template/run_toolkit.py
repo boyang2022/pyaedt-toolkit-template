@@ -13,7 +13,7 @@ else:
 # User or tool could pass the desktop ID and version
 desktop_pid = None
 desktop_version = None
-if len(sys.argv) > 2:
+if len(sys.argv) != 2:
     desktop_pid = sys.argv[1]
     desktop_version = sys.argv[2]
 

@@ -3,20 +3,16 @@ try:
 except ModuleNotFoundError:
     from .properties_data import PropertiesData
 
-_default_properties = {}
+import json
+import os
 
-###############################
-# put here below the properties
+with open(os.path.join(os.path.dirname(__file__), "general_properties.json")) as fh:
+    _general_properties = json.load(fh)
 
-# general settings
-_default_properties["aedt_version"] = "2022.2"
-_default_properties["non_graphical"] = False
-_default_properties["debug"] = True
+with open(os.path.join(os.path.dirname(__file__), "..", "properties.json")) as fh:
+    _properties = json.load(fh)
 
-
-#############################
-# don't touch the lines below
-
+_default_properties = {**_general_properties, **_properties}
 properties = PropertiesData(_default_properties)
 
 

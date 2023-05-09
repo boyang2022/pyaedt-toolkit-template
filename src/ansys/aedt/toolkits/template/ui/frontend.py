@@ -3,9 +3,9 @@ import os
 import sys
 
 from PySide6 import QtWidgets
-import frontend_common
+import frontend_generic
 
-from ansys.aedt.toolkits.template.ui.frontend_ui import Ui_MainWindow
+from ansys.aedt.toolkits.template.ui.common.frontend_ui import Ui_MainWindow
 
 os.environ["QT_API"] = "pyside6"
 
@@ -26,7 +26,7 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         super(ApplicationWindow, self).__init__()
 
         # UI init
-        ui_obj = frontend_common.ui_common(self, url + ":" + port)
+        ui_obj = frontend_generic.ui_common(self, url + ":" + port)
 
         # Set title
         ui_obj.set_title(toolkit_title)
@@ -34,15 +34,16 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Check backend connection
         self.backend = ui_obj.check_connection()
 
-        # Close UI
-        # self.finished.connect(ui_obj.on_finished)
+        if not self.backend:
+            raise "Backend not running"
 
         # General Settings
 
+        # Get default properties
+        default_properties = ui_obj.get_properties()
+
         # Get AEDT installed versions
-        installed_versions = None
-        if self.backend:
-            installed_versions = ui_obj.installed_versions()
+        installed_versions = ui_obj.installed_versions()
 
         # Add versions to the UI
         if installed_versions:
@@ -51,11 +52,21 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif self.backend:
             self.aedt_version_combo.addItem("AEDT not installed")
 
+        if (
+            "aedt_version" in default_properties.keys()
+            and default_properties["aedt_version"] in installed_versions
+        ):
+            self.aedt_version_combo.setCurrentText(default_properties["aedt_version"])
+            ui_obj.find_process_ids()
+
         # Select AEDT project
         self.browse_project.clicked.connect(ui_obj.browse_for_project)
 
         # Close toolkit button
         self.release_button.clicked.connect(ui_obj.release_only)
+
+        # Find active AEDT sessions
+        self.aedt_version_combo.currentTextChanged.connect(ui_obj.find_process_ids)
 
         # Toolkit Settings
 
