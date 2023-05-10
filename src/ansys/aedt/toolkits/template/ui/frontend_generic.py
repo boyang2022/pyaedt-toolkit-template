@@ -44,7 +44,7 @@ class ui_common(object):
         return True
 
     def write_log_line(self, value):
-        self.log_text.insertPlainText(value)
+        self.log_text.insertPlainText(value + "\n")
         tc = self.log_text.textCursor()
         tc.setPosition(self.log_text.document().characterCount())
         self.log_text.setTextCursor(tc)
@@ -59,6 +59,7 @@ class ui_common(object):
                 count += 1
             if response.ok:
                 self.write_log_line(f"Backend running: {self.url}")
+                self.write_log_line(response.json())
                 return True
         except requests.exceptions.RequestException as e:
             logger.error("Backend not running")
@@ -105,6 +106,9 @@ class ui_common(object):
         )
         if fileName:
             self.main_window.project_name.setText(fileName)
+            properties = self.get_properties()
+            properties["project_name"] = fileName
+            self.set_properties(properties)
 
     def find_process_ids(self):
         self.main_window.process_id_combo.clear()
@@ -127,30 +131,61 @@ class ui_common(object):
                         self.main_window.process_id_combo.addItem(
                             "Process {} on Grpc {}".format(session[0], session[1])
                         )
-                return True
+            return True
         except requests.exceptions.RequestException:
             return False
 
-    def on_cancel_clicked(self):
-        self.main_window.close()
+    def launch_aedt(self):
+        properties = self.get_properties()
+        properties["aedt_version"] = self.main_window.aedt_version_combo.currentText()
+        properties["non_graphical"] = True
+        if self.main_window.non_graphical_combo.currentText() == "False":
+            properties["non_graphical"] = False
+        if self.main_window.process_id_combo.currentText() == "Create New Session":
+            properties["selected_process"] = 0
+        else:
+            text_splitted = self.main_window.process_id_combo.currentText().split(" ")
+            if len(text_splitted) == 5:
+                properties["use_grpc"] = True
+                properties["selected_process"] = int(text_splitted[4])
+            else:
+                properties["use_grpc"] = False
+                properties["selected_process"] = int(text_splitted[1])
+        self.set_properties(properties)
+
+        response = requests.post(self.url + "/launch_aedt", json=properties)
+        self.write_log_line(response.json())
+        self.find_process_ids()
+        if response.ok:
+            if properties["project_name"]:
+                response = requests.put(self.url + "/open_project", json=properties)
+                self.write_log_line(response.json())
+                if not response.ok:
+                    return False
+        else:
+            return False
+        return True
 
     def release_only(self):
         """Release desktop."""
-        self.main_window.close()
 
-    def closeEvent(self, event):
-        """Close UI."""
-        close = QtWidgets.QMessageBox.question(
-            self.main_window,
-            "QUIT",
-            "Confirm quit?",
-            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-        )
-        if close == QtWidgets.QMessageBox.Yes:
-            event.accept()
-            self.main_window.app.quit()
-        else:
-            event.ignore()
+        properties = {"close_projects": False, "close_on_exit": False}
+
+        response = requests.post(self.url + "/close_aedt", json=properties)
+        if response.ok:
+            self.main_window.close()
+
+    def release_and_close(self):
+        """Release and close desktop."""
+
+        properties = {"close_projects": True, "close_on_exit": True}
+
+        response = requests.post(self.url + "/close_aedt", json=properties)
+        if response.ok:
+            self.main_window.close()
+
+    def on_cancel_clicked(self):
+        self.main_window.close()
 
     @staticmethod
     def set_font(ui_obj):

@@ -26,13 +26,13 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         super(ApplicationWindow, self).__init__()
 
         # UI init
-        ui_obj = frontend_generic.ui_common(self, url + ":" + port)
+        self.ui_obj = frontend_generic.ui_common(self, url + ":" + port)
 
         # Set title
-        ui_obj.set_title(toolkit_title)
+        self.ui_obj.set_title(toolkit_title)
 
         # Check backend connection
-        self.backend = ui_obj.check_connection()
+        self.backend = self.ui_obj.check_connection()
 
         if not self.backend:
             raise "Backend not running"
@@ -40,10 +40,10 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # General Settings
 
         # Get default properties
-        default_properties = ui_obj.get_properties()
+        default_properties = self.ui_obj.get_properties()
 
         # Get AEDT installed versions
-        installed_versions = ui_obj.installed_versions()
+        installed_versions = self.ui_obj.installed_versions()
 
         # Add versions to the UI
         if installed_versions:
@@ -57,16 +57,22 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             and default_properties["aedt_version"] in installed_versions
         ):
             self.aedt_version_combo.setCurrentText(default_properties["aedt_version"])
-            ui_obj.find_process_ids()
+            self.ui_obj.find_process_ids()
 
         # Select AEDT project
-        self.browse_project.clicked.connect(ui_obj.browse_for_project)
+        self.browse_project.clicked.connect(self.ui_obj.browse_for_project)
 
         # Close toolkit button
-        self.release_button.clicked.connect(ui_obj.release_only)
+        self.release_button.clicked.connect(self.ui_obj.release_only)
+
+        # Close toolkit and AEDT button
+        self.release_and_exit_button.clicked.connect(self.ui_obj.release_and_close)
 
         # Find active AEDT sessions
-        self.aedt_version_combo.currentTextChanged.connect(ui_obj.find_process_ids)
+        self.aedt_version_combo.currentTextChanged.connect(self.ui_obj.find_process_ids)
+
+        # Launch AEDT
+        self.connect_aedtapp.clicked.connect(self.ui_obj.launch_aedt)
 
         # Toolkit Settings
 
@@ -76,6 +82,7 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         )
         if close == QtWidgets.QMessageBox.Yes:
             event.accept()
+            self.ui_obj.release_only()
         else:
             event.ignore()
 
