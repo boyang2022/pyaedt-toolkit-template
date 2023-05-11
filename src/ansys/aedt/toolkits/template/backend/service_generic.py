@@ -22,7 +22,7 @@ def set_properties(data):
 
     Returns
     -------
-    Tuple[bool, str]
+    tuple[bool, str]
         A tuple indicating the success status and a message.
 
     Examples
