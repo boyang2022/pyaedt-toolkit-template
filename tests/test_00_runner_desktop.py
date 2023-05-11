@@ -1,7 +1,7 @@
 import os
 
+import ansys.aedt.toolkits.template.backend.service_generic as service_generic
 from conftest import BasisTest
-import src.ansys.aedt.toolkits.template.backend.service_generic as service_generic
 
 test_project_name = "Test"
 test_subfolder = "T00"
