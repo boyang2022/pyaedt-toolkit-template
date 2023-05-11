@@ -4,6 +4,7 @@ import sys
 import threading
 
 import psutil
+import requests
 
 is_linux = os.name == "posix"
 script_name = os.path.splitext(os.path.basename(__file__))[0]
@@ -12,13 +13,6 @@ if is_linux:
     import subprocessdotnet as subprocess
 else:
     import subprocess
-
-# User or tool could pass the desktop ID and version
-desktop_pid = None
-desktop_version = None
-if len(sys.argv) == 2:
-    desktop_pid = sys.argv[1]
-    desktop_version = sys.argv[2]
 
 # Path to Python interpreter with Flask and Pyside6 installed
 python_path = sys.executable
@@ -62,6 +56,21 @@ def terminate_flask_process():
 flask_thread = threading.Thread(target=run_command, args=backend_command)
 flask_thread.daemon = True
 flask_thread.start()
+
+# # Wait for the Flask application to start
+# time.sleep(1)
+
+# User or tool could pass the desktop ID and version
+if len(sys.argv) == 3:
+    desktop_pid = sys.argv[1]
+    desktop_version = sys.argv[2]
+    properties = {
+        "selected_process": int(desktop_pid),
+        "aedt_version": desktop_version,
+        "use_grpc": False,
+    }
+    requests.put("http://localhost:5000/set_properties", json=properties)
+    requests.post("http://localhost:5000/launch_aedt", json=properties)
 
 # Create a thread to run the PySide6 UI
 ui_thread = threading.Thread(target=run_command, args=frontend_command)
