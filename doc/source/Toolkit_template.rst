@@ -53,7 +53,7 @@ Modify general settings
 There are some parts in the repository which are specific for each different toolkit and must be modified manually.
 
 #. Modify the folder name src/ansys/aedt/toolkits/toolkit_name/template to
-src/ansys/aedt/toolkits/toolkit_name/new_toolkit_name
+src/ansys/aedt/toolkits/new_toolkit_name
 
 #. Modify .github/workflows/ci_cd.yml file, from line 16 to 20, with the specific toolkit name.
 
@@ -65,7 +65,7 @@ src/ansys/aedt/toolkits/toolkit_name/new_toolkit_name
 
 #. Modify pyproject.toml file, line 57, with the corresponding toolkit name.
 
-#. Modify pyproject.toml file, from line 60 to 61, with the corresponding toolkit name.
+#. Modify pyproject.toml file, from line 60 to 62, with the corresponding toolkit name.
 
 
 Install default dependencies
