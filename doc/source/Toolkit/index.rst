@@ -1,10 +1,10 @@
-=============
-API reference
-=============
+=====================
+API backend reference
+=====================
 
-This section describes all classes for antenna types available in the toolkit:
+This section describes all classes available in the toolkit:
 
 .. toctree::
    :maxdepth: 2
 
-   backend
+   generic_service
