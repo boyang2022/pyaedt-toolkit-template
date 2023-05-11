@@ -22,13 +22,12 @@ def set_properties(data):
 
     Returns
     -------
-    tuple[bool, str]
+    Tuple[bool, str]
         A tuple indicating the success status and a message.
 
     Examples
     --------
     >>> set_properties({"property1": value1, "property2": value2})
-    (True, "properties updated successfully")
 
     """
 
@@ -170,6 +169,7 @@ def launch_aedt():
     Returns
     -------
     bool
+        ``True`` when successful, ``False`` when failed.
     """
 
     status, msg = aedt_connected()
