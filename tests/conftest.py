@@ -80,6 +80,8 @@ class BasisTest(object):
         scratch_path = tempfile.gettempdir()
         self.local_scratch = Scratch(scratch_path)
         self.aedtapps = []
+        self.test_config = config
+        self.local_path = local_path
         self._main = sys.modules["__main__"]
 
     def my_teardown(self):
