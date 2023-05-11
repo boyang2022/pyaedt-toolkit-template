@@ -4,8 +4,8 @@ import os
 import psutil
 import pyaedt
 
-from src.ansys.aedt.toolkits.template.backend.common.properties import properties
-from src.ansys.aedt.toolkits.template.backend.common.service_aedt import RunnerDesktop
+from ansys.aedt.toolkits.template.backend.common.properties import properties
+from ansys.aedt.toolkits.template.backend.common.service_aedt import RunnerDesktop
 
 logger = logging.getLogger(__name__)
 aedt_runner = RunnerDesktop()
