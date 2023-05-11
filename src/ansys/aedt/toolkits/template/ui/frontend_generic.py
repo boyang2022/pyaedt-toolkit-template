@@ -185,6 +185,7 @@ class ui_common(object):
 
     def launch_aedt_thread(self, properties):
         self.update_progress(25)
+        self.write_log_line("Connecting to AEDT...")
         response = requests.post(self.url + "/launch_aedt", json=properties)
         self.update_progress(50)
         self.write_log_line(response.json())

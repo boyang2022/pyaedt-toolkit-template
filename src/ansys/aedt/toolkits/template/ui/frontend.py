@@ -1,4 +1,3 @@
-# Next line must be changed with the toolkit name.
 import os
 import sys
 

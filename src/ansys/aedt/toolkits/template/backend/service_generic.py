@@ -217,7 +217,7 @@ def release_desktop(close_projects=False, close_on_exit=False):
 
     if aedt_runner.desktop is not None:
         aedt_runner.release_desktop(close_projects, close_on_exit)
-        return True
+    return True
 
 
 def open_project():
