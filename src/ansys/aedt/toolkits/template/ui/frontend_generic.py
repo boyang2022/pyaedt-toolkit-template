@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import threading
 import time
 
 from PySide6 import QtCore
@@ -9,7 +10,7 @@ from PySide6 import QtWidgets
 import qdarkstyle
 import requests
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("Global")
 
 # Create a handler and set logging level for the handler
 c_handler = logging.StreamHandler()
@@ -17,6 +18,7 @@ c_handler.setLevel(logging.DEBUG)
 
 # link handler to logger
 logger.addHandler(c_handler)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class ui_common(object):
@@ -48,6 +50,11 @@ class ui_common(object):
         tc = self.log_text.textCursor()
         tc.setPosition(self.log_text.document().characterCount())
         self.log_text.setTextCursor(tc)
+
+    def update_progress(self, value):
+        self.main_window.progress_bar.setValue(value)
+        if self.main_window.progress_bar.isHidden():
+            self.main_window.progress_bar.setVisible(True)
 
     def check_connection(self):
         try:
@@ -153,18 +160,7 @@ class ui_common(object):
                 properties["selected_process"] = int(text_splitted[1])
         self.set_properties(properties)
 
-        response = requests.post(self.url + "/launch_aedt", json=properties)
-        self.write_log_line(response.json())
-        self.find_process_ids()
-        if response.ok:
-            if properties["project_name"]:
-                response = requests.put(self.url + "/open_project", json=properties)
-                self.write_log_line(response.json())
-                if not response.ok:
-                    return False
-        else:
-            return False
-        return True
+        threading.Thread(target=self.launch_aedt_thread, args=(properties,), daemon=True).start()
 
     def release_only(self):
         """Release desktop."""
@@ -186,6 +182,23 @@ class ui_common(object):
 
     def on_cancel_clicked(self):
         self.main_window.close()
+
+    def launch_aedt_thread(self, properties):
+        self.update_progress(25)
+        response = requests.post(self.url + "/launch_aedt", json=properties)
+        self.update_progress(50)
+        self.write_log_line(response.json())
+        self.find_process_ids()
+        if response.ok:
+            if properties["project_name"]:
+                self.update_progress(75)
+                response = requests.put(self.url + "/open_project", json=properties)
+                self.write_log_line(response.json())
+        else:
+            self.write_log_line(f"Launch AEDT failed")
+            return False
+        self.update_progress(100)
+        return True
 
     @staticmethod
     def set_font(ui_obj):
