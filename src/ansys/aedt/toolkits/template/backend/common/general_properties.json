@@ -5,5 +5,7 @@
   "project_name" : "",
   "selected_process" : 0,
   "use_grpc" : true,
+  "is_step_running" : false,
+  "is_step_completed" : true,
   "debug" : true
 }

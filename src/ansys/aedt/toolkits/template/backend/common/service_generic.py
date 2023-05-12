@@ -6,9 +6,28 @@ import pyaedt
 
 from ansys.aedt.toolkits.template.backend.common.properties import properties
 from ansys.aedt.toolkits.template.backend.common.service_aedt import RunnerDesktop
+from ansys.aedt.toolkits.template.backend.common.toolkit_thread import ToolkitThread
+
+thread = ToolkitThread()
 
 
 class ServiceGeneric(object):
+    """Generic backend class. It provides basic functions to control AEDT and properties
+    to share between backend and frontend.
+
+    Examples
+    --------
+    >>> from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
+    >>> service_generic = ServiceGeneric()
+    >>> properties = service_generic.get_properties()
+    >>> new_properties = {"aedt_version": "2022.2"}
+    >>> service_generic.set_properties(new_properties)
+    >>> properties = service_generic.get_properties()
+    >>> msg = service_generic.launch_aedt()
+    >>> service_generic.release_desktop()
+
+    """
+
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.aedt_runner = RunnerDesktop()
@@ -170,6 +189,7 @@ class ServiceGeneric(object):
                 pass
         return sessions
 
+    @thread.launch_thread
     def launch_aedt(self):
         """Launch AEDT or connect to an existing AEDT session.
 

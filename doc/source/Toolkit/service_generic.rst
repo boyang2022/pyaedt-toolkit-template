@@ -7,7 +7,7 @@ This section list the available generic methods in the backend, these methods ar
 .. autosummary::
    :toctree: _autosummary
 
-   ToolkitService
+   ServiceGeneric
 
 The API must be used using PyAEDT as in the following example:
 
