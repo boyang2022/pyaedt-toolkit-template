@@ -3,11 +3,19 @@ import logging
 from flask import Flask
 from flask import jsonify
 from flask import request
-import service_generic
+from service import ToolkitService
+
+from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
+
+service_generic = ServiceGeneric()
+service = ToolkitService(service_generic)
 
 app = Flask(__name__)
 
 logger = logging.getLogger(__name__)
+
+
+# Generic services
 
 
 @app.route("/health", methods=["GET"])
@@ -98,6 +106,43 @@ def open_project_call():
         return jsonify(response), 200
     else:
         return jsonify("Fail to connect to AEDT"), 500
+
+
+# Toolkit services
+
+
+@app.route("/connect_hfss", methods=["POST"])
+def connect_hfss_call():
+    logger.info("[POST] /connect_hfss (connect or create a HFSS design)")
+
+    desktop_connected, msg = service_generic.aedt_connected()
+    if not desktop_connected:
+        return jsonify(msg), 200
+
+    response = service.connect_hfss()
+
+    if response:
+        return jsonify("HFSS connected"), 200
+    else:
+        return jsonify("Fail to connect to HFSS"), 500
+
+
+@app.route("/create_geometry", methods=["POST"])
+def create_geometry_call():
+    logger.info("[POST] /create_geometry (create a box or sphere in HFSS)")
+
+    desktop_connected, msg = service_generic.aedt_connected()
+    if not desktop_connected:
+        return jsonify(msg), 500
+
+    if service.aedtapp:
+        response = service.create_geometry()
+        if response:
+            return jsonify("Geometry created"), 200
+        else:
+            return jsonify("Geometry creation failed"), 500
+    else:
+        return jsonify("HFSS is not connected"), 500
 
 
 if __name__ == "__main__":

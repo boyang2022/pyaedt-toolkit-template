@@ -2,9 +2,10 @@ import os
 import sys
 
 from PySide6 import QtWidgets
-import frontend_generic
 
+from ansys.aedt.toolkits.template.ui.common import frontend_generic
 from ansys.aedt.toolkits.template.ui.common.frontend_ui import Ui_MainWindow
+from ansys.aedt.toolkits.template.ui.frontend_toolkit import ui_toolkit
 
 os.environ["QT_API"] = "pyside6"
 
@@ -58,6 +59,10 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.aedt_version_combo.setCurrentText(default_properties["aedt_version"])
             self.ui_obj.find_process_ids()
 
+        # Add default properties
+        self.non_graphical_combo.setCurrentText(str(default_properties["non_graphical"]))
+        self.numcores.setText(str(default_properties["core_number"]))
+
         # Select AEDT project
         self.browse_project.clicked.connect(self.ui_obj.browse_for_project)
 
@@ -74,6 +79,12 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.connect_aedtapp.clicked.connect(self.ui_obj.launch_aedt)
 
         # Toolkit Settings
+
+        # Initialize toolkit frontend
+        self.ui_toolkit = ui_toolkit(self.ui_obj, url + ":" + port)
+
+        # Create geometry
+        self.create_geometry_buttom.clicked.connect(self.ui_toolkit.create_geometry)
 
     def closeEvent(self, event):
         close = QtWidgets.QMessageBox.question(

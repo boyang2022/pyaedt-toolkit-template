@@ -1,6 +1,7 @@
 {
   "aedt_version" : "2023.1",
   "non_graphical" : false,
+  "core_number" : 4,
   "project_name" : "",
   "selected_process" : 0,
   "use_grpc" : true,

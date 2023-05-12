@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-import threading
 import time
 
 from PySide6 import QtCore
@@ -28,7 +27,7 @@ class ui_common(object):
         self.main_window.setupUi(self.main_window)
 
         # Load toolkit icon
-        self.images_path = os.path.join(os.path.dirname(__file__), "common/images")
+        self.images_path = os.path.join(os.path.dirname(__file__), "images")
         icon = self._load_icon(self.images_path)
         self.main_window.setWindowIcon(icon)
 
@@ -68,6 +67,8 @@ class ui_common(object):
                 self.write_log_line(f"Backend running: {self.url}")
                 self.write_log_line(response.json())
                 return True
+            return False
+
         except requests.exceptions.RequestException as e:
             logger.error("Backend not running")
             return False
@@ -79,6 +80,7 @@ class ui_common(object):
                 versions = response.json()
                 return versions
         except requests.exceptions.RequestException:
+            self.write_log_line("Get AEDT installed versions failed")
             return False
 
     def get_properties(self):
@@ -88,16 +90,15 @@ class ui_common(object):
                 properties = response.json()
                 return properties
         except requests.exceptions.RequestException:
-            return False
+            self.write_log_line("Get properties failed")
 
     def set_properties(self, data):
         try:
             response = requests.put(self.url + "/set_properties", json=data)
             if response.ok:
                 response.json()
-                return True
         except requests.exceptions.RequestException:
-            return False
+            self.write_log_line(f"Set properties failed")
 
     def browse_for_project(self):
         dialog = QtWidgets.QFileDialog()
@@ -140,6 +141,7 @@ class ui_common(object):
                         )
             return True
         except requests.exceptions.RequestException:
+            self.write_log_line(f"Find AEDT sessions failed")
             return False
 
     def launch_aedt(self):
@@ -160,7 +162,21 @@ class ui_common(object):
                 properties["selected_process"] = int(text_splitted[1])
         self.set_properties(properties)
 
-        threading.Thread(target=self.launch_aedt_thread, args=(properties,), daemon=True).start()
+        self.update_progress(25)
+        self.write_log_line("Connecting to AEDT...")
+        response = requests.post(self.url + "/launch_aedt", json=properties)
+        self.update_progress(50)
+        self.write_log_line(response.json())
+
+        if response.ok and self.find_process_ids():
+            if properties["project_name"]:
+                self.update_progress(75)
+                response = requests.put(self.url + "/open_project", json=properties)
+                self.write_log_line(response.json())
+        else:
+            self.write_log_line("Launch AEDT failed")
+            return
+        self.update_progress(100)
 
     def release_only(self):
         """Release desktop."""
@@ -182,24 +198,6 @@ class ui_common(object):
 
     def on_cancel_clicked(self):
         self.main_window.close()
-
-    def launch_aedt_thread(self, properties):
-        self.update_progress(25)
-        self.write_log_line("Connecting to AEDT...")
-        response = requests.post(self.url + "/launch_aedt", json=properties)
-        self.update_progress(50)
-        self.write_log_line(response.json())
-        self.find_process_ids()
-        if response.ok:
-            if properties["project_name"]:
-                self.update_progress(75)
-                response = requests.put(self.url + "/open_project", json=properties)
-                self.write_log_line(response.json())
-        else:
-            self.write_log_line(f"Launch AEDT failed")
-            return False
-        self.update_progress(100)
-        return True
 
     @staticmethod
     def set_font(ui_obj):
