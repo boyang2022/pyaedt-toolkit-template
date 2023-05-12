@@ -3,6 +3,10 @@ from pyaedt import Desktop
 from pyaedt import Hfss
 from pyaedt.generic.general_methods import pyaedt_function_handler
 
+from ansys.aedt.toolkits.template.backend.common.toolkit_thread import ToolkitThread
+
+thread = ToolkitThread()
+
 
 class ToolkitService(object):
     """Toolkit class to control the workflow.
@@ -77,22 +81,34 @@ class ToolkitService(object):
 
         Examples
         --------
+        >>> from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
         >>> service_generic = ServiceGeneric()
         >>> service_generic.launch_aedt()
         >>> toolkit = ToolkitService(service_generic)
         >>> toolkit.create_geometry()
         """
+        toolkit_running = self.service_generic.get_properties()["is_toolkit_running"]
+        if not toolkit_running:
+            self.service_generic.set_properties({"is_toolkit_running": True})
+            self.create_geometry_thread()
+            return "Creating geometry"
+        else:
+            return "Toolkit running"
+
+    @thread.launch_thread
+    def create_geometry_thread(self):
         multiplier = self.service_generic.get_properties()["multiplier"]
         geometry = self.service_generic.get_properties()["geometry"]
         self.multiplier = multiplier
+        comp = None
         if geometry == "Box":
             comp = self.draw_box()
         elif geometry == "Sphere":
             comp = self.draw_sphere()
-        else:
-            return False
-        self.comps.append(comp)
-        return True
+        if comp:
+            self.comps.append(comp)
+        self.service_generic.set_properties({"is_toolkit_running": False})
 
     @pyaedt_function_handler()
     def draw_box(self):

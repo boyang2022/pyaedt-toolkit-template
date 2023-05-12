@@ -8,6 +8,16 @@ from ansys.aedt.toolkits.template.backend.common.properties import properties
 from ansys.aedt.toolkits.template.backend.common.service_aedt import RunnerDesktop
 from ansys.aedt.toolkits.template.backend.common.toolkit_thread import ToolkitThread
 
+logger = logging.getLogger("Global")
+
+# Create a handler and set logging level for the handler
+c_handler = logging.StreamHandler()
+c_handler.setLevel(logging.DEBUG)
+
+# link handler to logger
+logger.addHandler(c_handler)
+logging.basicConfig(level=logging.DEBUG)
+
 thread = ToolkitThread()
 
 
@@ -97,17 +107,17 @@ class ServiceGeneric(object):
                     str(self.aedt_runner.desktop.port),
                 )
                 self.logger.debug(msg)
-                return True, msg
             else:
                 msg = "AEDT connected to process {}".format(
                     str(self.aedt_runner.desktop.aedt_process_id)
                 )
                 self.logger.debug(msg)
-                return True, msg
-
+            connected = True
         else:
-            self.logger.debug("AEDT not connected")
-            return False, "AEDT not connected"
+            msg = "AEDT not connected"
+            self.logger.debug(msg)
+            connected = False
+        return connected, msg
 
     @staticmethod
     def installed_aedt_version():
@@ -189,7 +199,6 @@ class ServiceGeneric(object):
                 pass
         return sessions
 
-    @thread.launch_thread
     def launch_aedt(self):
         """Launch AEDT or connect to an existing AEDT session.
 
@@ -199,37 +208,22 @@ class ServiceGeneric(object):
             ``True`` when successful, ``False`` when failed.
         """
 
-        status, msg = self.aedt_connected()
+        connected, msg = self.aedt_connected()
 
-        if status:
-            return msg
+        if not connected and not properties.is_toolkit_running:
+            properties.is_toolkit_running = True
+            self.launch_aedt_thread()
+        return msg
 
+    @thread.launch_thread
+    def launch_aedt_thread(self):
         self.aedt_runner.launch_aedt(
             properties.aedt_version,
             properties.non_graphical,
             properties.selected_process,
             properties.use_grpc,
         )
-        if (
-            self.aedt_runner.desktop is not None
-            and self.aedt_runner.desktop.aedt_version_id == properties.aedt_version
-        ):
-            if self.aedt_runner.desktop.port != 0:
-                msg = "AEDT connected to process {} on Grpc {}".format(
-                    str(self.aedt_runner.desktop.aedt_process_id),
-                    str(self.aedt_runner.desktop.port),
-                )
-                self.logger.debug("AEDT not connected")
-                return msg
-            else:
-                msg = "AEDT connected to process {}".format(
-                    str(self.aedt_runner.desktop.aedt_process_id)
-                )
-                self.logger.debug("AEDT not connected")
-                return msg
-        else:
-            self.logger.debug("AEDT launch failed")
-            return False
+        properties.is_toolkit_running = False
 
     def release_desktop(self, close_projects=False, close_on_exit=False):
         """Release AEDT.
@@ -262,7 +256,7 @@ class ServiceGeneric(object):
         str
         """
 
-        if self.aedt_runner.desktop is not None:
+        if self.aedt_runner.desktop is not None and not properties.is_toolkit_running:
             if ".lock" in properties.project_name:
                 self.set_properties({"project_name": ""})
                 msg = "Project locked"

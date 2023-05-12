@@ -26,17 +26,19 @@ class TestClass(BasisTest, object):
     def test_01_connect_hfss(self):
         assert not self.toolkit.connect_hfss()
         self.service_generic.launch_aedt()
+        while self.service_generic.get_properties()["is_toolkit_running"]:
+            pass
         assert self.toolkit.connect_hfss()
 
     def test_02_create_geometry(self):
+        while self.service_generic.get_properties()["is_toolkit_running"]:
+            pass
         assert self.toolkit.create_geometry()
+
         new_properties = {
             "geometry": "Sphere",
         }
         self.service_generic.set_properties(new_properties)
+        while self.service_generic.get_properties()["is_toolkit_running"]:
+            pass
         assert self.toolkit.create_geometry()
-        new_properties = {
-            "geometry": "Box_Test",
-        }
-        self.service_generic.set_properties(new_properties)
-        assert not self.toolkit.create_geometry()

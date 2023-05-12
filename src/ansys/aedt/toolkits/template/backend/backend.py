@@ -138,9 +138,9 @@ def create_geometry_call():
     if service.aedtapp:
         response = service.create_geometry()
         if response:
-            return jsonify("Geometry created"), 200
+            return jsonify(response), 200
         else:
-            return jsonify("Geometry creation failed"), 500
+            return jsonify(response), 500
     else:
         return jsonify("HFSS is not connected"), 500
 
