@@ -1,5 +1,4 @@
 import logging
-import os
 
 import psutil
 import pyaedt
@@ -223,6 +222,8 @@ class ServiceGeneric(object):
             properties.selected_process,
             properties.use_grpc,
         )
+        if properties.project_name:
+            self.aedt_runner.open_project(properties.project_name)
         properties.is_toolkit_running = False
 
     def release_desktop(self, close_projects=False, close_on_exit=False):
@@ -247,32 +248,3 @@ class ServiceGeneric(object):
             self.aedt_runner.release_desktop(close_projects, close_on_exit)
         self.logger.debug("AEDT released")
         return True
-
-    def open_project(self):
-        """Open an existing AEDT project.
-
-        Returns
-        -------
-        str
-        """
-
-        if self.aedt_runner.desktop is not None and not properties.is_toolkit_running:
-            if ".lock" in properties.project_name:
-                self.set_properties({"project_name": ""})
-                msg = "Project locked"
-                self.logger.debug(msg)
-                return msg
-            self.aedt_runner.open_project(properties.project_name)
-            if len(self.aedt_runner.desktop.odesktop.GetProjects()) > 0:
-                msg = "{} opened".format(
-                    os.path.splitext(os.path.basename(properties.project_name))[0]
-                )
-                self.logger.debug(msg)
-                return msg
-            msg = "Project name not correct"
-            self.logger.debug(msg)
-            return msg
-        else:
-            msg = "AEDT not connected"
-            self.logger.debug(msg)
-            return msg

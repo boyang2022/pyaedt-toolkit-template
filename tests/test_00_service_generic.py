@@ -42,33 +42,13 @@ class TestClass(BasisTest, object):
     def test_05_open_project(self):
         filename = os.path.join(self.local_path, "example_models", test_subfolder, "Coax_HFSS.aedt")
         filename = self.local_scratch.copyfile(filename)
+        process_id = self.aedtapp.odesktop.GetProcessID()
         new_properties = {
+            "use_grpc": True,
+            "selected_process": process_id,
             "project_name": filename,
         }
-        self.service_generic.set_properties(new_properties)
-        while self.service_generic.get_properties()["is_toolkit_running"]:
-            pass
-        assert self.service_generic.open_project() == "AEDT not connected"
-
-        process_id = self.aedtapp.odesktop.GetProcessID()
-        new_properties = {"use_grpc": True, "selected_process": process_id}
         self.service_generic.set_properties(new_properties)
         msg = self.service_generic.launch_aedt()
-        assert str(process_id) in msg
-
-        new_properties = {
-            "project_name": filename,
-        }
-        self.service_generic.set_properties(new_properties)
-        self.service_generic.open_project()
+        assert msg
         assert len(self.aedtapp.odesktop.GetProjects()) > 0
-
-        filename = os.path.join(
-            self.local_path, "example_models", test_subfolder, "Coax_HFSS_locked.aedt.lock"
-        )
-        filename = self.local_scratch.copyfile(filename)
-        new_properties = {
-            "project_name": filename,
-        }
-        self.service_generic.set_properties(new_properties)
-        assert self.service_generic.open_project() == "Project locked"

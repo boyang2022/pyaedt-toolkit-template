@@ -168,14 +168,9 @@ class ui_common(object):
         self.update_progress(50)
         self.write_log_line(response.json())
 
-        if response.ok and self.find_process_ids():
-            if properties["project_name"]:
-                self.update_progress(75)
-                response = requests.put(self.url + "/open_project", json=properties)
-                self.write_log_line(response.json())
-        else:
+        if not response.ok:
             self.write_log_line("Launch AEDT failed")
-            return
+
         self.update_progress(100)
 
     def release_only(self):
