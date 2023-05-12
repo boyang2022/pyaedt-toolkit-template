@@ -46,6 +46,8 @@ class TestClass(BasisTest, object):
             "project_name": filename,
         }
         self.service_generic.set_properties(new_properties)
+        while self.service_generic.get_properties()["is_toolkit_running"]:
+            pass
         assert self.service_generic.open_project() == "AEDT not connected"
 
         process_id = self.aedtapp.odesktop.GetProcessID()
