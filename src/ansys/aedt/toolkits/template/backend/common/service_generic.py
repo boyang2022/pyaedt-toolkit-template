@@ -217,6 +217,7 @@ class ServiceGeneric(object):
     @thread.launch_thread
     def launch_aedt_thread(self):
         """Launch AEDT."""
+
         self.aedt_runner.launch_aedt(
             properties.aedt_version,
             properties.non_graphical,
