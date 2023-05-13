@@ -216,7 +216,14 @@ class ServiceGeneric(object):
 
     @thread.launch_thread
     def launch_aedt_thread(self):
-        """Launch AEDT."""
+        """Launch AEDT.
+
+        Returns
+        -------
+        bool
+            ``True`` when successful, ``False`` when failed.
+        """
+
 
         self.aedt_runner.launch_aedt(
             properties.aedt_version,
