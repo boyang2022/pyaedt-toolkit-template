@@ -214,25 +214,20 @@ class ServiceGeneric(object):
             self.launch_aedt_thread()
         return msg
 
-    # @thread.launch_thread
-    # def launch_aedt_thread(self):
-    #     """Launch AEDT.
+    @thread.launch_thread
+    def launch_aedt_thread(self):
+        """Launch AEDT.
+        """
 
-    #     Returns
-    #     -------
-    #     bool
-    #         ``True`` when successful, ``False`` when failed.
-    #     """
-
-    #     self.aedt_runner.launch_aedt(
-    #         properties.aedt_version,
-    #         properties.non_graphical,
-    #         properties.selected_process,
-    #         properties.use_grpc,
-    #     )
-    #     if properties.project_name:
-    #         self.aedt_runner.open_project(properties.project_name)
-    #     properties.is_toolkit_running = False
+        self.aedt_runner.launch_aedt(
+            properties.aedt_version,
+            properties.non_graphical,
+            properties.selected_process,
+            properties.use_grpc,
+        )
+        if properties.project_name:
+            self.aedt_runner.open_project(properties.project_name)
+        properties.is_toolkit_running = False
 
     def release_desktop(self, close_projects=False, close_on_exit=False):
         """Release AEDT.
