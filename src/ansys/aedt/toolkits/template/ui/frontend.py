@@ -75,6 +75,9 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Find active AEDT sessions
         self.aedt_version_combo.currentTextChanged.connect(self.ui_obj.find_process_ids)
 
+        # Refresh active sessions
+        # self.process_id_combo.popupAboutToBeShown.connect(self.ui_obj.find_process_ids)
+
         # Launch AEDT
         self.connect_aedtapp.clicked.connect(self.ui_obj.launch_aedt)
 
