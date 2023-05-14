@@ -1,11 +1,11 @@
 import logging
+from threading import Thread
 
 import psutil
 import pyaedt
 
 from ansys.aedt.toolkits.template.backend.common.properties import properties
 from ansys.aedt.toolkits.template.backend.common.service_aedt import RunnerDesktop
-from ansys.aedt.toolkits.template.backend.common.toolkit_thread import ToolkitThread
 
 logger = logging.getLogger("Global")
 
@@ -16,8 +16,6 @@ c_handler.setLevel(logging.DEBUG)
 # link handler to logger
 logger.addHandler(c_handler)
 logging.basicConfig(level=logging.DEBUG)
-
-thread = ToolkitThread()
 
 
 class ServiceGeneric(object):
@@ -97,23 +95,23 @@ class ServiceGeneric(object):
         Examples
         --------
         >>> aedt_connected()
-        (True, "AEDT connected to process <process_id> on Grpc <grpc_port>")
+        (True, "Backend connected to process <process_id> on Grpc <grpc_port>")
         """
         if self.aedt_runner.desktop:
             if self.aedt_runner.desktop.port != 0:
-                msg = "AEDT connected to process {} on Grpc {}".format(
+                msg = "Backend connected to process {} on Grpc {}".format(
                     str(self.aedt_runner.desktop.aedt_process_id),
                     str(self.aedt_runner.desktop.port),
                 )
                 self.logger.debug(msg)
             else:
-                msg = "AEDT connected to process {}".format(
+                msg = "Backend connected to process {}".format(
                     str(self.aedt_runner.desktop.aedt_process_id)
                 )
                 self.logger.debug(msg)
             connected = True
         else:
-            msg = "AEDT not connected"
+            msg = "Backend not connected to AEDT"
             self.logger.debug(msg)
             connected = False
         return connected, msg
@@ -158,45 +156,47 @@ class ServiceGeneric(object):
         >>> aedt_sessions()
         [[pid1, grpc_port1], [pid2, grpc_port2]]
         """
-
-        version = properties.aedt_version
-        keys = ["ansysedt.exe"]
-        if version and "." in version:
-            version = version[-4:].replace(".", "")
-        if version < "222":  # pragma: no cover
-            version = version[:2] + "." + version[2]
-        sessions = []
-        for p in psutil.process_iter():
-            try:
-                if p.name() in keys:
-                    cmd = p.cmdline()
-                    if not version or (version and version in cmd[0]):
-                        if "-grpcsrv" in cmd:
-                            if not version or (version and version in cmd[0]):
-                                try:
-                                    sessions.append(
-                                        [
-                                            p.pid,
-                                            int(cmd[cmd.index("-grpcsrv") + 1]),
-                                        ]
-                                    )
-                                except IndexError:
-                                    sessions.append(
-                                        [
-                                            p.pid,
-                                            -1,
-                                        ]
-                                    )
-                        else:
-                            sessions.append(
-                                [
-                                    p.pid,
-                                    -1,
-                                ]
-                            )
-            except:
-                pass
-        return sessions
+        if not properties.is_toolkit_running:
+            version = properties.aedt_version
+            keys = ["ansysedt.exe"]
+            if version and "." in version:
+                version = version[-4:].replace(".", "")
+            if version < "222":  # pragma: no cover
+                version = version[:2] + "." + version[2]
+            sessions = []
+            for p in psutil.process_iter():
+                try:
+                    if p.name() in keys:
+                        cmd = p.cmdline()
+                        if not version or (version and version in cmd[0]):
+                            if "-grpcsrv" in cmd:
+                                if not version or (version and version in cmd[0]):
+                                    try:
+                                        sessions.append(
+                                            [
+                                                p.pid,
+                                                int(cmd[cmd.index("-grpcsrv") + 1]),
+                                            ]
+                                        )
+                                    except IndexError:
+                                        sessions.append(
+                                            [
+                                                p.pid,
+                                                -1,
+                                            ]
+                                        )
+                            else:
+                                sessions.append(
+                                    [
+                                        p.pid,
+                                        -1,
+                                    ]
+                                )
+                except:
+                    pass
+            return sessions
+        else:
+            return []
 
     def launch_aedt(self):
         """Launch AEDT or connect to an existing AEDT session.
@@ -211,13 +211,13 @@ class ServiceGeneric(object):
 
         if not connected and not properties.is_toolkit_running:
             properties.is_toolkit_running = True
-            self.launch_aedt_thread()
+            aedt_thread = Thread(target=self.launch_aedt_thread)
+            aedt_thread.start()
+
         return msg
 
-    @thread.launch_thread
     def launch_aedt_thread(self):
-        """Launch AEDT.
-        """
+        """Launch AEDT thread."""
 
         self.aedt_runner.launch_aedt(
             properties.aedt_version,

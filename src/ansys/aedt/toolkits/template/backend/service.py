@@ -1,11 +1,11 @@
+from threading import Thread
+
 import numpy as np
 from pyaedt import Desktop
 from pyaedt import Hfss
 from pyaedt.generic.general_methods import pyaedt_function_handler
 
-from ansys.aedt.toolkits.template.backend.common.toolkit_thread import ToolkitThread
-
-thread = ToolkitThread()
+from ansys.aedt.toolkits.template.backend.common.properties import properties
 
 
 class ToolkitService(object):
@@ -88,15 +88,14 @@ class ToolkitService(object):
         >>> toolkit = ToolkitService(service_generic)
         >>> toolkit.create_geometry()
         """
-        toolkit_running = self.service_generic.get_properties()["is_toolkit_running"]
-        if not toolkit_running:
-            self.service_generic.set_properties({"is_toolkit_running": True})
-            self.create_geometry_thread()
-            return "Creating geometry"
-        else:
-            return "Toolkit running"
+        hfss_connect = self.connect_hfss()
+        if hfss_connect and not properties.is_toolkit_running:
+            properties.is_toolkit_running = True
+            aedt_thread = Thread(target=self.create_geometry_thread)
+            aedt_thread.start()
+            return True
+        return False
 
-    @thread.launch_thread
     def create_geometry_thread(self):
         multiplier = self.service_generic.get_properties()["multiplier"]
         geometry = self.service_generic.get_properties()["geometry"]
@@ -108,7 +107,7 @@ class ToolkitService(object):
             comp = self.draw_sphere()
         if comp:
             self.comps.append(comp)
-        self.service_generic.set_properties({"is_toolkit_running": False})
+        properties.is_toolkit_running = False
 
     @pyaedt_function_handler()
     def draw_box(self):

@@ -96,18 +96,6 @@ def close_aedt_call():
         return jsonify("AEDT is not connected"), 500
 
 
-# @app.route("/open_project", methods=["PUT"])
-# def open_project_call():
-#     logger.info("[PUT] /open_project (open an AEDT project)")
-#
-#     response = service_generic.open_project()
-#
-#     if response:
-#         return jsonify(response), 200
-#     else:
-#         return jsonify("Fail to connect to AEDT"), 500
-
-
 # Toolkit services
 
 
@@ -138,7 +126,7 @@ def create_geometry_call():
     if service.aedtapp:
         response = service.create_geometry()
         if response:
-            return jsonify(response), 200
+            return "Creating geometry", 200
         else:
             return jsonify(response), 500
     else:

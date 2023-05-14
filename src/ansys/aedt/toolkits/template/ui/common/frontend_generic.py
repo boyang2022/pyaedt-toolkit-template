@@ -39,6 +39,9 @@ class ui_common(object):
         XStream.stdout().messageWritten.connect(lambda value: self.write_log_line(value))
         XStream.stderr().messageWritten.connect(lambda value: self.write_log_line(value))
 
+        # UI thread
+        self.backend_thread = BackendThread()
+
     def set_title(self, toolkit_title):
         # Toolkit name
         self.main_window.setWindowTitle(toolkit_title)
@@ -162,16 +165,20 @@ class ui_common(object):
                 properties["selected_process"] = int(text_splitted[1])
         self.set_properties(properties)
 
-        self.update_progress(25)
-        self.write_log_line("Connecting to AEDT...")
-        response = requests.post(self.url + "/launch_aedt", json=properties)
-        self.update_progress(50)
-        self.write_log_line(response.json())
-
-        if not response.ok:
-            self.write_log_line("Launch AEDT failed")
-
-        self.update_progress(100)
+        if properties["is_toolkit_running"]:
+            self.write_log_line("Toolkit running... Please wait")
+        else:
+            self.update_progress(0)
+            response = requests.get(self.url + "/health")
+            if response.json() == "Backend not connected to AEDT":
+                # Thread
+                self.backend_thread.url = self.url + "/launch_aedt"
+                self.backend_thread.ui_class = self
+                self.backend_thread.rest_type = "POST"
+                self.backend_thread.start()
+            else:
+                self.write_log_line(response.json())
+                self.update_progress(100)
 
     def release_only(self):
         """Release desktop."""
@@ -256,3 +263,48 @@ class XStream(QtCore.QObject):
             XStream._stderr = XStream()
             sys.stderr = XStream._stderr
         return XStream._stderr
+
+
+class BackendThread(QtCore.QThread):
+    statusChanged = QtCore.Signal(str)
+
+    def __init__(self):
+        super().__init__()
+        self.url = None
+        self.ui_class = None
+        self.rest_type = None
+
+    def __int__(self):
+        super().__init__()
+
+    def run(self):
+        self.launch_thread()
+
+    def launch_thread(self):
+        if self.rest_type == "POST":
+            response = requests.post(self.url)
+        elif self.rest_type == "GET":
+            response = requests.get(self.url)
+        elif self.rest_type == "PUT":
+            response = requests.put(self.url)
+        else:
+            return
+
+        if response.status_code == 200:
+            self.ui_class.update_progress(50)
+            # If the request was successful, start checking the status
+            while True:
+                properties = self.ui_class.get_properties()
+                toolkit_running = properties["is_toolkit_running"]
+                # Emit the signal to update the status label
+                self.statusChanged.emit(toolkit_running)
+                if not toolkit_running:
+                    break
+                time.sleep(1)
+
+            self.ui_class.find_process_ids()
+
+            self.ui_class.update_progress(100)
+        else:
+            self.ui_class.write_log_line(f"Failed backend call: {self.url}")
+            self.ui_class.update_progress(100)
