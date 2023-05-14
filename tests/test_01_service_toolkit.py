@@ -31,8 +31,6 @@ class TestClass(BasisTest, object):
         assert self.toolkit.connect_hfss()
 
     def test_02_create_geometry(self):
-        while self.service_generic.get_properties()["is_toolkit_running"]:
-            pass
         assert self.toolkit.create_geometry()
 
         new_properties = {
