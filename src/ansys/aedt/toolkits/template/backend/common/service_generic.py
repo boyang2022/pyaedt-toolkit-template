@@ -26,14 +26,14 @@ class ServiceGeneric(object):
 
     Examples
     --------
-    >>> from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
-    >>> service_generic = ServiceGeneric()
-    >>> properties = service_generic.get_properties()
+    >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+    >>> service = ToolkitService()
+    >>> properties = service.get_properties()
     >>> new_properties = {"aedt_version": "2022.2"}
-    >>> service_generic.set_properties(new_properties)
-    >>> properties = service_generic.get_properties()
-    >>> msg = service_generic.launch_aedt()
-    >>> service_generic.release_desktop()
+    >>> service.set_properties(new_properties)
+    >>> new_properties = service.get_properties()
+    >>> msg = service.launch_aedt()
+    >>> service.release_desktop()
 
     """
 
@@ -57,7 +57,9 @@ class ServiceGeneric(object):
 
         Examples
         --------
-        >>> set_properties({"property1": value1, "property2": value2})
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.set_properties({"property1": value1, "property2": value2})
 
         """
 
@@ -81,7 +83,9 @@ class ServiceGeneric(object):
 
         Examples
         --------
-        >>> get_properties()
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.get_properties()
         {"property1": value1, "property2": value2}
         """
         return properties.export_to_dict()
@@ -95,6 +99,11 @@ class ServiceGeneric(object):
         bool
             ``True`` when active, ``False`` when not active.
 
+        Examples
+        --------
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.get_thread_status()
         """
         thread_running = thread.is_thread_running()
         is_toolkit_busy = properties.is_toolkit_busy
@@ -115,7 +124,9 @@ class ServiceGeneric(object):
 
         Examples
         --------
-        >>> aedt_connected()
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.aedt_connected()
         (True, "Backend connected to process <process_id> on Grpc <grpc_port>")
         """
         if self.aedt_runner.desktop:
@@ -149,7 +160,9 @@ class ServiceGeneric(object):
 
         Examples
         --------
-        >>> installed_aedt_version()
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.installed_aedt_version()
         ["2021.1", "2021.2", "2022.1"]
         """
 
@@ -165,7 +178,7 @@ class ServiceGeneric(object):
 
     @staticmethod
     def aedt_sessions():
-        """Get information for the active COM AEDT sessions.
+        """Get information for the active AEDT sessions.
 
         Returns
         -------
@@ -174,7 +187,9 @@ class ServiceGeneric(object):
 
         Examples
         --------
-        >>> aedt_sessions()
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.aedt_sessions()
         [[pid1, grpc_port1], [pid2, grpc_port2]]
         """
         if not properties.is_toolkit_busy:
@@ -221,7 +236,19 @@ class ServiceGeneric(object):
 
     @thread.launch_thread
     def launch_aedt(self):
-        """Launch AEDT thread."""
+        """Launch AEDT.
+
+        Returns
+        -------
+        bool
+            ``True`` when successful, ``False`` when failed.
+
+        Examples
+        --------
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.launch_aedt()
+        """
 
         connected, msg = self.aedt_connected()
         if not connected:
@@ -233,6 +260,7 @@ class ServiceGeneric(object):
             )
             if properties.project_name:
                 self.aedt_runner.open_project(properties.project_name)
+        return True
 
     def release_desktop(self, close_projects=False, close_on_exit=False):
         """Release AEDT.
@@ -250,6 +278,13 @@ class ServiceGeneric(object):
         -------
         bool
             ``True`` when successful, ``False`` when failed.
+
+        Examples
+        --------
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.release_desktop()
+
         """
 
         if self.aedt_runner.desktop is not None:

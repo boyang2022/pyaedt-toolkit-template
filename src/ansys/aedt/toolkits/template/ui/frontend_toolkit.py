@@ -2,6 +2,9 @@ import logging
 
 import requests
 
+from ansys.aedt.toolkits.template.ui.common.frontend_generic import FrontendGeneric
+from ansys.aedt.toolkits.template.ui.common.thread_manager import FrontendThread
+
 logger = logging.getLogger("Global")
 
 # Create a handler and set logging level for the handler
@@ -13,34 +16,36 @@ logger.addHandler(c_handler)
 logging.basicConfig(level=logging.DEBUG)
 
 
-class ui_toolkit(object):
-    def __init__(self, common_frontend, url):
-        self.ui_common = common_frontend
-        self.url = url
+class ToolkitFrontend(FrontendGeneric, FrontendThread):
+    def __init__(self):
+        FrontendThread.__init__(self)
+        FrontendGeneric.__init__(self)
 
-    def create_geometry(self):
-        properties = self.ui_common.get_properties()
-        properties["multiplier"] = float(self.ui_common.main_window.multiplier.text())
-        properties["geometry"] = self.ui_common.main_window.geometry_combo.currentText()
-        self.ui_common.set_properties(properties)
+    def create_geometry_toolkit(self):
+        properties = self.get_properties()
+        properties["multiplier"] = float(self.multiplier.text())
+        properties["geometry"] = self.geometry_combo.currentText()
+        self.set_properties(properties)
+        response = requests.get(self.url + "/get_status")
 
-        if (
-            self.ui_common.main_window.progress_bar.value() < 100
-            or properties["is_toolkit_running"]
+        if self.progress_bar.value() < 100 or (
+            response.ok and response.json() == "Backend running"
         ):
-            self.ui_common.write_log_line("Waiting for the previous process to terminate.")
+            self.write_log_line("Waiting for the previous process to terminate.")
             return
 
-        self.ui_common.update_progress(0)
+        self.update_progress(0)
 
         response = requests.post(self.url + "/connect_hfss", json=properties)
 
         if response.ok:
-            self.ui_common.backend_thread.url = self.url + "/create_geometry"
-            self.ui_common.backend_thread.ui_class = self.ui_common
-            self.ui_common.backend_thread.rest_type = "POST"
-            self.ui_common.backend_thread.start()
-            self.ui_common.write_log_line("Creating geometry process launched.")
+            response = requests.post(self.url + "/create_geometry")
+            if response.ok:
+                self.start()
+                self.write_log_line("Creating geometry process launched.")
+            else:
+                self.write_log_line(f"Failed backend call: {self.url}")
+                self.update_progress(100)
         else:
-            self.ui_common.write_log_line(response.json())
-            self.ui_common.update_progress(100)
+            self.write_log_line(response.json())
+            self.update_progress(100)

@@ -51,4 +51,6 @@ class TestClass(BasisTest, object):
         self.service_generic.set_properties(new_properties)
         msg = self.service_generic.launch_aedt()
         assert msg
+        while self.service_generic.get_thread_status()[0] != -1:
+            pass
         assert len(self.aedtapp.odesktop.GetProjects()) > 0

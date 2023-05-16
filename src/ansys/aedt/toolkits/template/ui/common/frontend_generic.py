@@ -20,31 +20,25 @@ logger.addHandler(c_handler)
 logging.basicConfig(level=logging.DEBUG)
 
 
-class ui_common(object):
-    def __init__(self, main_window, url):
-        self.main_window = main_window
-        self.url = url
-        self.main_window.setupUi(self.main_window)
+class FrontendGeneric(object):
+    def __init__(self):
+        self.setupUi(self)
 
         # Load toolkit icon
         self.images_path = os.path.join(os.path.dirname(__file__), "images")
         icon = self._load_icon(self.images_path)
-        self.main_window.setWindowIcon(icon)
+        self.setWindowIcon(icon)
 
         # Set font style
-        self.set_font(self.main_window)
+        self.set_font(self)
 
         # UI Logger
-        self.log_text = self.main_window.log_text
         XStream.stdout().messageWritten.connect(lambda value: self.write_log_line(value))
         XStream.stderr().messageWritten.connect(lambda value: self.write_log_line(value))
 
-        # UI thread
-        self.backend_thread = BackendThread()
-
     def set_title(self, toolkit_title):
         # Toolkit name
-        self.main_window.setWindowTitle(toolkit_title)
+        self.setWindowTitle(toolkit_title)
         return True
 
     def write_log_line(self, value):
@@ -54,9 +48,9 @@ class ui_common(object):
         self.log_text.setTextCursor(tc)
 
     def update_progress(self, value):
-        self.main_window.progress_bar.setValue(value)
-        if self.main_window.progress_bar.isHidden():
-            self.main_window.progress_bar.setVisible(True)
+        self.progress_bar.setValue(value)
+        if self.progress_bar.isHidden():
+            self.progress_bar.setVisible(True)
 
     def check_connection(self):
         try:
@@ -122,12 +116,12 @@ class ui_common(object):
             self.set_properties(properties)
 
     def find_process_ids(self):
-        self.main_window.process_id_combo.clear()
-        self.main_window.process_id_combo.addItem("Create New Session")
+        self.process_id_combo.clear()
+        self.process_id_combo.addItem("Create New Session")
         try:
             # Modify selected version
             properties = self.get_properties()
-            properties["aedt_version"] = self.main_window.aedt_version_combo.currentText()
+            properties["aedt_version"] = self.aedt_version_combo.currentText()
             self.set_properties(properties)
 
             response = requests.get(self.url + "/aedt_sessions")
@@ -135,11 +129,9 @@ class ui_common(object):
                 sessions = response.json()
                 for session in sessions:
                     if session[1] == -1:
-                        self.main_window.process_id_combo.addItem(
-                            "Process {}".format(session[0], session[1])
-                        )
+                        self.process_id_combo.addItem("Process {}".format(session[0], session[1]))
                     else:
-                        self.main_window.process_id_combo.addItem(
+                        self.process_id_combo.addItem(
                             "Process {} on Grpc {}".format(session[0], session[1])
                         )
             return True
@@ -148,58 +140,63 @@ class ui_common(object):
             return False
 
     def launch_aedt(self):
-        properties = self.get_properties()
-        properties["aedt_version"] = self.main_window.aedt_version_combo.currentText()
-        properties["non_graphical"] = True
-        if self.main_window.non_graphical_combo.currentText() == "False":
-            properties["non_graphical"] = False
-        if self.main_window.process_id_combo.currentText() == "Create New Session":
-            properties["selected_process"] = 0
-        else:
-            text_splitted = self.main_window.process_id_combo.currentText().split(" ")
-            if len(text_splitted) == 5:
-                properties["use_grpc"] = True
-                properties["selected_process"] = int(text_splitted[4])
-            else:
-                properties["use_grpc"] = False
-                properties["selected_process"] = int(text_splitted[1])
-        self.set_properties(properties)
+        response = requests.get(self.url + "/get_status")
 
-        if properties["is_toolkit_running"]:
-            self.write_log_line("Toolkit running... Please wait")
-        else:
+        if response.ok and response.json() == "Backend running":
+            self.write_log_line("Backend running... Please wait")
+        elif response.ok and response.json() == "Backend free":
             self.update_progress(0)
             response = requests.get(self.url + "/health")
-            if response.json() == "Backend not connected to AEDT":
-                # Thread
-                self.backend_thread.url = self.url + "/launch_aedt"
-                self.backend_thread.ui_class = self
-                self.backend_thread.rest_type = "POST"
-                self.backend_thread.start()
+            if response.ok and response.json() == "Backend not connected to AEDT":
+                properties = self.get_properties()
+                properties["aedt_version"] = self.aedt_version_combo.currentText()
+                properties["non_graphical"] = True
+                if self.non_graphical_combo.currentText() == "False":
+                    properties["non_graphical"] = False
+                if self.process_id_combo.currentText() == "Create New Session":
+                    properties["selected_process"] = 0
+                else:
+                    text_splitted = self.process_id_combo.currentText().split(" ")
+                    if len(text_splitted) == 5:
+                        properties["use_grpc"] = True
+                        properties["selected_process"] = int(text_splitted[4])
+                    else:
+                        properties["use_grpc"] = False
+                        properties["selected_process"] = int(text_splitted[1])
+                self.set_properties(properties)
+
+                response = requests.post(self.url + "/launch_aedt")
+                if response.status_code == 200:
+                    self.update_progress(50)
+                    self.start()
+                else:
+                    self.write_log_line(f"Failed backend call: {self.url}")
+                    self.update_progress(100)
             else:
                 self.write_log_line(response.json())
                 self.update_progress(100)
+        else:
+            self.write_log_line(response.json())
+            self.update_progress(100)
 
     def release_only(self):
         """Release desktop."""
 
         properties = {"close_projects": False, "close_on_exit": False}
-
-        response = requests.post(self.url + "/close_aedt", json=properties)
-        if response.ok:
-            self.main_window.close()
+        event = self.close()
+        if event:
+            requests.post(self.url + "/close_aedt", json=properties)
 
     def release_and_close(self):
         """Release and close desktop."""
 
         properties = {"close_projects": True, "close_on_exit": True}
-
-        response = requests.post(self.url + "/close_aedt", json=properties)
-        if response.ok:
-            self.main_window.close()
+        event = self.close()
+        if event:
+            requests.post(self.url + "/close_aedt", json=properties)
 
     def on_cancel_clicked(self):
-        self.main_window.close()
+        self.close()
 
     @staticmethod
     def set_font(ui_obj):
@@ -263,48 +260,3 @@ class XStream(QtCore.QObject):
             XStream._stderr = XStream()
             sys.stderr = XStream._stderr
         return XStream._stderr
-
-
-class BackendThread(QtCore.QThread):
-    statusChanged = QtCore.Signal(str)
-
-    def __init__(self):
-        super().__init__()
-        self.url = None
-        self.ui_class = None
-        self.rest_type = None
-
-    def __int__(self):
-        super().__init__()
-
-    def run(self):
-        self.launch_thread()
-
-    def launch_thread(self):
-        if self.rest_type == "POST":
-            response = requests.post(self.url)
-        elif self.rest_type == "GET":
-            response = requests.get(self.url)
-        elif self.rest_type == "PUT":
-            response = requests.put(self.url)
-        else:
-            return
-
-        if response.status_code == 200:
-            self.ui_class.update_progress(50)
-            # If the request was successful, start checking the status
-            while True:
-                properties = self.ui_class.get_properties()
-                toolkit_running = properties["is_toolkit_running"]
-                # Emit the signal to update the status label
-                self.statusChanged.emit(toolkit_running)
-                if not toolkit_running:
-                    break
-                time.sleep(1)
-
-            self.ui_class.find_process_ids()
-
-            self.ui_class.update_progress(100)
-        else:
-            self.ui_class.write_log_line(f"Failed backend call: {self.url}")
-            self.ui_class.update_progress(100)
