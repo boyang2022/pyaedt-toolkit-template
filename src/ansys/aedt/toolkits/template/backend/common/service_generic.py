@@ -1,11 +1,11 @@
 import logging
-from threading import Thread
 
 import psutil
 import pyaedt
 
 from ansys.aedt.toolkits.template.backend.common.properties import properties
 from ansys.aedt.toolkits.template.backend.common.service_aedt import RunnerDesktop
+from ansys.aedt.toolkits.template.backend.common.thread_manager import ThreadManager
 
 logger = logging.getLogger("Global")
 
@@ -16,6 +16,8 @@ c_handler.setLevel(logging.DEBUG)
 # link handler to logger
 logger.addHandler(c_handler)
 logging.basicConfig(level=logging.DEBUG)
+
+thread = ThreadManager()
 
 
 class ServiceGeneric(object):
@@ -83,6 +85,25 @@ class ServiceGeneric(object):
         {"property1": value1, "property2": value2}
         """
         return properties.export_to_dict()
+
+    @staticmethod
+    def get_thread_status():
+        """Get toolkit thread status.
+
+        Returns
+        -------
+        bool
+            ``True`` when active, ``False`` when not active.
+
+        """
+        thread_running = thread.is_thread_running()
+        is_toolkit_busy = properties.is_toolkit_busy
+        if thread_running and is_toolkit_busy:
+            return 0, "Backend running"
+        elif (not thread_running and is_toolkit_busy) or (thread_running and not is_toolkit_busy):
+            return 1, "Backend crashed"
+        else:
+            return -1, "Backend free"
 
     def aedt_connected(self):
         """Check if AEDT is connected.
@@ -156,7 +177,7 @@ class ServiceGeneric(object):
         >>> aedt_sessions()
         [[pid1, grpc_port1], [pid2, grpc_port2]]
         """
-        if not properties.is_toolkit_running:
+        if not properties.is_toolkit_busy:
             version = properties.aedt_version
             keys = ["ansysedt.exe"]
             if version and "." in version:
@@ -198,36 +219,20 @@ class ServiceGeneric(object):
         else:
             return []
 
+    @thread.launch_thread
     def launch_aedt(self):
-        """Launch AEDT or connect to an existing AEDT session.
-
-        Returns
-        -------
-        bool
-            ``True`` when successful, ``False`` when failed.
-        """
-
-        connected, msg = self.aedt_connected()
-
-        if not connected and not properties.is_toolkit_running:
-            properties.is_toolkit_running = True
-            aedt_thread = Thread(target=self.launch_aedt_thread)
-            aedt_thread.start()
-
-        return msg
-
-    def launch_aedt_thread(self):
         """Launch AEDT thread."""
 
-        self.aedt_runner.launch_aedt(
-            properties.aedt_version,
-            properties.non_graphical,
-            properties.selected_process,
-            properties.use_grpc,
-        )
-        if properties.project_name:
-            self.aedt_runner.open_project(properties.project_name)
-        properties.is_toolkit_running = False
+        connected, msg = self.aedt_connected()
+        if not connected:
+            self.aedt_runner.launch_aedt(
+                properties.aedt_version,
+                properties.non_graphical,
+                properties.selected_process,
+                properties.use_grpc,
+            )
+            if properties.project_name:
+                self.aedt_runner.open_project(properties.project_name)
 
     def release_desktop(self, close_projects=False, close_on_exit=False):
         """Release AEDT.

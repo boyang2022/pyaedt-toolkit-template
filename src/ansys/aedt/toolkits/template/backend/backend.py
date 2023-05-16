@@ -5,10 +5,7 @@ from flask import jsonify
 from flask import request
 from service import ToolkitService
 
-from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
-
-service_generic = ServiceGeneric()
-service = ToolkitService(service_generic)
+service = ToolkitService()
 
 app = Flask(__name__)
 
@@ -21,11 +18,21 @@ logger = logging.getLogger(__name__)
 @app.route("/health", methods=["GET"])
 def get_health():
     logger.info("[GET] /health (check if the server is healthy)")
-    desktop_connected, msg = service_generic.aedt_connected()
+    desktop_connected, msg = service.aedt_connected()
     if desktop_connected:
         return jsonify(msg), 200
     else:
         return jsonify(msg), 200
+
+
+@app.route("/get_status", methods=["GET"])
+def get_status_call():
+    logger.info("[GET] /get_status (check if the step is running)")
+    exit_code, msg = service.get_thread_status()
+    if exit_code <= 0:
+        return jsonify(msg), 200
+    else:
+        return jsonify(msg), 500
 
 
 @app.route("/set_properties", methods=["PUT"])
@@ -33,7 +40,7 @@ def set_properties_call():
     logger.info("[PUT] /set_properties (set toolkit properties)")
 
     body = request.json
-    success, msg = service_generic.set_properties(body)
+    success, msg = service.set_properties(body)
     if success:
         return jsonify(msg), 200
     else:
@@ -43,20 +50,20 @@ def set_properties_call():
 @app.route("/get_properties", methods=["GET"])
 def get_properties_call():
     logger.info("[GET] /get_properties (get toolkit properties)")
-    return jsonify(service_generic.get_properties()), 200
+    return jsonify(service.get_properties()), 200
 
 
 @app.route("/installed_versions", methods=["GET"])
 def installed_aedt_version_call():
     logger.info("[GET] /version (get the version)")
-    return jsonify(service_generic.installed_aedt_version()), 200
+    return jsonify(service.installed_aedt_version()), 200
 
 
 @app.route("/aedt_sessions", methods=["GET"])
 def aedt_sessions_call():
     logger.info("[GET] /aedt_sessions (aedt sessions for specific version)")
 
-    response = service_generic.aedt_sessions()
+    response = service.aedt_sessions()
 
     if isinstance(response, list):
         return jsonify(response), 200
@@ -68,10 +75,10 @@ def aedt_sessions_call():
 def launch_aedt_call():
     logger.info("[POST] /launch_aedt (launch or connect AEDT)")
 
-    response = service_generic.launch_aedt()
+    response = service.launch_aedt()
 
     if response:
-        return jsonify(response), 200
+        return jsonify("AEDT launched"), 200
     else:
         return jsonify("Fail to connect to AEDT"), 500
 
@@ -89,7 +96,7 @@ def close_aedt_call():
 
     close_projects = body["close_projects"]
     close_on_exit = body["close_on_exit"]
-    response = service_generic.release_desktop(close_projects, close_on_exit)
+    response = service.release_desktop(close_projects, close_on_exit)
     if response:
         return jsonify("AEDT correctly released"), 200
     else:
@@ -103,7 +110,7 @@ def close_aedt_call():
 def connect_hfss_call():
     logger.info("[POST] /connect_hfss (connect or create a HFSS design)")
 
-    desktop_connected, msg = service_generic.aedt_connected()
+    desktop_connected, msg = service.aedt_connected()
     if not desktop_connected:
         return jsonify(msg), 200
 
@@ -119,14 +126,14 @@ def connect_hfss_call():
 def create_geometry_call():
     logger.info("[POST] /create_geometry (create a box or sphere in HFSS)")
 
-    desktop_connected, msg = service_generic.aedt_connected()
+    desktop_connected, msg = service.aedt_connected()
     if not desktop_connected:
         return jsonify(msg), 500
 
     if service.aedtapp:
         response = service.create_geometry()
         if response:
-            return "Creating geometry", 200
+            return jsonify("Geometry created"), 200
         else:
             return jsonify(response), 500
     else:
@@ -134,4 +141,4 @@ def create_geometry_call():
 
 
 if __name__ == "__main__":
-    app.run(debug=service_generic.debug)
+    app.run(debug=service.debug)

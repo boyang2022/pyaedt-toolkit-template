@@ -5,6 +5,6 @@
   "project_name" : "",
   "selected_process" : 0,
   "use_grpc" : true,
-  "is_toolkit_running" : false,
+  "is_toolkit_busy" : false,
   "debug" : true
 }

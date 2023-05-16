@@ -1,42 +1,36 @@
-from threading import Thread
-
 import numpy as np
 from pyaedt import Desktop
 from pyaedt import Hfss
 from pyaedt.generic.general_methods import pyaedt_function_handler
 
-from ansys.aedt.toolkits.template.backend.common.properties import properties
+from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
+from ansys.aedt.toolkits.template.backend.common.service_generic import thread
 
 
-class ToolkitService(object):
-    """Toolkit class to control the workflow.
+class ToolkitService(ServiceGeneric):
+    """Toolkit class to control the toolkit workflow.
 
     This class provides methods to connect to HFSS and create geometries.
 
-    Parameters
-    ----------
-    None
-
-    Attributes
-    ----------
-    aedtapp : obj
-        AEDT application object.
-    multiplier : float
-        Multiplier value.
-    comps : list
-        List of components.
-
+    Examples
+    --------
+    >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+    >>> service = ToolkitService()
+    >>> msg1 = service.launch_aedt()
+    >>> msg2 = service.create_geometry()
+    >>> service.release_desktop()
     """
 
-    def __init__(self, service_generic):
+    def __init__(self):
+        ServiceGeneric.__init__(self)
         self.aedtapp = None
         self.multiplier = 1.0
         self.comps = []
-        self.service_generic = service_generic
 
     @pyaedt_function_handler()
     def connect_hfss(self):
-        """Connect to HFSS.
+        """Connect to HFSS design. If HFSS design exists, it takes the active project and design,
+         if not, it creates a new HFSS design.
 
         Returns
         -------
@@ -45,34 +39,32 @@ class ToolkitService(object):
 
         Examples
         --------
-        >>> service_generic = ServiceGeneric()
-        >>> service_generic.launch_aedt()
-        >>> toolkit = ToolkitService(service_generic)
-        >>> toolkit.connect_hfss()
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.launch_aedt()
+        >>> service.connect_hfss()
 
         """
-        if isinstance(self.service_generic.aedt_runner.desktop, type(Desktop())):
+        if isinstance(self.aedt_runner.desktop, type(Desktop())):
             if not self.aedtapp:
-                if not self.service_generic.aedt_runner.desktop.design_list():  # pragma: no cover
+                if not self.aedt_runner.desktop.design_list():  # pragma: no cover
                     # If no design exist then create a new HFSS design
                     self.aedtapp = Hfss(
-                        specified_version=self.service_generic.aedt_runner.desktop.aedt_version_id,
-                        aedt_process_id=self.service_generic.aedt_runner.desktop.aedt_process_id,
+                        specified_version=self.aedt_runner.desktop.aedt_version_id,
+                        aedt_process_id=self.aedt_runner.desktop.aedt_process_id,
                         new_desktop_session=False,
                     )
                 else:
-                    oproject = self.service_generic.aedt_runner.desktop.odesktop.GetActiveProject()
+                    oproject = self.aedt_runner.desktop.odesktop.GetActiveProject()
                     projectname = oproject.GetName()
                     activedesign = oproject.GetActiveDesign().GetName()
-                    self.aedtapp = self.service_generic.aedt_runner.desktop[
-                        [projectname, activedesign]
-                    ]
+                    self.aedtapp = self.aedt_runner.desktop[[projectname, activedesign]]
             return True
         return False
 
-    @pyaedt_function_handler()
+    @thread.launch_thread
     def create_geometry(self):
-        """Create geometry.
+        """Create a box or a sphere in HFSS.
 
         Returns
         -------
@@ -81,33 +73,24 @@ class ToolkitService(object):
 
         Examples
         --------
-        >>> from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
         >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
-        >>> service_generic = ServiceGeneric()
-        >>> service_generic.launch_aedt()
-        >>> toolkit = ToolkitService(service_generic)
-        >>> toolkit.create_geometry()
+        >>> service = ToolkitService()
+        >>> service.launch_aedt()
+        >>> service.create_geometry()
         """
         hfss_connect = self.connect_hfss()
-        if hfss_connect and not properties.is_toolkit_running:
-            properties.is_toolkit_running = True
-            aedt_thread = Thread(target=self.create_geometry_thread)
-            aedt_thread.start()
-            return True
-        return False
-
-    def create_geometry_thread(self):
-        multiplier = self.service_generic.get_properties()["multiplier"]
-        geometry = self.service_generic.get_properties()["geometry"]
-        self.multiplier = multiplier
-        comp = None
-        if geometry == "Box":
-            comp = self.draw_box()
-        elif geometry == "Sphere":
-            comp = self.draw_sphere()
-        if comp:
-            self.comps.append(comp)
-        properties.is_toolkit_running = False
+        if hfss_connect:
+            properties = self.get_properties()
+            multiplier = properties["multiplier"]
+            geometry = properties["geometry"]
+            self.multiplier = multiplier
+            comp = None
+            if geometry == "Box":
+                comp = self.draw_box()
+            elif geometry == "Sphere":
+                comp = self.draw_sphere()
+            if comp:
+                self.comps.append(comp)
 
     @pyaedt_function_handler()
     def draw_box(self):
