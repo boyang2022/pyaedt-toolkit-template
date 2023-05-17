@@ -36,23 +36,18 @@ import pytest
 local_path = os.path.dirname(os.path.realpath(__file__))
 
 from pyaedt import Desktop
-from pyaedt import Hfss
 from pyaedt.generic.filesystem import Scratch
+
+from ansys.aedt.toolkits.template.backend.service import ToolkitService
 
 test_project_name = "test_antenna"
 
 sys.path.append(local_path)
-# from _unittest.launch_desktop_tests import run_desktop_tests
 
 # Initialize default desktop configuration
 default_version = "2023.1"
 
-config = {
-    "desktopVersion": default_version,
-    "NonGraphical": True,
-    "NewThread": True,
-    "use_grpc": True,
-}
+config = {"desktopVersion": default_version, "NonGraphical": True, "NewThread": True}
 
 # Check for the local config file, override defaults if found
 local_config_file = os.path.join(local_path, "local_config.json")
@@ -77,15 +72,28 @@ logger = pyaedt_logger
 
 class BasisTest(object):
     def my_setup(self):
-        scratch_path = tempfile.gettempdir()
-        self.local_scratch = Scratch(scratch_path)
-        self.aedtapps = []
+        self.desktop = Desktop(desktop_version, non_graphical, new_desktop_session=False)
+        self.desktop.disable_autosave()
         self.test_config = config
         self.local_path = local_path
         self._main = sys.modules["__main__"]
 
+        self.service = ToolkitService()
+
+        new_properties = {
+            "non_graphical": config["NonGraphical"],
+            "aedt_version": config["desktopVersion"],
+            "selected_process": int(self.desktop.aedt_process_id),
+        }
+        self.service.set_properties(new_properties)
+
+        self.service.launch_aedt()
+
+        while self.service.get_thread_status()[0] != -1:
+            pass
+
     def my_teardown(self):
-        if self.aedtapps:
+        if self.desktop:
             try:
                 oDesktop = self._main.oDesktop
                 proj_list = oDesktop.GetProjectList()
@@ -96,52 +104,10 @@ class BasisTest(object):
                 oDesktop.ClearMessages("", "", 3)
             for proj in proj_list:
                 oDesktop.CloseProject(proj)
-            del self.aedtapps
+            del self.desktop
 
         logger.remove_all_project_file_logger()
-        shutil.rmtree(self.local_scratch.path, ignore_errors=True)
-
-    def add_app(
-        self,
-        project_name=None,
-        design_name=None,
-        solution_type=None,
-        application=None,
-        subfolder="",
-    ):
-        if "oDesktop" not in dir(self._main):
-            self.desktop = Desktop(desktop_version, settings.non_graphical, new_thread)
-            self.desktop.disable_autosave()
-        if project_name:
-            example_project = os.path.join(
-                local_path, "example_models", subfolder, project_name + ".aedt"
-            )
-            example_folder = os.path.join(
-                local_path, "example_models", subfolder, project_name + ".aedb"
-            )
-            if os.path.exists(example_project):
-                self.test_project = self.local_scratch.copyfile(example_project)
-            elif os.path.exists(example_project + "z"):
-                example_project = example_project + "z"
-                self.test_project = self.local_scratch.copyfile(example_project)
-            else:
-                self.test_project = os.path.join(self.local_scratch.path, project_name + ".aedt")
-            if os.path.exists(example_folder):
-                target_folder = os.path.join(self.local_scratch.path, project_name + ".aedb")
-                self.local_scratch.copyfolder(example_folder, target_folder)
-        else:
-            self.test_project = None
-        if not application:
-            application = Hfss
-        self.aedtapps.append(
-            application(
-                projectname=self.test_project,
-                designname=design_name,
-                solution_type=solution_type,
-                specified_version=desktop_version,
-            )
-        )
-        return self.aedtapps[-1]
+        shutil.rmtree(scratch_path, ignore_errors=True)
 
     def teardown_method(self):
         """
@@ -159,11 +125,18 @@ class BasisTest(object):
 # Define desktopVersion explicitly since this is imported by other modules
 desktop_version = config["desktopVersion"]
 new_thread = config["NewThread"]
+non_graphical = config["NonGraphical"]
+local_scratch = Scratch(scratch_path)
 
 
 @pytest.fixture(scope="session", autouse=True)
 def desktop_init():
-    desktop = Desktop(desktop_version, settings.non_graphical, new_thread)
+    desktop = Desktop(desktop_version, non_graphical, new_thread)
+    new_project = desktop.odesktop.NewProject()
+    desktop.save_project(
+        project_name=new_project.GetName(),
+        project_path=os.path.join(local_scratch.path, new_project.GetName() + ".aedt"),
+    )
     yield
     desktop.release_desktop(True, True)
     del desktop

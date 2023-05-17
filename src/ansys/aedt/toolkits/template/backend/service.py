@@ -45,14 +45,16 @@ class ToolkitService(ServiceGeneric):
         """
         if isinstance(self.aedt_runner.desktop, type(Desktop())):
             if not self.aedtapp:
-                if not self.aedt_runner.desktop.design_list():  # pragma: no cover
+                if not self.aedt_runner.desktop.design_list():
+                    properties = self.get_properties()
                     # If no design exist then create a new HFSS design
                     self.aedtapp = Hfss(
                         specified_version=self.aedt_runner.desktop.aedt_version_id,
                         aedt_process_id=self.aedt_runner.desktop.aedt_process_id,
+                        non_graphical=properties["non_graphical"],
                         new_desktop_session=False,
                     )
-                else:
+                else:  # pragma: no cover
                     oproject = self.aedt_runner.desktop.odesktop.GetActiveProject()
                     projectname = oproject.GetName()
                     activedesign = oproject.GetActiveDesign().GetName()
@@ -89,6 +91,9 @@ class ToolkitService(ServiceGeneric):
                 comp = self.draw_sphere()
             if comp:
                 self.comps.append(comp)
+            return True
+        else:  # pragma: no cover
+            return False
 
     @thread.launch_thread
     def save_project(self):

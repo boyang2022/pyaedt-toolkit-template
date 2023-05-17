@@ -258,7 +258,7 @@ class ServiceGeneric(object):
                 properties.selected_process,
                 properties.use_grpc,
             )
-            if properties.project_name:
+            if properties.project_name:  # pragma: no cover
                 self.aedt_runner.open_project(properties.project_name)
         return True
 
