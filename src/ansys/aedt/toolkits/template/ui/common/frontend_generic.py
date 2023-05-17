@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-import threading
 import time
 
 from PySide6 import QtCore
@@ -21,28 +20,25 @@ logger.addHandler(c_handler)
 logging.basicConfig(level=logging.DEBUG)
 
 
-class ui_common(object):
-    def __init__(self, main_window, url):
-        self.main_window = main_window
-        self.url = url
-        self.main_window.setupUi(self.main_window)
+class FrontendGeneric(object):
+    def __init__(self):
+        self.setupUi(self)
 
         # Load toolkit icon
-        self.images_path = os.path.join(os.path.dirname(__file__), "common/images")
+        self.images_path = os.path.join(os.path.dirname(__file__), "images")
         icon = self._load_icon(self.images_path)
-        self.main_window.setWindowIcon(icon)
+        self.setWindowIcon(icon)
 
         # Set font style
-        self.set_font(self.main_window)
+        self.set_font(self)
 
         # UI Logger
-        self.log_text = self.main_window.log_text
         XStream.stdout().messageWritten.connect(lambda value: self.write_log_line(value))
         XStream.stderr().messageWritten.connect(lambda value: self.write_log_line(value))
 
     def set_title(self, toolkit_title):
         # Toolkit name
-        self.main_window.setWindowTitle(toolkit_title)
+        self.setWindowTitle(toolkit_title)
         return True
 
     def write_log_line(self, value):
@@ -52,9 +48,9 @@ class ui_common(object):
         self.log_text.setTextCursor(tc)
 
     def update_progress(self, value):
-        self.main_window.progress_bar.setValue(value)
-        if self.main_window.progress_bar.isHidden():
-            self.main_window.progress_bar.setVisible(True)
+        self.progress_bar.setValue(value)
+        if self.progress_bar.isHidden():
+            self.progress_bar.setVisible(True)
 
     def check_connection(self):
         try:
@@ -67,9 +63,20 @@ class ui_common(object):
             if response.ok:
                 self.write_log_line(f"Backend running: {self.url}")
                 self.write_log_line(response.json())
+                if response.json() != "Toolkit not connected to AEDT":
+                    self.design_tab.setTabEnabled(0, False)
                 return True
+            return False
+
         except requests.exceptions.RequestException as e:
             logger.error("Backend not running")
+            return False
+
+    def backend_busy(self):
+        response = requests.get(self.url + "/get_status")
+        if response.ok and response.json() == "Backend running":
+            return True
+        else:
             return False
 
     def installed_versions(self):
@@ -79,6 +86,7 @@ class ui_common(object):
                 versions = response.json()
                 return versions
         except requests.exceptions.RequestException:
+            self.write_log_line("Get AEDT installed versions failed")
             return False
 
     def get_properties(self):
@@ -88,16 +96,22 @@ class ui_common(object):
                 properties = response.json()
                 return properties
         except requests.exceptions.RequestException:
-            return False
+            self.write_log_line("Get properties failed")
 
     def set_properties(self, data):
         try:
             response = requests.put(self.url + "/set_properties", json=data)
             if response.ok:
                 response.json()
-                return True
         except requests.exceptions.RequestException:
-            return False
+            self.write_log_line(f"Set properties failed")
+
+    def change_thread_status(self):
+        self.find_process_ids()
+        self.toolkit_running_led.setText("")
+        self.toolkit_running_led.adjustSize()
+        self.toolkit_running_led.setStyleSheet("background-color: green;")
+        self.update_progress(100)
 
     def browse_for_project(self):
         dialog = QtWidgets.QFileDialog()
@@ -106,24 +120,24 @@ class ui_common(object):
         dialog.setOption(QtWidgets.QFileDialog.Option.DontConfirmOverwrite, True)
         dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
         fileName, _ = dialog.getOpenFileName(
-            self.main_window,
+            self,
             "Open or create new aedt file",
             "",
             "Aedt Files (*.aedt)",
         )
         if fileName:
-            self.main_window.project_name.setText(fileName)
+            self.project_name.setText(fileName)
             properties = self.get_properties()
             properties["project_name"] = fileName
             self.set_properties(properties)
 
     def find_process_ids(self):
-        self.main_window.process_id_combo.clear()
-        self.main_window.process_id_combo.addItem("Create New Session")
+        self.process_id_combo.clear()
+        self.process_id_combo.addItem("Create New Session")
         try:
             # Modify selected version
             properties = self.get_properties()
-            properties["aedt_version"] = self.main_window.aedt_version_combo.currentText()
+            properties["aedt_version"] = self.aedt_version_combo.currentText()
             self.set_properties(properties)
 
             response = requests.get(self.url + "/aedt_sessions")
@@ -131,76 +145,80 @@ class ui_common(object):
                 sessions = response.json()
                 for session in sessions:
                     if session[1] == -1:
-                        self.main_window.process_id_combo.addItem(
-                            "Process {}".format(session[0], session[1])
-                        )
+                        self.process_id_combo.addItem("Process {}".format(session[0], session[1]))
                     else:
-                        self.main_window.process_id_combo.addItem(
+                        self.process_id_combo.addItem(
                             "Process {} on Grpc {}".format(session[0], session[1])
                         )
             return True
         except requests.exceptions.RequestException:
+            self.write_log_line(f"Find AEDT sessions failed")
             return False
 
     def launch_aedt(self):
-        properties = self.get_properties()
-        properties["aedt_version"] = self.main_window.aedt_version_combo.currentText()
-        properties["non_graphical"] = True
-        if self.main_window.non_graphical_combo.currentText() == "False":
-            properties["non_graphical"] = False
-        if self.main_window.process_id_combo.currentText() == "Create New Session":
-            properties["selected_process"] = 0
-        else:
-            text_splitted = self.main_window.process_id_combo.currentText().split(" ")
-            if len(text_splitted) == 5:
-                properties["use_grpc"] = True
-                properties["selected_process"] = int(text_splitted[4])
-            else:
-                properties["use_grpc"] = False
-                properties["selected_process"] = int(text_splitted[1])
-        self.set_properties(properties)
+        response = requests.get(self.url + "/get_status")
 
-        threading.Thread(target=self.launch_aedt_thread, args=(properties,), daemon=True).start()
+        if response.ok and response.json() == "Backend running":
+            self.write_log_line("Please wait, toolkit running")
+        elif response.ok and response.json() == "Backend free":
+            self.update_progress(0)
+            response = requests.get(self.url + "/health")
+            if response.ok and response.json() == "Toolkit not connected to AEDT":
+                properties = self.get_properties()
+                properties["aedt_version"] = self.aedt_version_combo.currentText()
+                properties["non_graphical"] = True
+                if self.non_graphical_combo.currentText() == "False":
+                    properties["non_graphical"] = False
+                if self.process_id_combo.currentText() == "Create New Session":
+                    properties["selected_process"] = 0
+                else:
+                    text_splitted = self.process_id_combo.currentText().split(" ")
+                    if len(text_splitted) == 5:
+                        properties["use_grpc"] = True
+                        properties["selected_process"] = int(text_splitted[4])
+                    else:
+                        properties["use_grpc"] = False
+                        properties["selected_process"] = int(text_splitted[1])
+                self.set_properties(properties)
+
+                response = requests.post(self.url + "/launch_aedt")
+
+                if response.status_code == 200:
+                    self.update_progress(50)
+                    self.toolkit_running_led.setText("Toolkit busy")
+                    self.toolkit_running_led.adjustSize()
+                    self.toolkit_running_led.setStyleSheet("background-color: red;")
+
+                    # Start the thread
+                    self.running = True
+                    self.start()
+                    self.design_tab.setTabEnabled(0, False)
+                else:
+                    self.write_log_line(f"Failed backend call: {self.url}")
+                    self.update_progress(100)
+            else:
+                self.write_log_line(response.json())
+                self.update_progress(100)
+        else:
+            self.write_log_line(response.json())
+            self.update_progress(100)
 
     def release_only(self):
         """Release desktop."""
 
         properties = {"close_projects": False, "close_on_exit": False}
-
-        response = requests.post(self.url + "/close_aedt", json=properties)
-        if response.ok:
-            self.main_window.close()
+        if self.close():
+            requests.post(self.url + "/close_aedt", json=properties)
 
     def release_and_close(self):
         """Release and close desktop."""
 
         properties = {"close_projects": True, "close_on_exit": True}
-
-        response = requests.post(self.url + "/close_aedt", json=properties)
-        if response.ok:
-            self.main_window.close()
+        if self.close():
+            requests.post(self.url + "/close_aedt", json=properties)
 
     def on_cancel_clicked(self):
-        self.main_window.close()
-
-    def launch_aedt_thread(self, properties):
-        """Connect to AEDT."""
-        self.update_progress(25)
-        self.write_log_line("Connecting to AEDT...")
-        response = requests.post(self.url + "/launch_aedt", json=properties)
-        self.update_progress(50)
-        self.write_log_line(response.json())
-        self.find_process_ids()
-        if response.ok:
-            if properties["project_name"]:
-                self.update_progress(75)
-                response = requests.put(self.url + "/open_project", json=properties)
-                self.write_log_line(response.json())
-        else:
-            self.write_log_line(f"Launch AEDT failed")
-            return False
-        self.update_progress(100)
-        return True
+        self.close()
 
     @staticmethod
     def set_font(ui_obj):

@@ -2,27 +2,22 @@ Backend generic service
 =======================
 This section list the available generic methods in the backend, these methods are the same for all toolkits:
 
-.. currentmodule:: ansys.aedt.toolkits.template.backend.service_generic
+.. currentmodule:: ansys.aedt.toolkits.template.backend.common.service_generic
 
 .. autosummary::
    :toctree: _autosummary
 
-   set_properties
-   get_properties
-   aedt_connected
-   installed_aedt_version
-   aedt_sessions
-   launch_aedt
-   release_desktop
-   open_project
-
+   ServiceGeneric
 
 The API must be used using PyAEDT as in the following example:
 
 .. code:: python
 
     # Import backend
-    import ansys.aedt.toolkits.template.backend.service_generic as service_generic
+    from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
+
+    # Initialize generic service
+    service_generic = ServiceGeneric()
 
     # Get the default properties loaded from json file
     properties = service_generic.get_properties()

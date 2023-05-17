@@ -3,6 +3,8 @@ import json
 
 
 class FrozenClass(object):
+    """Frozen properties."""
+
     __isfrozen = False
 
     def __setattr__(self, key, value):
@@ -27,6 +29,8 @@ class FrozenClass(object):
 
 
 class PropertiesData(FrozenClass):
+    """Properties data model."""
+
     def __init__(self, default_properties):
         self.__default_properties = copy.deepcopy(default_properties)
         for key, value in self.__default_properties.items():
