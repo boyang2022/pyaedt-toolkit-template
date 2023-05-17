@@ -50,6 +50,20 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow, ToolkitFrontend):
 
         # General Settings
 
+        # Update toolkit running flag
+        self.toolkit_running_led.setStyleSheet(
+            "text-align: center; qproperty-alignment: 'AlignCenter';"
+        )
+
+        if self.backend_busy():
+            self.toolkit_running_led.setText("Toolkit busy")
+            self.toolkit_running_led.adjustSize()
+            self.toolkit_running_led.setStyleSheet("background-color: red;")
+        else:
+            self.toolkit_running_led.setText("")
+            self.toolkit_running_led.adjustSize()
+            self.toolkit_running_led.setStyleSheet("background-color: green;")
+
         # Get default properties
         default_properties = self.get_properties()
 
@@ -74,6 +88,9 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow, ToolkitFrontend):
         self.non_graphical_combo.setCurrentText(str(default_properties["non_graphical"]))
         self.numcores.setText(str(default_properties["core_number"]))
 
+        # Thread signal
+        self.status_changed.connect(self.change_thread_status)
+
         # Select AEDT project
         self.browse_project.clicked.connect(self.browse_for_project)
 
@@ -89,8 +106,13 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow, ToolkitFrontend):
         # Launch AEDT
         self.connect_aedtapp.clicked.connect(self.launch_aedt)
 
+        # Toolkit Settings
+
         # Create geometry
         self.create_geometry_buttom.clicked.connect(self.create_geometry_toolkit)
+
+        # Save project
+        self.action_save_project.triggered.connect(lambda checked: self.save_project())
 
     def closeEvent(self, event):
         close = QtWidgets.QMessageBox.question(

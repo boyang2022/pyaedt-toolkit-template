@@ -140,5 +140,23 @@ def create_geometry_call():
         return jsonify("HFSS is not connected"), 500
 
 
+@app.route("/save_project", methods=["POST"])
+def save_project_call():
+    logger.info("[POST] /save_project (Save AEDT project)")
+
+    desktop_connected, msg = service.aedt_connected()
+    if not desktop_connected:
+        return jsonify(msg), 500
+
+    if service.aedtapp:
+        response = service.save_project()
+        if response:
+            return jsonify("Project saved"), 200
+        else:
+            return jsonify(response), 500
+    else:
+        return jsonify("HFSS is not connected"), 500
+
+
 if __name__ == "__main__":
     app.run(debug=service.debug)

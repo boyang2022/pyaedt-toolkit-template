@@ -63,11 +63,20 @@ class FrontendGeneric(object):
             if response.ok:
                 self.write_log_line(f"Backend running: {self.url}")
                 self.write_log_line(response.json())
+                if response.json() != "Toolkit not connected to AEDT":
+                    self.design_tab.setTabEnabled(0, False)
                 return True
             return False
 
         except requests.exceptions.RequestException as e:
             logger.error("Backend not running")
+            return False
+
+    def backend_busy(self):
+        response = requests.get(self.url + "/get_status")
+        if response.ok and response.json() == "Backend running":
+            return True
+        else:
             return False
 
     def installed_versions(self):
@@ -97,6 +106,13 @@ class FrontendGeneric(object):
         except requests.exceptions.RequestException:
             self.write_log_line(f"Set properties failed")
 
+    def change_thread_status(self):
+        self.find_process_ids()
+        self.toolkit_running_led.setText("")
+        self.toolkit_running_led.adjustSize()
+        self.toolkit_running_led.setStyleSheet("background-color: green;")
+        self.update_progress(100)
+
     def browse_for_project(self):
         dialog = QtWidgets.QFileDialog()
         dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog, True)
@@ -104,13 +120,13 @@ class FrontendGeneric(object):
         dialog.setOption(QtWidgets.QFileDialog.Option.DontConfirmOverwrite, True)
         dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
         fileName, _ = dialog.getOpenFileName(
-            self.main_window,
+            self,
             "Open or create new aedt file",
             "",
             "Aedt Files (*.aedt)",
         )
         if fileName:
-            self.main_window.project_name.setText(fileName)
+            self.project_name.setText(fileName)
             properties = self.get_properties()
             properties["project_name"] = fileName
             self.set_properties(properties)
@@ -143,11 +159,11 @@ class FrontendGeneric(object):
         response = requests.get(self.url + "/get_status")
 
         if response.ok and response.json() == "Backend running":
-            self.write_log_line("Backend running... Please wait")
+            self.write_log_line("Please wait, toolkit running")
         elif response.ok and response.json() == "Backend free":
             self.update_progress(0)
             response = requests.get(self.url + "/health")
-            if response.ok and response.json() == "Backend not connected to AEDT":
+            if response.ok and response.json() == "Toolkit not connected to AEDT":
                 properties = self.get_properties()
                 properties["aedt_version"] = self.aedt_version_combo.currentText()
                 properties["non_graphical"] = True
@@ -166,9 +182,17 @@ class FrontendGeneric(object):
                 self.set_properties(properties)
 
                 response = requests.post(self.url + "/launch_aedt")
+
                 if response.status_code == 200:
                     self.update_progress(50)
+                    self.toolkit_running_led.setText("Toolkit busy")
+                    self.toolkit_running_led.adjustSize()
+                    self.toolkit_running_led.setStyleSheet("background-color: red;")
+
+                    # Start the thread
+                    self.running = True
                     self.start()
+                    self.design_tab.setTabEnabled(0, False)
                 else:
                     self.write_log_line(f"Failed backend call: {self.url}")
                     self.update_progress(100)
@@ -183,16 +207,14 @@ class FrontendGeneric(object):
         """Release desktop."""
 
         properties = {"close_projects": False, "close_on_exit": False}
-        event = self.close()
-        if event:
+        if self.close():
             requests.post(self.url + "/close_aedt", json=properties)
 
     def release_and_close(self):
         """Release and close desktop."""
 
         properties = {"close_projects": True, "close_on_exit": True}
-        event = self.close()
-        if event:
+        if self.close():
             requests.post(self.url + "/close_aedt", json=properties)
 
     def on_cancel_clicked(self):

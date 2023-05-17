@@ -127,23 +127,23 @@ class ServiceGeneric(object):
         >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
         >>> service = ToolkitService()
         >>> service.aedt_connected()
-        (True, "Backend connected to process <process_id> on Grpc <grpc_port>")
+        (True, "Toolkit connected to process <process_id> on Grpc <grpc_port>")
         """
         if self.aedt_runner.desktop:
             if self.aedt_runner.desktop.port != 0:
-                msg = "Backend connected to process {} on Grpc {}".format(
+                msg = "Toolkit connected to process {} on Grpc {}".format(
                     str(self.aedt_runner.desktop.aedt_process_id),
                     str(self.aedt_runner.desktop.port),
                 )
                 self.logger.debug(msg)
             else:
-                msg = "Backend connected to process {}".format(
+                msg = "Toolkit connected to process {}".format(
                     str(self.aedt_runner.desktop.aedt_process_id)
                 )
                 self.logger.debug(msg)
             connected = True
         else:
-            msg = "Backend not connected to AEDT"
+            msg = "Toolkit not connected to AEDT"
             self.logger.debug(msg)
             connected = False
         return connected, msg

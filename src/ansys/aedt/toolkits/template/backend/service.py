@@ -1,7 +1,6 @@
 import numpy as np
 from pyaedt import Desktop
 from pyaedt import Hfss
-from pyaedt.generic.general_methods import pyaedt_function_handler
 
 from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
 from ansys.aedt.toolkits.template.backend.common.service_generic import thread
@@ -27,7 +26,6 @@ class ToolkitService(ServiceGeneric):
         self.multiplier = 1.0
         self.comps = []
 
-    @pyaedt_function_handler()
     def connect_hfss(self):
         """Connect to HFSS design. If HFSS design exists, it takes the active project and design,
          if not, it creates a new HFSS design.
@@ -92,7 +90,31 @@ class ToolkitService(ServiceGeneric):
             if comp:
                 self.comps.append(comp)
 
-    @pyaedt_function_handler()
+    @thread.launch_thread
+    def save_project(self):
+        """Save project.
+
+        Returns
+        -------
+        bool
+            Returns ``True`` if the connection is successful, ``False`` otherwise.
+
+        Examples
+        --------
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.launch_aedt()
+        >>> service.save_project()
+        """
+        hfss_connect = self.connect_hfss()
+        if hfss_connect:
+            properties = self.get_properties()
+            new_project_name = properties["new_project_name"]
+            self.aedt_runner.desktop.save_project(project_path=new_project_name)
+            return True
+        else:
+            return False
+
     def draw_box(self):
         """Draw a box.
 
@@ -114,7 +136,6 @@ class ToolkitService(ServiceGeneric):
         box.color = (props[1][0], props[1][1], props[1][2])
         return box
 
-    @pyaedt_function_handler()
     def draw_sphere(self):
         """Draw a sphere.
 
@@ -138,7 +159,6 @@ class ToolkitService(ServiceGeneric):
         sp.color = (props[1][0], props[1][1], props[1][2])
         return sp
 
-    @pyaedt_function_handler()
     def _comp_props(self):
         """Return a random position and color.
 
