@@ -28,14 +28,14 @@ You could install PyAEDT and all dependencies using the CPython 3.7 base interpr
       :alt: PyAEDT console in AEDT
 
 
-#. Connect to the desktop and run the `add toolkit method <https://aedt.docs.pyansys.com/version/stable/API/_autosummary/pyaedt.desktop.Desktop.add_custom_toolkit.html#pyaedt.desktop.Desktop.add_custom_toolkit>`_:
+#. Run the PyADET command: `add toolkit method <https://aedt.docs.pyansys.com/version/stable/API/_autosummary/pyaedt.desktop.Desktop.add_custom_toolkit.html#pyaedt.desktop.Desktop.add_custom_toolkit>`_:
 
     .. code:: python
 
       desktop.add_custom_toolkit("TemplateToolkit")
       exit()
 
-#. Close the console and open the toolkit, if you do not close AEDT, you need to Update the Menu:
+#. Close the console and open the toolkit, if you do not close AEDT, you need to *Update Menu*:
 
     .. image:: ./_static/toolkit_in_AEDT.png
       :width: 800

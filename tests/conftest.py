@@ -69,31 +69,25 @@ if not os.path.exists(scratch_path):
 
 logger = pyaedt_logger
 
+service = ToolkitService()
+
 
 class BasisTest(object):
     def my_setup(self):
-        self.desktop = Desktop(desktop_version, non_graphical, new_desktop_session=False)
-        self.desktop.disable_autosave()
+        # self.desktop = Desktop(desktop_version, non_graphical, new_desktop_session=False)
+
         self.test_config = config
         self.local_path = local_path
         self._main = sys.modules["__main__"]
 
-        self.service = ToolkitService()
-
-        new_properties = {
-            "non_graphical": config["NonGraphical"],
-            "aedt_version": config["desktopVersion"],
-            "selected_process": int(self.desktop.aedt_process_id),
-        }
-        self.service.set_properties(new_properties)
-
-        self.service.launch_aedt()
-
-        while self.service.get_thread_status()[0] != -1:
+        service.launch_aedt()
+        while service.get_thread_status()[0] != -1:
             pass
+        service.connect_aedt()
+        self.service = service
 
     def my_teardown(self):
-        if self.desktop:
+        if self.service.desktop:
             try:
                 oDesktop = self._main.oDesktop
                 proj_list = oDesktop.GetProjectList()
@@ -104,7 +98,7 @@ class BasisTest(object):
                 oDesktop.ClearMessages("", "", 3)
             for proj in proj_list:
                 oDesktop.CloseProject(proj)
-            del self.desktop
+            self.service.desktop = None
 
         logger.remove_all_project_file_logger()
         shutil.rmtree(scratch_path, ignore_errors=True)
@@ -137,6 +131,12 @@ def desktop_init():
         project_name=new_project.GetName(),
         project_path=os.path.join(local_scratch.path, new_project.GetName() + ".aedt"),
     )
+    new_properties = {
+        "non_graphical": config["NonGraphical"],
+        "aedt_version": config["desktopVersion"],
+        "selected_process": int(desktop.port),
+    }
+    service.set_properties(new_properties)
     yield
     desktop.release_desktop(True, True)
     del desktop

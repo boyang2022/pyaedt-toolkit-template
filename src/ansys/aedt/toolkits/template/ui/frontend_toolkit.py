@@ -29,15 +29,13 @@ class ToolkitFrontend(FrontendThread, FrontendGeneric):
         self.set_properties(properties)
         response = requests.get(self.url + "/get_status")
 
-        if self.progress_bar.value() < 100 or (
-            response.ok and response.json() == "Backend running"
-        ):
+        if response.ok and response.json() == "Backend running":
             self.write_log_line("Please wait, toolkit running")
             return
 
         self.update_progress(0)
 
-        response = requests.post(self.url + "/connect_hfss", json=properties)
+        response = requests.post(self.url + "/connect_hfss")
 
         if response.ok:
             response = requests.post(self.url + "/create_geometry")

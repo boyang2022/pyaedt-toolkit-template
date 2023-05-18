@@ -80,7 +80,18 @@ def launch_aedt_call():
     if response:
         return jsonify("AEDT launched"), 200
     else:
-        return jsonify("Fail to connect to AEDT"), 500
+        return jsonify("Fail to launch to AEDT"), 500
+
+
+@app.route("/connect_aedt", methods=["PUT"])
+def connect_aedt_call():
+    logger.info("[PUT] /connect_aedt (connect to an existing AEDT session)")
+
+    response = service.connect_aedt()
+    if response:
+        return jsonify("AEDT session connected"), 200
+    else:
+        return jsonify("AEDT session not connected"), 500
 
 
 @app.route("/close_aedt", methods=["POST"])
@@ -112,7 +123,9 @@ def connect_hfss_call():
 
     desktop_connected, msg = service.aedt_connected()
     if not desktop_connected:
-        return jsonify(msg), 200
+        response = service.connect_aedt()
+        if not response:
+            return jsonify("Fail to connect to AEDT"), 500
 
     response = service.connect_hfss()
 
@@ -159,4 +172,4 @@ def save_project_call():
 
 
 if __name__ == "__main__":
-    app.run(debug=service.debug)
+    app.run(debug=True)

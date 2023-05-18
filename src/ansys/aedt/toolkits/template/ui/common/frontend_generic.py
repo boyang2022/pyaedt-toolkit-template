@@ -65,6 +65,7 @@ class FrontendGeneric(object):
                 self.write_log_line(response.json())
                 if response.json() != "Toolkit not connected to AEDT":
                     self.design_tab.setTabEnabled(0, False)
+                    self.connect_aedtapp.setEnabled(False)
                 return True
             return False
 
@@ -193,6 +194,7 @@ class FrontendGeneric(object):
                     self.running = True
                     self.start()
                     self.design_tab.setTabEnabled(0, False)
+                    self.connect_aedtapp.setEnabled(False)
                 else:
                     self.write_log_line(f"Failed backend call: {self.url}")
                     self.update_progress(100)
