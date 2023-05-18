@@ -4,7 +4,6 @@ import psutil
 import pyaedt
 
 from ansys.aedt.toolkits.template.backend.common.properties import properties
-from ansys.aedt.toolkits.template.backend.common.service_aedt import RunnerDesktop
 from ansys.aedt.toolkits.template.backend.common.thread_manager import ThreadManager
 
 logger = logging.getLogger("Global")
@@ -39,8 +38,7 @@ class ServiceGeneric(object):
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.aedt_runner = RunnerDesktop()
-        self.debug = properties.debug
+        self.desktop = None
 
     def set_properties(self, data):
         """Assign the passed data to the internal data model.
@@ -129,17 +127,15 @@ class ServiceGeneric(object):
         >>> service.aedt_connected()
         (True, "Toolkit connected to process <process_id> on Grpc <grpc_port>")
         """
-        if self.aedt_runner.desktop:
-            if self.aedt_runner.desktop.port != 0:
+        if self.desktop:
+            if self.desktop.port != 0:
                 msg = "Toolkit connected to process {} on Grpc {}".format(
-                    str(self.aedt_runner.desktop.aedt_process_id),
-                    str(self.aedt_runner.desktop.port),
+                    str(self.desktop.aedt_process_id),
+                    str(self.desktop.port),
                 )
                 self.logger.debug(msg)
             else:
-                msg = "Toolkit connected to process {}".format(
-                    str(self.aedt_runner.desktop.aedt_process_id)
-                )
+                msg = "Toolkit connected to process {}".format(str(self.desktop.aedt_process_id))
                 self.logger.debug(msg)
             connected = True
         else:
@@ -252,14 +248,97 @@ class ServiceGeneric(object):
 
         connected, msg = self.aedt_connected()
         if not connected:
-            self.aedt_runner.launch_aedt(
-                properties.aedt_version,
-                properties.non_graphical,
-                properties.selected_process,
-                properties.use_grpc,
+            version = properties.aedt_version
+            non_graphical = properties.non_graphical
+            selected_process = properties.selected_process
+            use_grpc = properties.use_grpc
+
+            pyaedt.settings.use_grpc_api = use_grpc
+            if selected_process == 0:  # pragma: no cover
+                # Launch AEDT with COM
+                self.desktop = pyaedt.Desktop(
+                    specified_version=version,
+                    non_graphical=non_graphical,
+                    new_desktop_session=True,
+                )
+            elif use_grpc:
+                # Launch AEDT with GRPC
+                self.desktop = pyaedt.Desktop(
+                    specified_version=version,
+                    non_graphical=non_graphical,
+                    port=selected_process,
+                    new_desktop_session=True,
+                )
+            else:  # pragma: no cover
+                self.desktop = pyaedt.Desktop(
+                    specified_version=version,
+                    non_graphical=non_graphical,
+                    aedt_process_id=selected_process,
+                    new_desktop_session=False,
+                )
+
+            if self.desktop:
+                # After launching AEDT we need to release the desktop because
+                # this method is launched in a thread
+                if use_grpc:
+                    new_properties = {"selected_process": self.desktop.port}
+                else:
+                    new_properties = {"selected_process": self.desktop.aedt_process_id}
+                self.set_properties(new_properties)
+                self.desktop.release_desktop(False, False)
+                self.desktop = None
+            else:  # pragma: no cover
+                return False
+        return True
+
+    def connect_aedt(self):
+        """Connect to an existing AEDT session.
+
+        Returns
+        -------
+        bool
+            ``True`` when successful, ``False`` when failed.
+
+        Examples
+        --------
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.connect_aedt()
+        """
+        if properties.selected_process == 0:
+            return False
+        connected, msg = self.aedt_connected()
+        if connected:
+            self.desktop.release_desktop(False, False)
+        self.desktop = None
+        version = properties.aedt_version
+        non_graphical = properties.non_graphical
+        selected_process = properties.selected_process
+        use_grpc = properties.use_grpc
+
+        pyaedt.settings.use_grpc_api = use_grpc
+        if use_grpc:
+            # Launch AEDT with GRPC
+            self.desktop = pyaedt.Desktop(
+                specified_version=version,
+                non_graphical=non_graphical,
+                port=selected_process,
+                new_desktop_session=False,
             )
-            if properties.project_name:  # pragma: no cover
-                self.aedt_runner.open_project(properties.project_name)
+
+        else:  # pragma: no cover
+            self.desktop = pyaedt.Desktop(
+                specified_version=version,
+                non_graphical=non_graphical,
+                aedt_process_id=selected_process,
+                new_desktop_session=False,
+            )
+
+        if properties.project_name:  # pragma: no cover
+            self.open_project(properties.project_name)
+
+        if not self.desktop:
+            return False
         return True
 
     def release_desktop(self, close_projects=False, close_on_exit=False):
@@ -287,7 +366,28 @@ class ServiceGeneric(object):
 
         """
 
-        if self.aedt_runner.desktop is not None:
-            self.aedt_runner.release_desktop(close_projects, close_on_exit)
-        self.logger.debug("AEDT released")
-        return True
+        if self.desktop is not None:
+            self.desktop.release_desktop(close_projects, close_on_exit)
+            self.desktop = None
+            return True
+        else:
+            return False
+
+    def open_project(self, project_name=None):
+        """Open project AEDT.
+
+        Parameters
+        ----------
+        project_name : str, optional
+            Project path to open.
+
+        Returns
+        -------
+        bool
+            ``True`` when successful, ``False`` when failed.
+        """
+        if self.desktop and project_name:
+            self.desktop.odesktop.OpenProject(project_name)
+            return True
+        else:
+            return False

@@ -1,5 +1,5 @@
-PyAEDT template toolkit
-=======================
+AEDT template toolkit
+=====================
 
 |pyansys| |PythonVersion| |GH-CI| |MIT| |black|
 
@@ -10,8 +10,8 @@ PyAEDT template toolkit
 .. |PythonVersion| image:: https://img.shields.io/badge/python-3.7+-blue.svg
    :target: https://www.python.org/downloads/
 
-.. |GH-CI| image:: https://github.com/pyansys/pyaedt-antenna-toolkit/actions/workflows/ci_cd.yml/badge.svg
-   :target: https://github.com/pyansys/pyaedt-antenna-toolkit/actions/workflows/ci_cd.yml
+.. |GH-CI| image:: https://github.com/ansys/pyaedt-toolkit-template/actions/workflows/ci_cd.yml/badge.svg
+   :target: https://github.com/ansys/pyaedt-toolkit-template/actions/workflows/ci_cd.yml
 
 .. |MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
    :target: https://opensource.org/licenses/MIT
@@ -23,6 +23,14 @@ PyAEDT template toolkit
 The ``pyaedt-toolkit-template`` package provides a template to create your own toolkit using PyAEDT.
 The toolkit could be used inside AEDT or launched from a python console.
 Toolkit features should be accessible from the user interface or the directly from the API.
+This template shows how to separate backend
+(using `Flask <https://flask.palletsprojects.com/en/2.3.x/>`_)
+and frontend (using `Pyside6 <https://doc.qt.io/qtforpython-6/quickstart.html>`_).
+
+If you want to start a new toolkit go to
+`New toolkit guidelines" <https://aedt.toolkit.template.docs.pyansys.com/version/dev/Toolkit_template.html>`_ section.
+If you want to test the template, go to
+`Getting started" <https://aedt.toolkit.template.docs.pyansys.com/version/dev/Getting_started.html>`_ section.
 
 Requirements
 ~~~~~~~~~~~~
@@ -33,11 +41,11 @@ Documentation and issues
 ~~~~~~~~~~~~~~~~~~~~~~~~
 In addition to installation and usage information, the toolkit
 documentation provides
-`API reference <https://aedt.antenna.toolkit.docs.pyansys.com/version/dev/Antennas/antennas.html>`_,
+`API reference <https://aedt.toolkit.template.docs.pyansys.com/version/dev/Toolkit/index.html>`_,
 and `Contribute
-<https://aedt.antenna.toolkit.docs.pyansys.com/version/dev/Contributing.html>`_ sections.
+<https://aedt.toolkit.template.docs.pyansys.com/version/dev/Contributing.html>`_ sections.
 
-On the `Toolkit issues <https://github.com/pyansys/pyaedt-toolkit-template/issues>`_ page, you can
+On the `Toolkit issues <https://github.com/ansys/pyaedt-toolkit-template/issues>`_ page, you can
 create issues to submit questions, report bugs, and request new features.
 
 License

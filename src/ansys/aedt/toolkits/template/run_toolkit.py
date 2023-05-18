@@ -1,13 +1,17 @@
+import atexit
 import os
 import signal
 import sys
 import threading
+import time
 
 import psutil
 import requests
 
+from ansys.aedt.toolkits.template import backend
+from ansys.aedt.toolkits.template import ui
+
 is_linux = os.name == "posix"
-script_name = os.path.splitext(os.path.basename(__file__))[0]
 
 if is_linux:
     import subprocessdotnet as subprocess
@@ -18,10 +22,21 @@ else:
 python_path = sys.executable
 
 # Define the command to start the Flask application
-backend_command = [python_path, "backend\\backend.py"]
+backend_file = os.path.join(backend.__path__[0], "run.py")
+backend_command = [python_path, backend_file]
 
 # Define the command to start the PySide6 UI
-frontend_command = [python_path, "ui\\frontend.py"]
+frontend_file = os.path.join(ui.__path__[0], "frontend.py")
+frontend_command = [python_path, frontend_file]
+
+
+# Clean up python processes
+def clean_python_processes():
+    # Terminate all remaining Python processes
+    current_process = psutil.Process()
+    for process in current_process.children(recursive=True):
+        if process.name() == "python.exe" or process.name() == "python":
+            process.terminate()
 
 
 # Define a function to run the subprocess command
@@ -50,6 +65,7 @@ def terminate_flask_process():
         else:
             flask_process.terminate()
         flask_process.wait()
+        clean_python_processes()
 
 
 # Create a thread to run the Flask application
@@ -57,8 +73,11 @@ flask_thread = threading.Thread(target=run_command, args=backend_command)
 flask_thread.daemon = True
 flask_thread.start()
 
-# # Wait for the Flask application to start
-# time.sleep(1)
+# Wait for the Flask application to start
+response = requests.get("http://localhost:5000/get_status")
+while response.json() != "Backend free":
+    time.sleep(1)
+    response = requests.get("http://localhost:5000/get_status")
 
 # User or tool could pass the desktop ID and version
 if len(sys.argv) == 3:
@@ -71,6 +90,12 @@ if len(sys.argv) == 3:
     }
     requests.put("http://localhost:5000/set_properties", json=properties)
     requests.post("http://localhost:5000/launch_aedt", json=properties)
+
+    response = requests.get("http://localhost:5000/get_status")
+    while response.json() != "Backend free":
+        time.sleep(1)
+        response = requests.get("http://localhost:5000/get_status")
+    requests.put("http://localhost:5000/connect_aedt")
 
 # Create a thread to run the PySide6 UI
 ui_thread = threading.Thread(target=run_command, args=frontend_command)
@@ -86,8 +111,5 @@ terminate_flask_process()
 # Wait for the Flask thread to complete
 flask_thread.join()
 
-# Terminate all remaining Python processes
-current_process = psutil.Process()
-for process in current_process.children(recursive=True):
-    if process.name() == "python.exe" or process.name() == "python":
-        process.terminate()
+# Register the cleanup function to be called on script exit
+atexit.register(clean_python_processes)

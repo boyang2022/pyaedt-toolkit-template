@@ -15,7 +15,7 @@ class TestClass(BasisTest, object):
     def test_01_connect_hfss(self):
         assert self.service.connect_hfss()
 
-    def test_01_create_geometry(self):
+    def test_02_create_geometry(self):
         assert self.service.create_geometry()
         while self.service.get_thread_status()[0] != -1:
             pass

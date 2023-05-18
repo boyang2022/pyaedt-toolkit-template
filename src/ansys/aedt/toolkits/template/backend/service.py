@@ -1,5 +1,4 @@
 import numpy as np
-from pyaedt import Desktop
 from pyaedt import Hfss
 
 from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
@@ -16,7 +15,8 @@ class ToolkitService(ServiceGeneric):
     >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
     >>> service = ToolkitService()
     >>> msg1 = service.launch_aedt()
-    >>> msg2 = service.create_geometry()
+    >>> msg2 = service.connect_aedt()
+    >>> msg3 = service.create_geometry()
     >>> service.release_desktop()
     """
 
@@ -40,25 +40,26 @@ class ToolkitService(ServiceGeneric):
         >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
         >>> service = ToolkitService()
         >>> service.launch_aedt()
+        >>> service.connect_aedt()
         >>> service.connect_hfss()
 
         """
-        if isinstance(self.aedt_runner.desktop, type(Desktop())):
+        if self.desktop:
             if not self.aedtapp:
-                if not self.aedt_runner.desktop.design_list():
+                if not self.desktop.design_list():
                     properties = self.get_properties()
                     # If no design exist then create a new HFSS design
                     self.aedtapp = Hfss(
-                        specified_version=self.aedt_runner.desktop.aedt_version_id,
-                        aedt_process_id=self.aedt_runner.desktop.aedt_process_id,
+                        specified_version=properties["aedt_version"],
+                        aedt_process_id=properties["selected_process"],
                         non_graphical=properties["non_graphical"],
                         new_desktop_session=False,
                     )
                 else:  # pragma: no cover
-                    oproject = self.aedt_runner.desktop.odesktop.GetActiveProject()
+                    oproject = self.desktop.odesktop.GetActiveProject()
                     projectname = oproject.GetName()
                     activedesign = oproject.GetActiveDesign().GetName()
-                    self.aedtapp = self.aedt_runner.desktop[[projectname, activedesign]]
+                    self.aedtapp = self.desktop[[projectname, activedesign]]
             return True
         return False
 
@@ -76,10 +77,10 @@ class ToolkitService(ServiceGeneric):
         >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
         >>> service = ToolkitService()
         >>> service.launch_aedt()
+        >>> service.connect_aedt()
         >>> service.create_geometry()
         """
-        hfss_connect = self.connect_hfss()
-        if hfss_connect:
+        if self.aedtapp:
             properties = self.get_properties()
             multiplier = properties["multiplier"]
             geometry = properties["geometry"]
@@ -109,13 +110,13 @@ class ToolkitService(ServiceGeneric):
         >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
         >>> service = ToolkitService()
         >>> service.launch_aedt()
+        >>> service.connect_aedt()
         >>> service.save_project()
         """
-        hfss_connect = self.connect_hfss()
-        if hfss_connect:
+        if self.aedtapp:
             properties = self.get_properties()
             new_project_name = properties["new_project_name"]
-            self.aedt_runner.desktop.save_project(project_path=new_project_name)
+            self.desktop.save_project(project_path=new_project_name)
             return True
         else:
             return False
