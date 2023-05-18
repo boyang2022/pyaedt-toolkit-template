@@ -50,20 +50,6 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow, ToolkitFrontend):
 
         # General Settings
 
-        # Update toolkit running flag
-        self.toolkit_running_led.setStyleSheet(
-            "text-align: center; qproperty-alignment: 'AlignCenter';"
-        )
-
-        if self.backend_busy():
-            self.toolkit_running_led.setText("Toolkit busy")
-            self.toolkit_running_led.adjustSize()
-            self.toolkit_running_led.setStyleSheet("background-color: red;")
-        else:
-            self.toolkit_running_led.setText("")
-            self.toolkit_running_led.adjustSize()
-            self.toolkit_running_led.setStyleSheet("background-color: green;")
-
         # Get default properties
         default_properties = self.get_properties()
 

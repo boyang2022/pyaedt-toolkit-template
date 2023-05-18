@@ -267,7 +267,7 @@ class ServiceGeneric(object):
                     specified_version=version,
                     non_graphical=non_graphical,
                     port=selected_process,
-                    new_desktop_session=True,
+                    new_desktop_session=False,
                 )
             else:  # pragma: no cover
                 self.desktop = pyaedt.Desktop(

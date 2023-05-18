@@ -352,19 +352,6 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.progress_bar)
 
-        self.toolkit_running_led = QLineEdit(self.centralwidget)
-        self.toolkit_running_led.setObjectName(u"toolkit_running_led")
-        self.toolkit_running_led.setCursor(QCursor(Qt.ArrowCursor))
-        self.toolkit_running_led.setLayoutDirection(Qt.LeftToRight)
-        self.toolkit_running_led.setMaxLength(3276)
-        self.toolkit_running_led.setFrame(False)
-        self.toolkit_running_led.setEchoMode(QLineEdit.Normal)
-        self.toolkit_running_led.setCursorPosition(10)
-        self.toolkit_running_led.setReadOnly(True)
-        self.toolkit_running_led.setCursorMoveStyle(Qt.LogicalMoveStyle)
-
-        self.verticalLayout.addWidget(self.toolkit_running_led, 0, Qt.AlignHCenter)
-
         MainWindow.setCentralWidget(self.centralwidget)
         self.top_menu_bar = QMenuBar(MainWindow)
         self.top_menu_bar.setObjectName(u"top_menu_bar")
@@ -419,7 +406,6 @@ class Ui_MainWindow(object):
         self.multiplier.setText(QCoreApplication.translate("MainWindow", u"1", None))
         self.picture.setText("")
         self.design_tab.setTabText(self.design_tab.indexOf(self.design), QCoreApplication.translate("MainWindow", u" Design ", None))
-        self.toolkit_running_led.setText(QCoreApplication.translate("MainWindow", u"Toolkit running", None))
         self.top_menu.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
     # retranslateUi
 

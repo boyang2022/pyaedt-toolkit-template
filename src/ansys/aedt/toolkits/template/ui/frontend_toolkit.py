@@ -41,9 +41,6 @@ class ToolkitFrontend(FrontendThread, FrontendGeneric):
             response = requests.post(self.url + "/create_geometry")
             if response.ok:
                 self.update_progress(50)
-                self.toolkit_running_led.setText("Toolkit busy")
-                self.toolkit_running_led.adjustSize()
-                self.toolkit_running_led.setStyleSheet("background-color: red;")
 
                 # Start the thread
                 self.running = True
@@ -81,9 +78,6 @@ class ToolkitFrontend(FrontendThread, FrontendGeneric):
                 response = requests.post(self.url + "/save_project", json=properties)
                 if response.ok:
                     self.update_progress(50)
-                    self.toolkit_running_led.setText("Toolkit busy")
-                    self.toolkit_running_led.adjustSize()
-                    self.toolkit_running_led.setStyleSheet("background-color: red;")
 
                     # Start the thread
                     self.running = True

@@ -49,6 +49,31 @@ class FrontendGeneric(object):
 
     def update_progress(self, value):
         self.progress_bar.setValue(value)
+        if 0 < value < 100:
+            self.progress_bar.setStyleSheet(
+                """
+                QProgressBar {
+                    background-color: transparent;  /* Set the background color */
+                    color: #FFFFFF;  /* Set the text color */
+                }
+                QProgressBar::chunk {
+                    background-color: #FF0000;  /* Set the progress color */
+                }
+            """
+            )
+        elif value == 100:
+            self.progress_bar.setStyleSheet(
+                """
+                QProgressBar {
+                    background-color: transparent;  /* Set the background color */
+                    color: #FFFFFF;  /* Set the text color */
+                 }
+                QProgressBar::chunk {
+                    background-color: #008000;  /* Set the progress color */
+                }
+                """
+            )
+
         if self.progress_bar.isHidden():
             self.progress_bar.setVisible(True)
 
@@ -109,9 +134,6 @@ class FrontendGeneric(object):
 
     def change_thread_status(self):
         self.find_process_ids()
-        self.toolkit_running_led.setText("")
-        self.toolkit_running_led.adjustSize()
-        self.toolkit_running_led.setStyleSheet("background-color: green;")
         self.update_progress(100)
 
     def browse_for_project(self):
@@ -186,10 +208,6 @@ class FrontendGeneric(object):
 
                 if response.status_code == 200:
                     self.update_progress(50)
-                    self.toolkit_running_led.setText("Toolkit busy")
-                    self.toolkit_running_led.adjustSize()
-                    self.toolkit_running_led.setStyleSheet("background-color: red;")
-
                     # Start the thread
                     self.running = True
                     self.start()
