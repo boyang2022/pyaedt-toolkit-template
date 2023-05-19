@@ -1,11 +1,9 @@
 from functools import wraps
-import logging
 import threading
 import time
 
+from ansys.aedt.toolkits.template.backend.common.logger_handler import logger
 from ansys.aedt.toolkits.template.backend.common.properties import properties
-
-logger = logging.getLogger(__name__)
 
 
 class ThreadManager(object):

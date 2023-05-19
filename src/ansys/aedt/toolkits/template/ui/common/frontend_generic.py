@@ -1,4 +1,3 @@
-import logging
 import os
 import sys
 import time
@@ -9,15 +8,7 @@ from PySide6 import QtWidgets
 import qdarkstyle
 import requests
 
-logger = logging.getLogger("Global")
-
-# Create a handler and set logging level for the handler
-c_handler = logging.StreamHandler()
-c_handler.setLevel(logging.DEBUG)
-
-# link handler to logger
-logger.addHandler(c_handler)
-logging.basicConfig(level=logging.DEBUG)
+from ansys.aedt.toolkits.template.ui.common.logger_handler import logger
 
 
 class FrontendGeneric(object):
@@ -79,6 +70,7 @@ class FrontendGeneric(object):
 
     def check_connection(self):
         try:
+            logger.debug("Check backend connection")
             count = 0
             response = False
             while not response and count < 2:
@@ -89,9 +81,10 @@ class FrontendGeneric(object):
                 self.write_log_line(f"Backend running: {self.url}")
                 self.write_log_line(response.json())
                 if response.json() != "Toolkit not connected to AEDT":
-                    self.design_tab.setTabEnabled(0, False)
-                    self.connect_aedtapp.setEnabled(False)
+                    self.design_tab.removeTab(0)
+                logger.debug(response.json())
                 return True
+            logger.error(response.json())
             return False
 
         except requests.exceptions.RequestException as e:
@@ -134,6 +127,7 @@ class FrontendGeneric(object):
 
     def change_thread_status(self):
         self.find_process_ids()
+        logger.info("Frontend thread finished")
         self.update_progress(100)
 
     def browse_for_project(self):
@@ -211,8 +205,10 @@ class FrontendGeneric(object):
                     # Start the thread
                     self.running = True
                     self.start()
-                    self.design_tab.setTabEnabled(0, False)
-                    self.connect_aedtapp.setEnabled(False)
+                    # self.design_tab.setTabEnabled(0, False)
+                    # self.connect_aedtapp.setEnabled(False)
+                    self.design_tab.removeTab(0)
+                    # self.verticalLayout.removeWidget(self.connect_aedtapp)
                 else:
                     self.write_log_line(f"Failed backend call: {self.url}")
                     self.update_progress(100)
@@ -222,6 +218,36 @@ class FrontendGeneric(object):
         else:
             self.write_log_line(response.json())
             self.update_progress(100)
+
+    def save_project(self):
+        dialog = QtWidgets.QFileDialog()
+        dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog, True)
+        dialog.setFileMode(QtWidgets.QFileDialog.FileMode.AnyFile)
+        dialog.setOption(QtWidgets.QFileDialog.Option.DontConfirmOverwrite, True)
+        file_name, _ = dialog.getSaveFileName(
+            self,
+            "Save new aedt file",
+            "",
+            "Aedt Files (*.aedt)",
+        )
+
+        if file_name:
+            self.project_name.setText(file_name)
+            properties = self.get_properties()
+            properties["project_name"] = file_name
+            self.set_properties(properties)
+            self.update_progress(0)
+
+            response = requests.post(self.url + "/save_project", json=properties)
+            if response.ok:
+                self.update_progress(50)
+                # Start the thread
+                self.running = True
+                self.start()
+                self.write_log_line("Saving project process launched")
+            else:
+                self.write_log_line(f"Failed backend call: {self.url}")
+                self.update_progress(100)
 
     def release_only(self):
         """Release desktop."""

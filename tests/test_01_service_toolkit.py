@@ -13,7 +13,7 @@ class TestClass(BasisTest, object):
         BasisTest.my_teardown(self)
 
     def test_01_connect_hfss(self):
-        assert self.service.connect_hfss()
+        assert self.service.connect_aedtapp()
 
     def test_02_create_geometry(self):
         assert self.service.create_geometry()

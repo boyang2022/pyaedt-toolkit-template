@@ -1,20 +1,8 @@
-import logging
-
-from PySide6 import QtWidgets
 import requests
 
 from ansys.aedt.toolkits.template.ui.common.frontend_generic import FrontendGeneric
+from ansys.aedt.toolkits.template.ui.common.logger_handler import logger
 from ansys.aedt.toolkits.template.ui.common.thread_manager import FrontendThread
-
-logger = logging.getLogger("Global")
-
-# Create a handler and set logging level for the handler
-c_handler = logging.StreamHandler()
-c_handler.setLevel(logging.DEBUG)
-
-# link handler to logger
-logger.addHandler(c_handler)
-logging.basicConfig(level=logging.DEBUG)
 
 
 class ToolkitFrontend(FrontendThread, FrontendGeneric):
@@ -27,65 +15,20 @@ class ToolkitFrontend(FrontendThread, FrontendGeneric):
         properties["multiplier"] = float(self.multiplier.text())
         properties["geometry"] = self.geometry_combo.currentText()
         self.set_properties(properties)
-        response = requests.get(self.url + "/get_status")
-
-        if response.ok and response.json() == "Backend running":
-            self.write_log_line("Please wait, toolkit running")
-            return
 
         self.update_progress(0)
-
-        response = requests.post(self.url + "/connect_hfss")
+        response = requests.post(self.url + "/create_geometry")
 
         if response.ok:
-            response = requests.post(self.url + "/create_geometry")
-            if response.ok:
-                self.update_progress(50)
-
-                # Start the thread
-                self.running = True
-                self.start()
-                self.write_log_line("Creating geometry process launched")
-            else:
-                self.write_log_line(f"Failed backend call: {self.url}")
-                self.update_progress(100)
+            self.update_progress(50)
+            # Start the thread
+            self.running = True
+            self.start()
+            msg = "Create geometry call launched"
+            logger.debug(msg)
+            self.write_log_line(msg)
         else:
-            self.write_log_line(response.json())
+            msg = f"Failed backend call: {self.url}"
+            logger.debug(msg)
+            self.write_log_line(msg)
             self.update_progress(100)
-
-    def save_project(self):
-        dialog = QtWidgets.QFileDialog()
-        dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog, True)
-        dialog.setFileMode(QtWidgets.QFileDialog.FileMode.AnyFile)
-        dialog.setOption(QtWidgets.QFileDialog.Option.DontConfirmOverwrite, True)
-        file_name, _ = dialog.getSaveFileName(
-            self,
-            "Save new aedt file",
-            "",
-            "Aedt Files (*.aedt)",
-        )
-
-        if file_name:
-            self.project_name.setText(file_name)
-            properties = self.get_properties()
-            properties["new_project_name"] = file_name
-            self.set_properties(properties)
-            self.update_progress(0)
-
-            response = requests.post(self.url + "/connect_hfss", json=properties)
-
-            if response.ok and response.json() != "Toolkit not connected to AEDT":
-                response = requests.post(self.url + "/save_project", json=properties)
-                if response.ok:
-                    self.update_progress(50)
-
-                    # Start the thread
-                    self.running = True
-                    self.start()
-                    self.write_log_line("Saving project process launched")
-                else:
-                    self.write_log_line(f"Failed backend call: {self.url}")
-                    self.update_progress(100)
-            else:
-                self.write_log_line(response.json())
-                self.update_progress(100)

@@ -5,14 +5,6 @@ import requests
 
 logger = logging.getLogger("Global")
 
-# Create a handler and set logging level for the handler
-c_handler = logging.StreamHandler()
-c_handler.setLevel(logging.DEBUG)
-
-# link handler to logger
-logger.addHandler(c_handler)
-logging.basicConfig(level=logging.DEBUG)
-
 
 class FrontendThread(QtCore.QThread):
     status_changed = QtCore.Signal(bool)

@@ -1,15 +1,15 @@
-import logging
-
 from flask import Flask
 from flask import jsonify
 from flask import request
-from service import ToolkitService
+
+from ansys.aedt.toolkits.template.backend.common.logger_handler import logger
+from ansys.aedt.toolkits.template.backend.common.multithreading_server import MultithreadingServer
+from ansys.aedt.toolkits.template.backend.service import ToolkitService
 
 service = ToolkitService()
+settings = service.get_properties()
 
 app = Flask(__name__)
-
-logger = logging.getLogger(__name__)
 
 
 # Generic services
@@ -37,7 +37,7 @@ def get_status_call():
 
 @app.route("/set_properties", methods=["PUT"])
 def set_properties_call():
-    logger.info("[PUT] /set_properties (set toolkit properties)")
+    app.logger.info("[PUT] /set_properties (set toolkit properties)")
 
     body = request.json
     success, msg = service.set_properties(body)
@@ -49,7 +49,7 @@ def set_properties_call():
 
 @app.route("/get_properties", methods=["GET"])
 def get_properties_call():
-    logger.info("[GET] /get_properties (get toolkit properties)")
+    app.logger.info("[GET] /get_properties (get toolkit properties)")
     return jsonify(service.get_properties()), 200
 
 
@@ -101,9 +101,13 @@ def close_aedt_call():
     body = request.json
     aedt_keys = ["close_projects", "close_on_exit"]
     if not body:
-        return jsonify("body is empty!"), 500
+        msg = "body is empty!"
+        logger.error(msg)
+        return jsonify(msg), 500
     elif not isinstance(body, dict) or not all(item in body for item in set(aedt_keys)):
-        return jsonify("body not correct"), 500
+        msg = "body not correct"
+        logger.error(msg)
+        return jsonify(msg), 500
 
     close_projects = body["close_projects"]
     close_on_exit = body["close_on_exit"]
@@ -114,62 +118,71 @@ def close_aedt_call():
         return jsonify("AEDT is not connected"), 500
 
 
-# Toolkit services
+@app.route("/connect_aedtapp", methods=["POST"])
+def connect_aedtapp_call():
+    logger.info("[POST] /connect_hfss (connect or create a design)")
 
+    body = request.json
 
-@app.route("/connect_hfss", methods=["POST"])
-def connect_hfss_call():
-    logger.info("[POST] /connect_hfss (connect or create a HFSS design)")
-
-    desktop_connected, msg = service.aedt_connected()
-    if not desktop_connected:
-        response = service.connect_aedt()
-        if not response:
-            return jsonify("Fail to connect to AEDT"), 500
-
-    response = service.connect_hfss()
-
-    if response:
-        return jsonify("HFSS connected"), 200
-    else:
-        return jsonify("Fail to connect to HFSS"), 500
-
-
-@app.route("/create_geometry", methods=["POST"])
-def create_geometry_call():
-    logger.info("[POST] /create_geometry (create a box or sphere in HFSS)")
-
-    desktop_connected, msg = service.aedt_connected()
-    if not desktop_connected:
+    aedt_apps = [
+        "Circuit",
+        "Hfss",
+        "Edb",
+        "Emit",
+        "Hfss",
+        "Hfss3dLayout",
+        "Icepak",
+        "Maxwell2d",
+        "Maxwell3d",
+        "MaxwellCircuit",
+        "Q2d",
+        "Q3d",
+        "Rmxprt",
+        "Simplorer",
+    ]
+    if not body:
+        msg = "body is empty!"
+        logger.error(msg)
+        return jsonify("body is empty!"), 500
+    elif body["aedtapp"] not in aedt_apps:
+        msg = "body not correct"
+        logger.error(msg)
         return jsonify(msg), 500
 
-    if service.aedtapp:
-        response = service.create_geometry()
-        if response:
-            return jsonify("Geometry created"), 200
-        else:
-            return jsonify(response), 500
+    response = service.connect_aedtapp(body["aedtapp"])
+
+    if response:
+        return jsonify("Design connected"), 200
     else:
-        return jsonify("HFSS is not connected"), 500
+        return jsonify("Fail to connect to the design"), 500
 
 
 @app.route("/save_project", methods=["POST"])
 def save_project_call():
     logger.info("[POST] /save_project (Save AEDT project)")
 
-    desktop_connected, msg = service.aedt_connected()
-    if not desktop_connected:
-        return jsonify(msg), 500
-
-    if service.aedtapp:
-        response = service.save_project()
-        if response:
-            return jsonify("Project saved"), 200
-        else:
-            return jsonify(response), 500
+    response = service.save_project()
+    if response:
+        return jsonify("Project saved"), 200
     else:
-        return jsonify("HFSS is not connected"), 500
+        return jsonify(response), 500
+
+
+# Toolkit services
+
+
+@app.route("/create_geometry", methods=["POST"])
+def create_geometry_call():
+    logger.info("[POST] /create_geometry (create a box or sphere in HFSS)")
+
+    response = service.create_geometry()
+    if response:
+        return jsonify("Geometry created"), 200
+    else:
+        return jsonify("Geometry not created"), 500
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.debug = True
+    server = MultithreadingServer()
+    server.run(host=settings["url"], port=settings["port"], app=app)

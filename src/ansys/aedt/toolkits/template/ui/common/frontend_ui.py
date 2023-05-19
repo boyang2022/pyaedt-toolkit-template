@@ -47,12 +47,6 @@ class Ui_MainWindow(object):
         self.main_menu.setSizePolicy(sizePolicy1)
         self.gridLayout = QGridLayout(self.main_menu)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.connect_aedtapp = QPushButton(self.main_menu)
-        self.connect_aedtapp.setObjectName(u"connect_aedtapp")
-        self.connect_aedtapp.setMinimumSize(QSize(0, 40))
-
-        self.gridLayout.addWidget(self.connect_aedtapp, 3, 0, 1, 1)
-
         self.release_button = QPushButton(self.main_menu)
         self.release_button.setObjectName(u"release_button")
         self.release_button.setMinimumSize(QSize(0, 40))
@@ -193,6 +187,12 @@ class Ui_MainWindow(object):
         self.verticalSpacer_8 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout_4.addItem(self.verticalSpacer_8)
+
+        self.connect_aedtapp = QPushButton(self.settings)
+        self.connect_aedtapp.setObjectName(u"connect_aedtapp")
+        self.connect_aedtapp.setMinimumSize(QSize(0, 40))
+
+        self.verticalLayout_4.addWidget(self.connect_aedtapp)
 
 
         self.horizontalLayout_25.addLayout(self.verticalLayout_4)
@@ -379,7 +379,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.action_save_project.setText(QCoreApplication.translate("MainWindow", u"Save project", None))
-        self.connect_aedtapp.setText(QCoreApplication.translate("MainWindow", u"  Launch AEDT  ", None))
         self.release_button.setText(QCoreApplication.translate("MainWindow", u" Close Toolkit ", None))
         self.release_and_exit_button.setText(QCoreApplication.translate("MainWindow", u" Close Desktop and Toolkit ", None))
         self.label_13.setText(QCoreApplication.translate("MainWindow", u"Number of Cores", None))
@@ -394,6 +393,7 @@ class Ui_MainWindow(object):
 
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Project Name", None))
         self.browse_project.setText(QCoreApplication.translate("MainWindow", u"Select aedt project", None))
+        self.connect_aedtapp.setText(QCoreApplication.translate("MainWindow", u"  Launch AEDT  ", None))
         self.design_tab.setTabText(self.design_tab.indexOf(self.settings), QCoreApplication.translate("MainWindow", u" Settings ", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Select", None))
         self.geometry_combo.setItemText(0, QCoreApplication.translate("MainWindow", u"Box", None))
