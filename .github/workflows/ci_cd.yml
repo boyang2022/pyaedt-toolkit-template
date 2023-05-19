@@ -88,6 +88,10 @@ jobs:
           .\.venv\Scripts\Activate.ps1
           pytest -v --cov=pyaedt-toolkit-template --cov-report=xml --junitxml=junit/test-results.xml --cov-report=html tests
 
+      - uses: codecov/codecov-action@v3
+        if: matrix.python-version == '3.9'
+        name: 'Upload coverage to Codecov'
+
       - name: Upload Coverage Results
         uses: actions/upload-artifact@v3
         with:

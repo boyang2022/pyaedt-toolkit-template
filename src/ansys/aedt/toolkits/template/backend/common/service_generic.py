@@ -55,11 +55,14 @@ class ServiceGeneric(object):
 
         logger.debug("Updating the internal properties.")
         if data:
-            for key in data:
-                setattr(properties, key, data[key])
-            msg = "properties updated successfully"
-            logger.debug(msg)
-            return True, msg
+            try:
+                for key in data:
+                    setattr(properties, key, data[key])
+                msg = "properties updated successfully"
+                logger.debug(msg)
+                return True, msg
+            except:
+                return False, "Frozen property access"
         else:
             msg = "body is empty!"
             logger.debug(msg)

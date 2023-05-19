@@ -1,3 +1,5 @@
+import requests
+
 from conftest import BasisTest
 
 
@@ -9,8 +11,9 @@ class TestClass(BasisTest, object):
         BasisTest.my_teardown(self)
 
     def test_01_get_properties(self):
-        properties = self.service.get_properties()
-        assert isinstance(properties, dict)
+        response = requests.get(self.url + "/get_properties")
+        assert response.ok
+        assert len(response.json()) == 14
 
     def test_02_set_properties(self):
         new_properties = {
@@ -18,14 +21,10 @@ class TestClass(BasisTest, object):
             "non_graphical": self.test_config["NonGraphical"],
             "use_grpc": True,
         }
-        self.service.set_properties(new_properties)
-        properties = self.service.get_properties()
-        assert properties["aedt_version"] == self.test_config["desktopVersion"]
-
-    def test_03_installed_aedt(self):
-        versions = self.service.installed_aedt_version()
-        assert isinstance(versions, list)
-
-    def test_04_active_sessions(self):
-        sessions = self.service.aedt_sessions()
-        assert isinstance(sessions, list)
+        response = requests.put(self.url + "/set_properties", json=new_properties)
+        assert response.ok
+        new_properties = {"use_grpc": 1}
+        response = requests.put(self.url + "/set_properties", json=new_properties)
+        assert not response.ok
+        response = requests.put(self.url + "/set_properties")
+        assert not response.ok

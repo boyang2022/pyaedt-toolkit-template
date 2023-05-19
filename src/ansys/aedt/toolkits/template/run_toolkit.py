@@ -115,8 +115,5 @@ ui_thread.start()
 # Wait for the UI thread to complete
 ui_thread.join()
 
-# Terminate the Flask process
-terminate_flask_process()
-
 # Register the cleanup function to be called on script exit
 atexit.register(clean_python_processes)
