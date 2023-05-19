@@ -17,8 +17,8 @@ class TestClass(BasisTest, object):
 
     def test_02_set_properties(self):
         new_properties = {
-            "aedt_version": self.test_config["desktopVersion"],
-            "non_graphical": self.test_config["NonGraphical"],
+            "aedt_version": self.test_config["aedt_version"],
+            "non_graphical": self.test_config["non_graphical"],
             "use_grpc": True,
         }
         response = requests.put(self.url + "/set_properties", json=new_properties)
