@@ -84,6 +84,9 @@ class BasisTest(object):
         for proj in proj_list:
             oDesktop.CloseProject(proj)
 
+        properties = {"close_projects": True, "close_on_exit": True}
+        requests.post(self.url + "/close_aedt", json=properties)
+
         logger.remove_all_project_file_logger()
         shutil.rmtree(scratch_path, ignore_errors=True)
 
