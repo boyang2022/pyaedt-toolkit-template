@@ -32,9 +32,9 @@ from ansys.aedt.toolkits.template import backend
 
 # Initialize default configuration
 config = {
-    "desktopVersion": "2023.1",
-    "NonGraphical": True,
-    "NewThread": True,
+    "aedt_version": "2023.1",
+    "non_graphical": True,
+    "use_grpc": True,
     "url": "127.0.0.1",
     "port": "5001",
 }
