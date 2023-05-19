@@ -13,9 +13,6 @@ AEDT template toolkit
 .. |GH-CI| image:: https://github.com/ansys/pyaedt-toolkit-template/actions/workflows/ci_cd.yml/badge.svg
    :target: https://github.com/ansys/pyaedt-toolkit-template/actions/workflows/ci_cd.yml
 
-.. |coverage| image:: https://codecov.io/gh/pyansys/pyaedt/branch/main/graph/badge.svg
-   :target: https://codecov.io/gh/pyansys/pyaedt
-
 .. |MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
    :target: https://opensource.org/licenses/MIT
 
