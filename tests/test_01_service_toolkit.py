@@ -1,4 +1,6 @@
-import os
+import time
+
+import requests
 
 from conftest import BasisTest
 
@@ -12,30 +14,27 @@ class TestClass(BasisTest, object):
     def teardown_class(self):
         BasisTest.my_teardown(self)
 
-    def test_01_connect_hfss(self):
-        assert self.service.connect_hfss()
+    def test_01_create_geometry(self):
+        new_properties = {"geometry": "Box"}
+        response = requests.put(self.url + "/set_properties", json=new_properties)
+        assert response.ok
 
-    def test_02_create_geometry(self):
-        assert self.service.create_geometry()
-        while self.service.get_thread_status()[0] != -1:
-            pass
-        assert len(self.service.comps) == 1
-        new_properties = {
-            "geometry": "Sphere",
-        }
-        self.service.set_properties(new_properties)
+        response = requests.post(self.url + "/create_geometry")
+        assert response.ok
 
-        assert self.service.create_geometry()
-        while self.service.get_thread_status()[0] != -1:
-            pass
-        assert len(self.service.comps) == 2
+        response = requests.get(self.url + "/get_status")
+        while response.json() != "Backend free":
+            time.sleep(1)
+            response = requests.get(self.url + "/get_status")
 
-    def test_03_save_project(self):
-        new_properties = {
-            "new_project_name": os.path.join(self.service.aedtapp.project_path, "new.aedt"),
-        }
-        self.service.set_properties(new_properties)
+        new_properties = {"geometry": "Sphere"}
+        response = requests.put(self.url + "/set_properties", json=new_properties)
+        assert response.ok
 
-        assert self.service.save_project()
-        while self.service.get_thread_status()[0] != -1:
-            pass
+        response = requests.post(self.url + "/create_geometry")
+        assert response.ok
+
+        response = requests.get(self.url + "/get_status")
+        while response.json() != "Backend free":
+            time.sleep(1)
+            response = requests.get(self.url + "/get_status")

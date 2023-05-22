@@ -1,6 +1,6 @@
 import numpy as np
-from pyaedt import Hfss
 
+from ansys.aedt.toolkits.template.backend.common.logger_handler import logger
 from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
 from ansys.aedt.toolkits.template.backend.common.service_generic import thread
 
@@ -22,46 +22,8 @@ class ToolkitService(ServiceGeneric):
 
     def __init__(self):
         ServiceGeneric.__init__(self)
-        self.aedtapp = None
         self.multiplier = 1.0
         self.comps = []
-
-    def connect_hfss(self):
-        """Connect to HFSS design. If HFSS design exists, it takes the active project and design,
-         if not, it creates a new HFSS design.
-
-        Returns
-        -------
-        bool
-            Returns ``True`` if the connection is successful, ``False`` otherwise.
-
-        Examples
-        --------
-        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
-        >>> service = ToolkitService()
-        >>> service.launch_aedt()
-        >>> service.connect_aedt()
-        >>> service.connect_hfss()
-
-        """
-        if self.desktop:
-            if not self.aedtapp:
-                if not self.desktop.design_list():
-                    properties = self.get_properties()
-                    # If no design exist then create a new HFSS design
-                    self.aedtapp = Hfss(
-                        specified_version=properties["aedt_version"],
-                        aedt_process_id=properties["selected_process"],
-                        non_graphical=properties["non_graphical"],
-                        new_desktop_session=False,
-                    )
-                else:  # pragma: no cover
-                    oproject = self.desktop.odesktop.GetActiveProject()
-                    projectname = oproject.GetName()
-                    activedesign = oproject.GetActiveDesign().GetName()
-                    self.aedtapp = self.desktop[[projectname, activedesign]]
-            return True
-        return False
 
     @thread.launch_thread
     def create_geometry(self):
@@ -80,7 +42,7 @@ class ToolkitService(ServiceGeneric):
         >>> service.connect_aedt()
         >>> service.create_geometry()
         """
-        if self.aedtapp:
+        if self.connect_design("Hfss"):
             properties = self.get_properties()
             multiplier = properties["multiplier"]
             geometry = properties["geometry"]
@@ -92,33 +54,9 @@ class ToolkitService(ServiceGeneric):
                 comp = self.draw_sphere()
             if comp:
                 self.comps.append(comp)
+            self.release_desktop()
             return True
         else:  # pragma: no cover
-            return False
-
-    @thread.launch_thread
-    def save_project(self):
-        """Save project.
-
-        Returns
-        -------
-        bool
-            Returns ``True`` if the connection is successful, ``False`` otherwise.
-
-        Examples
-        --------
-        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
-        >>> service = ToolkitService()
-        >>> service.launch_aedt()
-        >>> service.connect_aedt()
-        >>> service.save_project()
-        """
-        if self.aedtapp:
-            properties = self.get_properties()
-            new_project_name = properties["new_project_name"]
-            self.desktop.save_project(project_path=new_project_name)
-            return True
-        else:
             return False
 
     def draw_box(self):
@@ -140,6 +78,7 @@ class ToolkitService(ServiceGeneric):
         )
 
         box.color = (props[1][0], props[1][1], props[1][2])
+        logger.debug("Box {} created".format(box.name))
         return box
 
     def draw_sphere(self):
@@ -163,6 +102,7 @@ class ToolkitService(ServiceGeneric):
         )
 
         sp.color = (props[1][0], props[1][1], props[1][2])
+        logger.debug("Sphere {} created".format(sp.name))
         return sp
 
     def _comp_props(self):

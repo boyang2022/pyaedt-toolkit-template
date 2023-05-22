@@ -1,4 +1,5 @@
 import atexit
+import json
 import os
 import signal
 import sys
@@ -11,6 +12,13 @@ import requests
 from ansys.aedt.toolkits.template import backend
 from ansys.aedt.toolkits.template import ui
 
+with open(os.path.join(os.path.dirname(__file__), "ui", "common", "general_properties.json")) as fh:
+    general_settings = json.load(fh)
+
+url = general_settings["backend_url"]
+port = general_settings["backend_port"]
+url_call = "http://" + url + ":" + str(port)
+
 is_linux = os.name == "posix"
 
 if is_linux:
@@ -22,8 +30,9 @@ else:
 python_path = sys.executable
 
 # Define the command to start the Flask application
-backend_file = os.path.join(backend.__path__[0], "run.py")
+backend_file = os.path.join(backend.__path__[0], "backend.py")
 backend_command = [python_path, backend_file]
+
 
 # Define the command to start the PySide6 UI
 frontend_file = os.path.join(ui.__path__[0], "frontend.py")
@@ -74,10 +83,10 @@ flask_thread.daemon = True
 flask_thread.start()
 
 # Wait for the Flask application to start
-response = requests.get("http://localhost:5000/get_status")
+response = requests.get(url_call + "/get_status")
 while response.json() != "Backend free":
     time.sleep(1)
-    response = requests.get("http://localhost:5000/get_status")
+    response = requests.get(url_call + "/get_status")
 
 # User or tool could pass the desktop ID and version
 if len(sys.argv) == 3:
@@ -88,14 +97,15 @@ if len(sys.argv) == 3:
         "aedt_version": desktop_version,
         "use_grpc": False,
     }
-    requests.put("http://localhost:5000/set_properties", json=properties)
-    requests.post("http://localhost:5000/launch_aedt", json=properties)
+    requests.put(url_call + "/set_properties", json=properties)
+    requests.post(url_call + "/launch_aedt", json=properties)
 
-    response = requests.get("http://localhost:5000/get_status")
+    response = requests.get(url_call + "/get_status")
     while response.json() != "Backend free":
         time.sleep(1)
-        response = requests.get("http://localhost:5000/get_status")
-    requests.put("http://localhost:5000/connect_aedt")
+        response = requests.get(url_call + "/get_status")
+    requests.put(url_call + "/connect_aedt")
+
 
 # Create a thread to run the PySide6 UI
 ui_thread = threading.Thread(target=run_command, args=frontend_command)
@@ -104,12 +114,6 @@ ui_thread.start()
 
 # Wait for the UI thread to complete
 ui_thread.join()
-
-# Terminate the Flask process
-terminate_flask_process()
-
-# Wait for the Flask thread to complete
-flask_thread.join()
 
 # Register the cleanup function to be called on script exit
 atexit.register(clean_python_processes)

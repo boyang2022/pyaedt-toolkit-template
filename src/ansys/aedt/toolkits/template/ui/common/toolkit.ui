@@ -30,19 +30,6 @@
        </sizepolicy>
       </property>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="3" column="0">
-        <widget class="QPushButton" name="connect_aedtapp">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>40</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>  Launch AEDT  </string>
-         </property>
-        </widget>
-       </item>
        <item row="3" column="2">
         <widget class="QPushButton" name="release_button">
          <property name="minimumSize">
@@ -265,6 +252,19 @@
                 </size>
                </property>
               </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="connect_aedtapp">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>  Launch AEDT  </string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -532,37 +532,6 @@
       </property>
       <property name="textDirection">
        <enum>QProgressBar::TopToBottom</enum>
-      </property>
-     </widget>
-    </item>
-    <item alignment="Qt::AlignHCenter">
-     <widget class="QLineEdit" name="toolkit_running_led">
-      <property name="cursor">
-       <cursorShape>ArrowCursor</cursorShape>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <property name="text">
-       <string>Toolkit running</string>
-      </property>
-      <property name="maxLength">
-       <number>3276</number>
-      </property>
-      <property name="frame">
-       <bool>false</bool>
-      </property>
-      <property name="echoMode">
-       <enum>QLineEdit::Normal</enum>
-      </property>
-      <property name="cursorPosition">
-       <number>10</number>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-      <property name="cursorMoveStyle">
-       <enum>Qt::LogicalMoveStyle</enum>
       </property>
      </widget>
     </item>
