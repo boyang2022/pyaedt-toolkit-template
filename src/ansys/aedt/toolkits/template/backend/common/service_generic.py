@@ -103,11 +103,13 @@ class ServiceGeneric(object):
         """
         thread_running = thread.is_thread_running()
         is_toolkit_busy = properties.is_toolkit_busy
-        if thread_running and is_toolkit_busy:
+        if thread_running and is_toolkit_busy:  # pragma: no cover
             msg = "Backend running"
             logger.debug(msg)
             return 0, msg
-        elif (not thread_running and is_toolkit_busy) or (thread_running and not is_toolkit_busy):
+        elif (not thread_running and is_toolkit_busy) or (
+            thread_running and not is_toolkit_busy
+        ):  # pragma: no cover
             msg = "Backend crashed"
             logger.error(msg)
             return 1, msg
@@ -378,9 +380,14 @@ class ServiceGeneric(object):
         logger.debug("AEDT connected")
         return True
 
-    def connect_aedtapp(self, aedtapp_name="Hfss"):
+    def connect_design(self, app_name="Hfss"):
         """Connect to an application design. If a design exists,
         it takes the active project and design, if not, it creates a new design.
+
+        Parameters
+        ----------
+        app_name : str
+            Aedt application name. The default is ``"Hfss"``.
 
         Returns
         -------
@@ -393,7 +400,7 @@ class ServiceGeneric(object):
         >>> service = ToolkitService()
         >>> service.launch_aedt()
         >>> service.connect_aedt()
-        >>> service.connect_aedtapp()
+        >>> service.connect_design()
 
         """
         if self.connect_aedt():
@@ -413,27 +420,27 @@ class ServiceGeneric(object):
                 oproject = self.desktop.odesktop.GetActiveProject()
             if not project_name and oproject:
                 project_name = oproject.GetName()
-            if not design_name and oproject:
+            design_list = self.desktop.design_list()
+            if design_list and not design_name and oproject:
                 design_name = oproject.GetActiveDesign().GetName()
 
             # Check in the project if the application exists
             design_type_flag = False
             if project_name:
-                design_list = self.desktop.design_list()
                 design_type_flag = False
                 if design_list:
                     if design_name and design_name in design_list:
                         # If the design name specified is in the project.
                         aedtapp = self.desktop[[project_name, design_name]]
-                        if type(aedtapp).__name__ == aedtapp_name:
+                        if type(aedtapp).__name__ == app_name:
                             # If the design is of type 'aedtapp_name' connect to this design.
                             design_type_flag = True
                         else:
                             # If the design is not type 'aedtapp_name' create a new design name.
-                            design_name = pyaedt.generate_unique_name(aedtapp_name)
+                            design_name = pyaedt.generate_unique_name(app_name)
 
             if not design_type_flag:
-                aedt_app_attr = getattr(pyaedt, aedtapp_name)
+                aedt_app_attr = getattr(pyaedt, app_name)
                 self.aedtapp = aedt_app_attr(
                     specified_version=properties.aedt_version,
                     aedt_process_id=properties.selected_process,
@@ -542,6 +549,6 @@ class ServiceGeneric(object):
             self.desktop.save_project(project_path=new_project_name)
             logger.debug("Project saved: {}".format(new_project_name))
             return True
-        else:
+        else:  # pragma: no cover
             logger.error("Project not saved")
             return False

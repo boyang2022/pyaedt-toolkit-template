@@ -70,7 +70,7 @@ logger = pyaedt_logger
 class BasisTest(object):
     def my_setup(self):
         self.test_config = config
-        self.local_path = local_path
+        self.local_path = local_scratch
         self._main = sys.modules["__main__"]
         self.url = "http://" + url + ":" + str(port)
 
@@ -83,12 +83,6 @@ class BasisTest(object):
             proj_list = []
         for proj in proj_list:
             oDesktop.CloseProject(proj)
-
-        properties = {"close_projects": True, "close_on_exit": True}
-        requests.post(self.url + "/close_aedt", json=properties)
-
-        logger.remove_all_project_file_logger()
-        shutil.rmtree(scratch_path, ignore_errors=True)
 
     def teardown_method(self):
         """
@@ -160,6 +154,11 @@ def desktop_init():
         time.sleep(1)
         response = requests.get(url_call + "/get_status")
     yield
+    properties = {"close_projects": True, "close_on_exit": True}
+    requests.post(url_call + "/close_aedt", json=properties)
+
+    logger.remove_all_project_file_logger()
+    shutil.rmtree(scratch_path, ignore_errors=True)
 
     # Register the cleanup function to be called on script exit
     atexit.register(clean_python_processes)

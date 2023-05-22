@@ -42,7 +42,7 @@ class ToolkitService(ServiceGeneric):
         >>> service.connect_aedt()
         >>> service.create_geometry()
         """
-        if self.connect_aedtapp("Hfss"):
+        if self.connect_design("Hfss"):
             properties = self.get_properties()
             multiplier = properties["multiplier"]
             geometry = properties["geometry"]

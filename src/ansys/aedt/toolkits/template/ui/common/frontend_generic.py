@@ -204,11 +204,9 @@ class FrontendGeneric(object):
                     self.update_progress(50)
                     # Start the thread
                     self.running = True
+                    logger.debug("Launching AEDT")
                     self.start()
-                    # self.design_tab.setTabEnabled(0, False)
-                    # self.connect_aedtapp.setEnabled(False)
                     self.design_tab.removeTab(0)
-                    # self.verticalLayout.removeWidget(self.connect_aedtapp)
                 else:
                     self.write_log_line(f"Failed backend call: {self.url}")
                     self.update_progress(100)
@@ -237,16 +235,18 @@ class FrontendGeneric(object):
             properties["project_name"] = file_name
             self.set_properties(properties)
             self.update_progress(0)
-
             response = requests.post(self.url + "/save_project", json=properties)
             if response.ok:
                 self.update_progress(50)
                 # Start the thread
                 self.running = True
+                logger.debug("Saving project: {}".format(file_name))
                 self.start()
                 self.write_log_line("Saving project process launched")
             else:
-                self.write_log_line(f"Failed backend call: {self.url}")
+                msg = f"Failed backend call: {self.url}"
+                logger.debug(msg)
+                self.write_log_line(msg)
                 self.update_progress(100)
 
     def release_only(self):
