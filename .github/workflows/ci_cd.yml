@@ -63,7 +63,7 @@ jobs:
     runs-on: [ self-hosted, pyaedt-toolkits ]
     # needs: [smoke-tests]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -88,12 +88,8 @@ jobs:
           .\.venv\Scripts\Activate.ps1
           pytest -v --cov=pyaedt-toolkit-template --cov-report=xml --junitxml=junit/test-results.xml --cov-report=html tests
 
-      - uses: codecov/codecov-action@v3
-        if: matrix.python-version == '3.9'
-        name: 'Upload coverage to Codecov'
-
       - name: Upload Coverage Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-html
           path: .cov/html
