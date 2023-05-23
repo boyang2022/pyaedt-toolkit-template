@@ -119,3 +119,8 @@ This section shows how to install the toolkit in an specific python environment 
       python
 
 #. Open AEDT and draw a sphere in a random position by run these commands:
+
+    .. code:: python
+
+      # Import required modules for the example
+      import time
