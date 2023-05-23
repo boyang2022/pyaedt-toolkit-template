@@ -19,7 +19,7 @@ which let interact different services by simply doing HTTP requests.
 2. The frontend, using `Pyside6 <https://doc.qt.io/qtforpython-6/quickstart.html>`_. Pyside6 has a designer tool
 which allows to create user interfaces and it is translated to python directly.
 
-Using Flask, the toolkit will be user interface agnostic, then you can decide change it and use a WebUI for instance
+Using Flask, the toolkit becomes interface agnostic, then you can decide change it and use a WebUI for instance
 as user interface.
 
 Toolkit architecture
@@ -62,9 +62,9 @@ Toolkit architecture is defined with the following structure of folders and file
 
 3. `template <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template>`_ contains the toolkit code. It is split in backend and frontend. It contains a script called "run_toolkit.py" which launches backend and frontend in two threads.
 
-    3.1 `backend <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/backend>`_: You will find two main files, **backend.py** where the entrypoints are defined and **services.py** which has toolkit API.
+    3.1 `backend <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/backend>`_: You can find two main files, **backend.py** where the entrypoints are defined and **services.py** which has toolkit API.
 
-    3.2 `ui <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/ui>`_: You will find two main files, **frontend.py** and **frontend_toolkit.py**.
+    3.2 `ui <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/ui>`_: You can find two main files, **frontend.py** and **frontend_toolkit.py**.
 
 4. `tests <https://github.com/ansys/pyaedt-toolkit-template/tree/main/tests>`_: folder contains the unit test of the backend.
 
@@ -100,7 +100,7 @@ Duplicate the new repository in a local repository.
 
     .. code:: bash
 
-      cd New-REPOSITORY-Path
+      cd Repo-Path
       git clone https://github.com/pyansys/pyaedt-toolkit-new_toolkit_name.git
 
 

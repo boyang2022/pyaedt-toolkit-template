@@ -39,7 +39,7 @@ The toolkit could be installed inside AEDT using
       :alt: PyAEDT console in AEDT
 
 
-#. Run the PyAEDT command: `add_custom_toolkit method <https://aedt.docs.pyansys.com/version/stable/API/_autosummary/pyaedt.desktop.Desktop.add_custom_toolkit.html#pyaedt.desktop.Desktop.add_custom_toolkit>`_:
+#. Run the PyAEDT command: `add custom toolkit method <https://aedt.docs.pyansys.com/version/stable/API/_autosummary/pyaedt.desktop.Desktop.add_custom_toolkit.html#pyaedt.desktop.Desktop.add_custom_toolkit>`_:
 
     .. code:: python
 

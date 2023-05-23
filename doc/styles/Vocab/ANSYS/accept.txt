@@ -9,3 +9,7 @@ toolkits
 pyaedt
 CPython
 rst
+github
+Github
+ui
+new_toolkit_name

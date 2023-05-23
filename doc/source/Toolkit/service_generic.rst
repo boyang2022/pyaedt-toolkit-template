@@ -10,7 +10,7 @@ This section list the available generic methods in the backend, these methods ar
    ServiceGeneric
 
 **ServiceGeneric** class is accessible directly from :doc:`service` because it is inherited, then
-we can create an object as in the following example to use both classes:
+you can create an object as in the following example to use both classes:
 
 .. code:: python
 

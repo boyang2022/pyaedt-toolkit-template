@@ -25,4 +25,4 @@ creates the selected geometry with a random position and color.
 The user can save the project, File>Save project.
 
 The wizard has a progress bar and a logger box, where the user can see the status of every operation.
-Red progress bar means the toolkit is busy, and every operation will need to wait until the toolkit is released.
+Red progress bar means the toolkit is busy, and every operation need to wait until the toolkit is released.
