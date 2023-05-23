@@ -128,7 +128,6 @@ def connect_design_call():
         "Hfss",
         "Edb",
         "Emit",
-        "Hfss",
         "Hfss3dLayout",
         "Icepak",
         "Maxwell2d",

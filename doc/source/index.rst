@@ -11,7 +11,7 @@ PyAEDT toolkit template documentation  |version|
 
    Toolkit_template
    Getting_started
-   Toolkit/template_wizard
+   Toolkit/ui
    Toolkit/index
    Contributing
 

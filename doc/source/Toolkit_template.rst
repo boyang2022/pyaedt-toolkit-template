@@ -2,14 +2,72 @@
 New toolkit guidelines
 ======================
 
-This repository is a template for any new PyAEDT toolkit. It standardizes PyAEDT toolkits implementation.
+This repository is a template for any new AEDT toolkit. It standardizes AEDT toolkits implementation.
 
-The **PyAEDT Toolkit Template** is a working toolkit able to connect to an existing AEDT session, open an existing
+The **AEDT Toolkit Template** is a working toolkit able to connect to an existing AEDT session, open an existing
 AEDT project or initialize a new AEDT session, which should be the basic capability of any toolkit.
 In addition, it creates boxes and spheres in random positions as an example of AEDT control.
 
 There are common parts which should not be modified, and others which could be different depending on
 the new toolkit implementation. In the following sections, it is defined best practices to implement your own toolkit.
+
+The architecture is split in two main parts:
+
+1. The backend, using `Flask <https://flask.palletsprojects.com/en/2.3.x/>`_. Flask creates a REST API,
+which let interact different services by simply doing HTTP requests.
+
+2. The frontend, using `Pyside6 <https://doc.qt.io/qtforpython-6/quickstart.html>`_. Pyside6 has a designer tool
+which allows to create user interfaces and it is translated to python directly.
+
+Using Flask, the toolkit will be user interface agnostic, then you can decide change it and use a WebUI for instance
+as user interface.
+
+Toolkit architecture
+--------------------
+
+Toolkit architecture is defined with the following structure of folders and files:
+
+.. code-block:: text
+
+   pyaedt-toolkit-template
+   ├── .github
+   │   └──workflows
+   │      └── ci_cd.yml
+   ├── doc
+   │   └──source
+   │      ├── Toolkit
+   │      │   └── toolkit_docs.rst
+   │      └── generic_docs.rst
+   ├── src.ansys.aedt.toolkits
+   │    └──template
+   │       ├── backend
+   │       │   ├── common
+   │       │   ├── backend.py
+   │       │   ├── properties.json
+   │       │   └── service.py
+   │       ├── ui
+   │       │   ├── common
+   │       │   │   └── toolkit.ui
+   │       │   ├── frontend.py
+   │       │   └── frontend_toolkit.py
+   │       └── run_toolkit.py
+   ├── tests
+   │   └── tests_files
+   ├── pyproject.toml
+   └── README.rst
+
+1. `github <https://github.com/ansys/pyaedt-toolkit-template/tree/main/.github>`_ contains the Github actions, you do not need to modify these files until the first pull request.
+
+2. `doc <https://github.com/ansys/pyaedt-toolkit-template/tree/main/doc>`_ contains the documentation structure.
+
+3. `template <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template>`_ contains the toolkit code. It is split in backend and frontend. It contains a script called "run_toolkit.py" which launches backend and frontend in two threads.
+
+    3.1 `backend <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/backend>`_: You will find two main files, **backend.py** where the entrypoints are defined and **services.py** which has toolkit API.
+
+    3.2 `ui <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/ui>`_: You will find two main files, **frontend.py** and **frontend_toolkit.py**.
+
+4. `tests <https://github.com/ansys/pyaedt-toolkit-template/tree/main/tests>`_: folder contains the unit test of the backend.
+
 
 Create a new repository in GitHub
 ---------------------------------
@@ -17,16 +75,15 @@ Create a new repository in GitHub
 The first step is to create a new repository, it could be Private, Internal, or Public,
 you could start making it Private.
 
-You could create this repository inside the `PyAnsys organization <https://github.com/pyansys>`_.
-If you're an employee of `Ansys Inc. <https://github.com/pyansys>`_,
+You could create this repository inside the `Ansys organization <https://github.com/ansys>`_.
+If you're an employee of `Ansys Inc. <https://github.com/ansys>`_,
 you can join the organization by visiting
-`Join PyAnsys. <https://myapps.microsoft.com/signin/
-8f67c59b-83ac-4318-ae96-f0588382ddc0?tenantId=34c6ce67-15b8-4eff-80e9-52da8be89706>`_.
+`Join Ansys GitHub Organization. <https://github.com/orgs/ansys/sso>`_.
 
 If you're external to Ansys but want to contribute to adding a new toolkit,
 please open an issue on `PyAEDT <https://aedt.docs.pyansys.com/version/stable//>`_.
 
-The naming convention for PyAEDT toolkits is **pyaedt-toolkit-new_toolkit_name**.
+The naming convention for PyAEDT toolkits is pyaedt-toolkit-**new_toolkit_name**.
 
 Choose the PyAEDT toolkit template as the repository template and include all branches.
 

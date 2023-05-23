@@ -16,6 +16,7 @@ class ServiceGeneric(object):
 
     Examples
     --------
+    >>> import time
     >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
     >>> service = ToolkitService()
     >>> properties = service.get_properties()
@@ -23,6 +24,10 @@ class ServiceGeneric(object):
     >>> service.set_properties(new_properties)
     >>> new_properties = service.get_properties()
     >>> msg = service.launch_aedt()
+    >>> response = service.get_thread_status()
+    >>> while response[0] == 0:
+    >>>     time.sleep(1)
+    >>>     response = service.get_thread_status()
     >>> service.release_desktop()
 
     """
@@ -241,7 +246,7 @@ class ServiceGeneric(object):
 
     @thread.launch_thread
     def launch_aedt(self):
-        """Launch AEDT.
+        """Launch AEDT. This method is launched in a thread.
 
         Returns
         -------
@@ -250,9 +255,14 @@ class ServiceGeneric(object):
 
         Examples
         --------
+        >>> import time
         >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
         >>> service = ToolkitService()
         >>> service.launch_aedt()
+        >>> while response[0] == 0:
+        >>>     time.sleep(1)
+        >>>     response = service.get_thread_status()
+        >>> toolkit_free = service.get_thread_status()
         """
 
         connected, msg = self.aedt_connected()
@@ -328,7 +338,7 @@ class ServiceGeneric(object):
         return True
 
     def connect_aedt(self):
-        """Connect to an existing AEDT session.
+        """Connect to an existing AEDT session. You can control the AEDT process ID with the properties.
 
         Returns
         -------
@@ -337,8 +347,13 @@ class ServiceGeneric(object):
 
         Examples
         --------
+        >>> import time
         >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
         >>> service = ToolkitService()
+        >>> service.launch_aedt()
+        >>> while response[0] == 0:
+        >>>     time.sleep(1)
+        >>>     response = service.get_thread_status()
         >>> service.connect_aedt()
         """
         if properties.selected_process == 0:
@@ -382,12 +397,26 @@ class ServiceGeneric(object):
 
     def connect_design(self, app_name="Hfss"):
         """Connect to an application design. If a design exists,
-        it takes the active project and design, if not, it creates a new design.
+        it takes the active project and design, if not, it creates a new design. If a design name and project name
+        is specified in the properties, it tries to connect to this design.
 
         Parameters
         ----------
         app_name : str
-            Aedt application name. The default is ``"Hfss"``.
+            Aedt application name. The default is ``"Hfss"``. Application available are:
+
+            * Circuit
+            * Hfss
+            * Edb
+            * Emit
+            * Hfss3dLayout
+            * Icepak
+            * Maxwell2d
+            * Maxwell3d
+            * Q2d
+            * Q3d
+            * Rmxprt
+            * Simplorer
 
         Returns
         -------
@@ -396,13 +425,37 @@ class ServiceGeneric(object):
 
         Examples
         --------
+        >>> import time
         >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
         >>> service = ToolkitService()
         >>> service.launch_aedt()
-        >>> service.connect_aedt()
+        >>> while response[0] == 0:
+        >>>     time.sleep(1)
+        >>>     response = service.get_thread_status()
         >>> service.connect_design()
 
         """
+
+        aedt_apps = [
+            "Circuit",
+            "Hfss",
+            "Edb",
+            "Emit",
+            "Hfss3dLayout",
+            "Icepak",
+            "Maxwell2d",
+            "Maxwell3d",
+            "MaxwellCircuit",
+            "Q2d",
+            "Q3d",
+            "Rmxprt",
+            "Simplorer",
+        ]
+
+        if app_name not in aedt_apps:
+            logger.error("Wrong application name: {}".format(app_name))
+            return False
+
         if self.connect_aedt():
             project_name = properties.project_name
             design_name = properties.design_name
@@ -488,9 +541,14 @@ class ServiceGeneric(object):
 
         Examples
         --------
+        >>> import time
         >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
         >>> service = ToolkitService()
-        >>> service.release_desktop()
+        >>> service.launch_aedt()
+        >>> while response[0] == 0:
+        >>>     time.sleep(1)
+        >>>     response = service.get_thread_status()
+        >>> service.release_desktop(True, True)
 
         """
 
@@ -508,7 +566,7 @@ class ServiceGeneric(object):
             return False
 
     def open_project(self, project_name=None):
-        """Open project AEDT.
+        """Open AEDT project.
 
         Parameters
         ----------
@@ -519,6 +577,19 @@ class ServiceGeneric(object):
         -------
         bool
             ``True`` when successful, ``False`` when failed.
+
+        Examples
+        --------
+        >>> import time
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.launch_aedt()
+        >>> while response[0] == 0:
+        >>>     time.sleep(1)
+        >>>     response = service.get_thread_status()
+        >>> service.open_project("path/to/file")
+        >>> service.release_desktop()
+
         """
         if self.desktop and project_name:
             self.desktop.odesktop.OpenProject(project_name)
@@ -529,7 +600,7 @@ class ServiceGeneric(object):
 
     @thread.launch_thread
     def save_project(self):
-        """Save project.
+        """Save project. It uses the properties to get the project path. This method is launched in a thread.
 
         Returns
         -------
@@ -538,9 +609,13 @@ class ServiceGeneric(object):
 
         Examples
         --------
+        >>> import time
         >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
         >>> service = ToolkitService()
         >>> service.launch_aedt()
+        >>> while response[0] == 0:
+        >>>     time.sleep(1)
+        >>>     response = service.get_thread_status()
         >>> service.connect_aedt()
         >>> service.save_project()
         """

@@ -1,5 +1,5 @@
-Backend toolkit service
-=======================
+Toolkit service
+===============
 This section list the available toolkit methods in the backend:
 
 .. currentmodule:: ansys.aedt.toolkits.template.backend.service
@@ -9,9 +9,12 @@ This section list the available toolkit methods in the backend:
 
    ToolkitService
 
-The API must be used using PyAEDT as in the following example:
+The API can be used as in the following example:
 
 .. code:: python
+
+    # Import required modules for the example
+    import time
 
     # Import backend
     from ansys.aedt.toolkits.template.backend.service import ToolkitService
@@ -30,8 +33,20 @@ The API must be used using PyAEDT as in the following example:
     # Launch AEDT
     msg = service.launch_aedt()
 
+    # Wait until thread is finished
+    response = service.get_thread_status()
+    while response[0] == 0:
+        time.sleep(1)
+        response = service.get_thread_status()
+
     # Create geometry
     msg = service.create_geometry()
+
+    # Wait until thread is finished
+    response = service.get_thread_status()
+    while response[0] == 0:
+        time.sleep(1)
+        response = service.get_thread_status()
 
     # Desktop is released here
     service.release_desktop()

@@ -4,18 +4,29 @@ Getting started
 
 To run this toolkit, you must have a licensed copy of Ansys Electronics Desktop (AEDT) installed.
 
-The toolkit could be used inside AEDT or launched from a python console. Toolkit features are accessible from the
-user interface **Toolkit Template Wizard** or the directly from the API.
+The toolkit could be launched from:
 
-Install the toolkit inside AEDT and run the UI using CPython 3.7 from AEDT installation
----------------------------------------------------------------------------------------
+- AEDT, see :ref:`install-toolkit-AEDT`.
+
+- From a python console, see :ref:`install_toolkit_console_ui` or :ref:`install_toolkit_console_api`
+
+The toolkit features can be accessed from:
+
+- The user interface (UI), see :doc:`Toolkit/ui`.
+
+- The API, see :doc:`Toolkit/index`.
+
+.. _install-toolkit-AEDT:
+
+How to install inside AEDT and run the UI
+-----------------------------------------
+
+This section shows how to install the toolkit inside AEDT using the base interpreter from AEDT installation.
 
 The toolkit could be installed inside AEDT using
 `PyAEDT <https://aedt.docs.pyansys.com/version/stable//>`_.
 
-You could install PyAEDT and all dependencies using the CPython 3.7 base interpreter from AEDT installation.
-
-#. Download and execute the batch file from PyAEDT documentation. `Install PyAEDT from a batch file <https://aedt.docs.pyansys.com/version/stable/Getting_started/Installation.html#install-from-a-batch-file>`_.
+#. Download and run the script from `PyAEDT documentation <https://https://aedt.docs.pyansys.com/version/stable/Getting_started/Installation.html#install-from-a-python-file>`_ to install PyAEDT.
 
 #. Open the console:
 
@@ -28,88 +39,35 @@ You could install PyAEDT and all dependencies using the CPython 3.7 base interpr
       :alt: PyAEDT console in AEDT
 
 
-#. Run the PyADET command: `add toolkit method <https://aedt.docs.pyansys.com/version/stable/API/_autosummary/pyaedt.desktop.Desktop.add_custom_toolkit.html#pyaedt.desktop.Desktop.add_custom_toolkit>`_:
+#. Run the PyAEDT command: `add_custom_toolkit method <https://aedt.docs.pyansys.com/version/stable/API/_autosummary/pyaedt.desktop.Desktop.add_custom_toolkit.html#pyaedt.desktop.Desktop.add_custom_toolkit>`_:
 
     .. code:: python
 
       desktop.add_custom_toolkit("TemplateToolkit")
       exit()
 
-#. Close the console and open the toolkit, if you do not close AEDT, you need to *Update Menu*:
+#. Close the console and open the toolkit, if you do not restart AEDT, you need to *Update Menu*:
 
     .. image:: ./_static/toolkit_in_AEDT.png
       :width: 800
-      :alt: PyAEDT template toolkit in AEDT
+      :alt: Template toolkit in AEDT
 
+#. The toolkit UI is connected directly to the AEDT session:
 
-Install the toolkit inside AEDT and run the UI for any CPython base interpreter
--------------------------------------------------------------------------------
+    .. image:: ./_static/design_connected.png
+      :width: 800
+      :alt: UI opened from AEDT, design tab
 
-The toolkit could be installed inside AEDT using
-`PyAEDT <https://aedt.docs.pyansys.com/version/stable//>`_.
+.. _install_toolkit_console_ui:
 
-If you have an existing virtual environment, you can skip step 1, and
-if you have PyAEDT installed, you can skip step 2.
+How to install in the console and run the UI
+--------------------------------------------
 
-#. Create a fresh-clean Python environment and activate it:
+This section shows how to install the toolkit in an specific python environment.
 
-   .. code:: bash
+If you have an existing virtual environment you can skip step 1.
 
-      # Create a virtual environment
-      python -m venv .venv
-
-      # Activate it in a POSIX system
-      source .venv/bin/activate
-
-      # Activate it in a Windows CMD environment
-      .venv\Scripts\activate.bat
-
-      # Activate it in Windows PowerShell
-      .venv\Scripts\Activate.ps1
-
-#. Install PyAEDT by run this command:
-
-    .. code:: bash
-
-      python -m pip install pyaedt
-
-#. Open python console:
-
-    .. code:: bash
-
-      python
-
-#. Open AEDT by run this command:
-
-    .. code:: python
-
-        # Launch AEDT
-        from pyaedt import Desktop
-
-        aedtapp = Desktop(
-            specified_version="2023.1",
-            non_graphical=False,
-            new_desktop_session=True,
-            close_on_exit=True,
-            student_version=False,
-        )
-        # Install toolkit inside AEDT
-        aedtapp.add_custom_toolkit("ToolkitTemplate")
-        # Desktop is released here
-        aedtapp.release_desktop()
-
-#. Open AEDT manually and run the toolkit:
-
-.. image:: ./_static/toolkit_in_AEDT.png
-  :width: 800
-  :alt: PyAEDT template toolkit in AEDT
-
-
-Install the toolkit in the console and run the UI
--------------------------------------------------
-
-If you have an existing virtual environment you can skip step 1,
-if you have installed the toolkit in the virtual environment you can skip step 2:
+If you have installed the toolkit in the virtual environment you can skip step 2.
 
 #. Create a fresh-clean Python environment and activate it:
 
@@ -137,67 +95,27 @@ if you have installed the toolkit in the virtual environment you can skip step 2
 
     .. code:: bash
 
-      python .venv\Lib\site-packages\ansys\aedt\toolkits\template\template_toolkit.py
+      python .venv\Lib\site-packages\ansys\aedt\toolkits\template\run_toolkit.py
 
-    .. image:: ./_static/template_toolkit_wizard.png
+#. Settings tab to create a new AEDT session or connect to an existing one:
+
+    .. image:: ./_static/settings.png
       :width: 800
-      :alt: Antenna Toolkit UI, Settings Tab
+      :alt: UI opened from console, settings tab
 
-Install the toolkit in the console and use the API
---------------------------------------------------
+.. _install_toolkit_console_api:
 
-If you have an existing virtual environment you can skip step 1,
-if you have installed the toolkit in the virtual environment you can skip step 2:
+How to install in the console and use the API
+---------------------------------------------
 
-#. Create a fresh-clean Python environment and activate it:
+This section shows how to install the toolkit in an specific python environment and use the API.
 
-   .. code:: bash
+#. Follow the step 1 and 2 described in :ref:`install_toolkit_console_ui`.
 
-      # Create a virtual environment
-      python -m venv .venv
-
-      # Activate it in a POSIX system
-      source .venv/bin/activate
-
-      # Activate it in a Windows CMD environment
-      .venv\Scripts\activate.bat
-
-      # Activate it in Windows PowerShell
-      .venv\Scripts\Activate.ps1
-
-#. Install the toolkit from git:
-
-    .. code:: bash
-
-      python -m pip install git+https://github.com/pyansys/pyaedt-antenna-toolkit.git
-
-#. Open a python console:
+#. Open a python console in the corresponding virtual environment:
 
     .. code:: bash
 
       python
 
-#. Open AEDT and draw a box in a random position by run these commands:
-
-    .. code:: python
-
-        # Launch AEDT
-        from pyaedt import Hfss
-
-        aedtapp = Hfss(
-            specified_version="2023.1",
-            non_graphical=False,
-            new_desktop_session=True,
-            close_on_exit=True,
-        )
-        # Import backend
-        from ansys.aedt.toolkits.template.backend.template_script import TemplateBackend
-
-        # Backend object
-        template = TemplateBackend(aedtapp)
-
-        # Create a box in a random position
-        b = template.draw_box()
-
-        # Desktop is released here
-        aedtapp.release_desktop()
+#. Open AEDT and draw a sphere in a random position by run these commands:
