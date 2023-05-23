@@ -124,3 +124,41 @@ This section shows how to install the toolkit in an specific python environment 
 
       # Import required modules for the example
       import time
+
+      # Import backend services
+      from ansys.aedt.toolkits.template.backend.service import ToolkitService
+
+      # Backend object
+      service = ToolkitService()
+
+      # Get service properties
+      properties = service.get_properties()
+
+      # Change geometry type
+      new_properties = {"geometry": "Sphere"}
+      service.set_properties(new_properties)
+
+      # Launch AEDT in a thread
+      service.launch_aedt()
+
+      # Wait until thread is finished
+      response = service.get_thread_status()
+
+      while response[0] == 0:
+          time.sleep(1)
+          response = service.get_thread_status()
+
+      # Create a sphere in a random position in a thread
+      b = service.create_geometry()
+
+      # Wait until thread is finished
+      response = service.get_thread_status()
+      while response[0] == 0:
+          time.sleep(1)
+          response = service.get_thread_status()
+
+      # Get number of solids added
+      len(service.comps)
+
+      # Desktop is released here
+      service.release_desktop()
