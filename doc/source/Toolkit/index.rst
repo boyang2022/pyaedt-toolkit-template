@@ -1,6 +1,6 @@
-=====================
-API backend reference
-=====================
+=============
+API reference
+=============
 
 This section describes all classes available in the toolkit:
 

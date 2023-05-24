@@ -13,10 +13,18 @@ class ToolkitService(ServiceGeneric):
     Examples
     --------
     >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+    >>> import time
     >>> service = ToolkitService()
     >>> msg1 = service.launch_aedt()
-    >>> msg2 = service.connect_aedt()
+    >>> response = service.get_thread_status()
+    >>> while response[0] == 0:
+    >>>     time.sleep(1)
+    >>>     response = service.get_thread_status()
     >>> msg3 = service.create_geometry()
+    >>> response = service.get_thread_status()
+    >>> while response[0] == 0:
+    >>>     time.sleep(1)
+    >>>     response = service.get_thread_status()
     >>> service.release_desktop()
     """
 
@@ -27,7 +35,7 @@ class ToolkitService(ServiceGeneric):
 
     @thread.launch_thread
     def create_geometry(self):
-        """Create a box or a sphere in HFSS.
+        """Create a box or a sphere in design.
 
         Returns
         -------
@@ -37,10 +45,19 @@ class ToolkitService(ServiceGeneric):
         Examples
         --------
         >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> import time
         >>> service = ToolkitService()
-        >>> service.launch_aedt()
-        >>> service.connect_aedt()
-        >>> service.create_geometry()
+        >>> msg1 = service.launch_aedt()
+        >>> response = service.get_thread_status()
+        >>> while response[0] == 0:
+        >>>     time.sleep(1)
+        >>>     response = service.get_thread_status()
+        >>> msg3 = service.create_geometry()
+        >>> response = service.get_thread_status()
+        >>> while response[0] == 0:
+        >>>     time.sleep(1)
+        >>>     response = service.get_thread_status()
+        >>> service.release_desktop()
         """
         if self.connect_design("Hfss"):
             properties = self.get_properties()
@@ -66,6 +83,20 @@ class ToolkitService(ServiceGeneric):
         -------
         :class:`pyaedt.modeler.object3d.Object3d`
             3D object.
+
+        Examples
+        --------
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> import time
+        >>> service = ToolkitService()
+        >>> msg1 = service.launch_aedt()
+        >>> response = service.get_thread_status()
+        >>> while response[0] == 0:
+        >>>     time.sleep(1)
+        >>>     response = service.get_thread_status()
+        >>> service.connect_design()
+        >>> service.draw_box()
+        >>> service.release_desktop()
         """
         props = self._comp_props()
         pos_x = props[0][0]
@@ -89,6 +120,19 @@ class ToolkitService(ServiceGeneric):
         :class:`pyaedt.modeler.object3d.Object3d`
             3D object.
 
+        Examples
+        --------
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> import time
+        >>> service = ToolkitService()
+        >>> msg1 = service.launch_aedt()
+        >>> response = service.get_thread_status()
+        >>> while response[0] == 0:
+        >>>     time.sleep(1)
+        >>>     response = service.get_thread_status()
+        >>> service.connect_design()
+        >>> service.draw_sphere()
+        >>> service.release_desktop()
         """
 
         props = self._comp_props()
