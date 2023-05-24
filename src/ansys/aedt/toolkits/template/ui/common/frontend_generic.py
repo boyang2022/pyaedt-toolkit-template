@@ -164,9 +164,7 @@ class FrontendGeneric(object):
                     if session[1] == -1:
                         self.process_id_combo.addItem("Process {}".format(session[0], session[1]))
                     else:
-                        self.process_id_combo.addItem(
-                            "Process {} on Grpc {}".format(session[0], session[1])
-                        )
+                        self.process_id_combo.addItem("Process {} on Grpc {}".format(session[0], session[1]))
             return True
         except requests.exceptions.RequestException:
             self.write_log_line(f"Find AEDT sessions failed")

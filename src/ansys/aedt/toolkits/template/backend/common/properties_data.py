@@ -10,15 +10,11 @@ class FrozenClass(object):
     def __setattr__(self, key, value):
         if self.__isfrozen:
             if key not in dir(self):
-                raise AttributeError(
-                    "{} is a frozen class. Not existing key: {}".format(type(self).__name__, key)
-                )
+                raise AttributeError("{} is a frozen class. Not existing key: {}".format(type(self).__name__, key))
             if type(value) == int and type(self.__dict__[key]) == float:
                 value = float(value)
             if not isinstance(value, type(self.__dict__[key])):
-                raise TypeError(
-                    "{} is a frozen class. Wrong type for key: {}".format(type(self).__name__, key)
-                )
+                raise TypeError("{} is a frozen class. Wrong type for key: {}".format(type(self).__name__, key))
         object.__setattr__(self, key, value)
 
     def _freeze(self):

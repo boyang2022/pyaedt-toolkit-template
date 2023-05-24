@@ -166,7 +166,7 @@ Open the terminal console with the virtual environment activated:
   pip install pre-commit
   pre-commit install
 
-You can do your first pull request to the repository.
+You can do your first pull request to the repository. In GitHub the tests actions will fail because the repository is still not using the runners with AEDT installed.
 
 
 Create backend
