@@ -84,7 +84,7 @@ If you're external to Ansys but want to contribute to adding a new toolkit,
 please open an issue on `PyAEDT <https://aedt.docs.pyansys.com/version/stable//>`_.
 
 The naming convention for PyAEDT toolkits is: pyaedt-toolkit-**new_toolkit_name**. In this example, the
-new toolkit is called: **amazing_toolkit**.
+new toolkit is called: **amazing toolkit**.
 
 Choose the PyAEDT toolkit template as the repository template and include all branches.
 
@@ -92,8 +92,8 @@ Choose the PyAEDT toolkit template as the repository template and include all br
   :width: 800
   :alt: New PyAnsys repository
 
-We can change the owner later, Settings > Transfer Ownership. Once the repository is ready for the first pull request,
-we can move it to ansys-internal, and if it is ready to be public, we can move it to ansys organization.
+You can change the owner later, Settings > Transfer Ownership. Once the repository is ready for the first pull request,
+You can move it to ansys-internal, and if it is ready to be public, you can move it to ansys organization.
 
 Clone the repository locally
 ----------------------------
@@ -119,9 +119,9 @@ src/ansys/aedt/toolkits/amazing_toolkit
 
 #. Modify .GitHub/workflows/ci_cd.yml file, from line 16 to 20, with the specific toolkit name.
 
-#. Comment in .GitHub/workflows/ci_cd.yml file, from line 61 to 96, we will need these lines to run the unit tests with GitHub actions.
+#. Comment in .GitHub/workflows/ci_cd.yml file, from line 61 to 96, you need these lines to run the unit tests with GitHub actions.
 
-#. Delete tests word in .GitHub/workflows/ci_cd.yml file, line 137, we will need this again once the remote tests are working.
+#. Delete tests word in .GitHub/workflows/ci_cd.yml file, line 137, you need this again once the remote tests are working.
 
 #. Modify .GitHub/workflows/ci_cd.yml file, line 89, with the specific toolkit name.
 
@@ -293,5 +293,5 @@ You have the file run_toolkit.py which is doing this task. Then you can use this
 Add toolkit in PyAEDT
 ---------------------
 
-Toolkits can be installed inside AEDT using PyAEDT.
-Create an issue on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page and contributors will add it if the repository is public.
+You can be install the toolkit inside AEDT using PyAEDT.
+Create an issue on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page and contributors can add it if the repository is public.
