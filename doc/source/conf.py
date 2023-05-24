@@ -30,7 +30,7 @@ html_logo = pyansys_logo_black
 html_theme = "ansys_sphinx_theme"
 html_short_title = html_title = "ansys-aedt-toolkits-template"
 
-# specify the location of your github repo
+# specify the location of your GitHub repo
 html_context = {
     "github_user": "pyansys",
     "github_repo": "pyaedt-toolkit-template",

@@ -30,7 +30,7 @@ Toolkit architecture is defined with the following structure of folders and file
 .. code-block:: text
 
    pyaedt-toolkit-template
-   ├── .github
+   ├── .GitHub
    │   └──workflows
    │      └── ci_cd.yml
    ├── doc
@@ -45,7 +45,7 @@ Toolkit architecture is defined with the following structure of folders and file
    │       │   ├── backend.py
    │       │   ├── properties.json
    │       │   └── service.py
-   │       ├── ui
+   │       ├── UI
    │       │   ├── common
    │       │   │   └── toolkit.ui
    │       │   ├── frontend.py
@@ -56,7 +56,7 @@ Toolkit architecture is defined with the following structure of folders and file
    ├── pyproject.toml
    └── README.rst
 
-1. `github <https://github.com/ansys/pyaedt-toolkit-template/tree/main/.github>`_ contains the Github actions, you do not need to modify these files until the first pull request.
+1. `GitHub <https://github.com/ansys/pyaedt-toolkit-template/tree/main/.github>`_ contains the Github actions, you do not need to modify these files until the first pull request.
 
 2. `doc <https://github.com/ansys/pyaedt-toolkit-template/tree/main/doc>`_ contains the documentation structure.
 
