@@ -127,8 +127,7 @@ src/ansys/aedt/toolkits/amazing_toolkit
 
 #. Modify doc/source/conf.py file, line 16, with the specific toolkit name.
 
-#. Modify doc/source python files (Contributing.rst, Getting_Started.rst...), with references to the initial toolkit.
-The most important ones are doc/source/Toolkit/service.rst and doc/source/Toolkit/service_generic.rst.
+#. Modify doc/source python files, the most important ones are doc/source/Toolkit/service.rst and doc/source/Toolkit/service_generic.rst.
 
 #. Modify .pre-commit-config.yml file, line 3, with the corresponding UI path.
 
@@ -190,13 +189,13 @@ The backend structure contains three files related to this specific toolkit, **p
 There is a **common folder** which contains generic methods useful for all toolkits, like the logger handler or launch and release AEDT services.
 
 
-properties.json
+Properties.json
 ~~~~~~~~~~~~~~~
 
-This file contains the data shared between methods in the backend. This toolkit is creating a box or an sphere in Hfss in random positions, and the dimensions are multiplied by a value.
+This file contains the data shared between methods in the backend. This toolkit is creating a box or an sphere in HFSS in random positions, and the dimensions are multiplied by a value.
 Then the only toolkit inputs are the geometry type and the multiplier.
 
-service.py
+Service.py
 ~~~~~~~~~~
 
 This file contains all the logic needed. For this example is a simple python file, but it can be a more complex structure with classes if it is needed.
@@ -204,7 +203,7 @@ This file contains all the logic needed. For this example is a simple python fil
 This file must work independently, it means, you do not need a user interface to run the full workflow of the toolkit.
 As an example, you can see in the docstring of the ToolkitService class, how to use the toolkit in a python terminal.
 
-backend.py
+Backend.py
 ~~~~~~~~~~
 
 Once you have a service working, you need to define the entrypoints. It means, you need to create the url commands to allow the communication between frontend and backend.
