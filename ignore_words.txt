@@ -28,5 +28,4 @@ mot
 nam
 ue
 ro
-.github
 ui
