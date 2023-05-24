@@ -56,7 +56,7 @@ Toolkit architecture is defined with the following structure of folders and file
    ├── pyproject.toml
    └── README.rst
 
-1. `.github <https://github.com/ansys/pyaedt-toolkit-template/tree/main/.github>`_ contains the GitHub actions, you do not need to modify these files until the first pull request.
+1. `GitHub <https://github.com/ansys/pyaedt-toolkit-template/tree/main/.github>`_ contains the GitHub actions, you do not need to modify these files until the first pull request.
 
 2. `doc <https://github.com/ansys/pyaedt-toolkit-template/tree/main/doc>`_ contains the documentation structure.
 
@@ -64,7 +64,7 @@ Toolkit architecture is defined with the following structure of folders and file
 
     3.1 `backend <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/backend>`_: You can find two main files, **backend.py** where the entrypoints are defined and **services.py** which has toolkit API.
 
-    3.2 `UI <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/ui>`_: You can find two main files, **frontend.py** and **frontend_toolkit.py**.
+    3.2 `Ui <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/ui>`_: You can find two main files, **frontend.py** and **frontend_toolkit.py**.
 
 4. `tests <https://github.com/ansys/pyaedt-toolkit-template/tree/main/tests>`_: folder contains the unit test of the backend.
 
@@ -112,9 +112,9 @@ There are some parts in the repository which are specific for each different too
 #. Modify the folder name src/ansys/aedt/toolkits/toolkit_name/template to
 src/ansys/aedt/toolkits/new_toolkit_name
 
-#. Modify .github/workflows/ci_cd.yml file, from line 16 to 20, with the specific toolkit name.
+#. Modify .GitHub/workflows/ci_cd.yml file, from line 16 to 20, with the specific toolkit name.
 
-#. Modify .github/workflows/ci_cd.yml file, line 89, with the specific toolkit name.
+#. Modify .GitHub/workflows/ci_cd.yml file, line 89, with the specific toolkit name.
 
 #. Modify .pre-commit-config.yml file, line 3, with the corresponding UI path.
 
@@ -158,7 +158,7 @@ Depending on the complexity of the unit tests, it could need AEDT or not to run 
 If AEDT needs to be run, the GitHub actions try to connect to a runner called *pyaedt-toolkits*, please submit an issue
 on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page.
 
-If the unit tests do not need AEDT, then you could modify the .github/workflows/ci_cd.yml and remove line 63.
+If the unit tests do not need AEDT, then you could modify the .GitHub/workflows/ci_cd.yml and remove line 63.
 
 Create user interface
 ---------------------
@@ -173,7 +173,7 @@ General guidelines for user interface implementation are:
 
        pyside6-designer
 
-#. Open the user interface template in src/ansys/aedt/toolkits/new_toolkit_name/ui/toolkit.ui.
+#. Open the user interface template in src/ansys/aedt/toolkits/new_toolkit_name/UI/toolkit.ui.
 
 #. Modify it and save it.
 
@@ -181,7 +181,7 @@ General guidelines for user interface implementation are:
 
     .. code:: bash
 
-        pyside6-uic src\ansys\aedt\toolkits\new_toolkit_name\ui\toolkit.ui -o src\ansys\aedt\toolkits\new_toolkit_name\ui\ui_main.py
+        pyside6-uic src\ansys\aedt\toolkits\new_toolkit_name\ui\toolkit.ui -o src\ansys\aedt\toolkits\new_toolkit_name\UI\ui_main.py
 
 #. Create your script to control this user interface.
 
