@@ -175,13 +175,13 @@ Open the terminal console with the virtual environment activated:
   pip install pre-commit
   pre-commit install
 
-You can do your first pull request to the repository. In GitHub the tests actions will fail because the repository is still not using the runners with AEDT installed.
+You can do your first pull request to the repository.
 
 
 Create backend
 --------------
 
-The backend part controls all related to AEDT. It should contain code which could be launched without a user interface.
+The backend part controls all tasks related to the workflow. It should contain code which could be launched without an user interface.
 
 On this repository you have a simple example, you can find in other toolkits more examples of how to develop a backend.
 It should be created in src/ansys/aedt/toolkits/new_toolkit_name/backend.
@@ -232,6 +232,7 @@ This repository has two unit test defined, the first one **test_00_service_gener
 The second one, **test_01_service_toolkit.py** is an example of how you can create the unit test for your toolkit.
 
 You can run locally the unit tests if you installed the [tests] dependencies.
+
 If you push these modifications, GitHub actions try to connect to a runner called *pyaedt-toolkits*, please submit an issue
 on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page to give access to your repository to run the unit test remotely.
 If you want to use these runners, you need to change the ownership of the repository to ansys-internal.
@@ -241,8 +242,9 @@ Create user interface
 ---------------------
 
 If you installed the default dependencies, you installed pyside6, which allows to create user interfaces.
-Please visit its website for more information.
-General guidelines for user interface implementation are:
+If you prefer other frontend libraries or even develop the frontend in a WebUI, you can do it because the backend is ready from the previous steps.
+
+If you use Pyside6, the general guidelines for user interface implementation are:
 
 #. Open the designer.
 
@@ -250,7 +252,7 @@ General guidelines for user interface implementation are:
 
        pyside6-designer
 
-#. Open the user interface template.
+#. Open the user interface template (frontend/common/toolkit).
 
 #. Modify it and save it.
 
@@ -260,21 +262,15 @@ General guidelines for user interface implementation are:
 
         pyside6-uic src\ansys\aedt\toolkits\new_toolkit_name\ui\toolkit.ui -o src\ansys\aedt\toolkits\new_toolkit_name\UI\ui_main.py
 
-#. Create your script to control this user interface.
+#. Create your script to control this user interface, you can use frontend\frontend.py as a template.
 
 
 Create documentation
 --------------------
 
-The documentation is created automatically using Sphinx. You need to define the structure in the doc/source/index.rst
+The documentation is created automatically using Sphinx.
 
-#. Modify doc/source/conf.py lines 16, 20, 31, 36, 46 and 57 with the toolkit name.
-
-#. Remove the file doc/source/Toolkit_template.py and line 12 from doc/source/index.rst.
-
-#. Modify README.rst, this is the first page when you open the documentation.
-
-#. Modify all rst files in doc/source
+You need to define the structure in doc/source/index.rst.
 
 #. You can build the documentation locally:
 
@@ -286,7 +282,16 @@ The documentation is created automatically using Sphinx. You need to define the 
 #. To publish the documentation online, you need to submit an issue on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page.
 
 
+Run the toolkit
+---------------
+
+In order to run the toolkit you need to run the backend and then run the frontend.
+
+You have the file run_toolkit.py which is doing this task. Then you can use this file to launch the toolkit directly.
+
+
 Add toolkit in PyAEDT
 ---------------------
 
-Create an issue on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page.
+Toolkits can be installed inside AEDT using PyAEDT.
+Create an issue on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page and contributors will add it if the repository is public.
