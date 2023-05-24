@@ -12,3 +12,4 @@ rst
 GitHub
 UI
 new_toolkit_name
+toolkit.ui

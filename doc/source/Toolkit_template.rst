@@ -62,9 +62,9 @@ Toolkit architecture is defined with the following structure of folders and file
 
 3. `template <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template>`_ contains the toolkit code. It is split in backend and frontend. It contains a script called "run_toolkit.py" which launches backend and frontend in two threads.
 
-    3.1 `backend <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/backend>`_: You can find two main files, **backend.py** where the entrypoints are defined and **services.py** which has toolkit API.
+    3.1 `backend <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/backend>`_: you can find two main files, **backend.py** where the entrypoints are defined and **services.py** which has toolkit API.
 
-    3.2 `Ui <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/ui>`_: You can find two main files, **frontend.py** and **frontend_toolkit.py**.
+    3.2 `UI <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/ui>`_: you can find two main files, **frontend.py** and **frontend_toolkit.py**.
 
 4. `tests <https://github.com/ansys/pyaedt-toolkit-template/tree/main/tests>`_: folder contains the unit test of the backend.
 
