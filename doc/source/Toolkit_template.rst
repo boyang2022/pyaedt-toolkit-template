@@ -83,7 +83,8 @@ you can join the organization by visiting
 If you're external to Ansys but want to contribute to adding a new toolkit,
 please open an issue on `PyAEDT <https://aedt.docs.pyansys.com/version/stable//>`_.
 
-The naming convention for PyAEDT toolkits is pyaedt-toolkit-**new_toolkit_name**.
+The naming convention for PyAEDT toolkits is: pyaedt-toolkit-**new_toolkit_name**. In this example, the
+new toolkit is called: **amazing_toolkit**.
 
 Choose the PyAEDT toolkit template as the repository template and include all branches.
 
@@ -91,17 +92,21 @@ Choose the PyAEDT toolkit template as the repository template and include all br
   :width: 800
   :alt: New PyAnsys repository
 
+We can change the owner later, Settings > Transfer Ownership. Once the repository is ready for the first pull request,
+we can move it to ansys-internal, and if it is ready to be public, we can move it to ansys organization.
+
 Clone the repository locally
 ----------------------------
 
 Duplicate the new repository in a local repository.
 
-#. Open Git Bash.
+#. Open Git Bash and run these commands:
 
     .. code:: bash
 
       cd Repo-Path
-      git clone https://github.com/pyansys/pyaedt-toolkit-new_toolkit_name.git
+      git clone https://github.com/Samuelopez-ansys/pyaedt-toolkit-amazing_toolkit.git
+
 
 
 Modify general settings
@@ -110,7 +115,7 @@ Modify general settings
 There are some parts in the repository which are specific for each different toolkit and must be modified manually.
 
 #. Modify the folder name src/ansys/aedt/toolkits/toolkit_name/template to
-src/ansys/aedt/toolkits/new_toolkit_name
+src/ansys/aedt/toolkits/amazing_toolkit
 
 #. Modify .GitHub/workflows/ci_cd.yml file, from line 16 to 20, with the specific toolkit name.
 
@@ -120,15 +125,38 @@ src/ansys/aedt/toolkits/new_toolkit_name
 
 #. Modify pyproject.toml file, line 7 and 9, with the corresponding toolkit name and description.
 
-#. Modify pyproject.toml file, line 57, with the corresponding toolkit name.
+#. Modify pyproject.toml file, line 58, with the corresponding toolkit name.
 
-#. Modify pyproject.toml file, from line 60 to 62, with the corresponding toolkit name.
+#. Modify pyproject.toml file, from line 61 to 63, with the corresponding toolkit name.
+
+#. Modify run_toolkit.py, from line 12 and 13, with the corresponding toolkit name.
+
+#. Modify backend/backend.py, from line 1 and 6, with the corresponding toolkit name.
+
+#. Modify backend/service.py, from line 3 and 5, with the corresponding toolkit name.
+
+#. Modify backend/common/backend_generic.py, from line 5 and 6, with the corresponding toolkit name.
+
+#. Modify backend/common/logger_handler.py, line 3, with the corresponding toolkit name.
+
+#. Modify backend/common/service_generic.py, from line 6 and 8, with the corresponding toolkit name.
+
+#. Modify backend/common/service_generic.py, from line 5 and 6, with the corresponding toolkit name.
+
+#. Modify frontend/frontend.py, from line 7 and 9, with the corresponding toolkit name.
+
+#. Modify frontend/frontend_toolkit.py, from line 3 and 5, with the corresponding toolkit name.
+
+#. Modify frontend/frontend_generic.py, line 11, with the corresponding toolkit name.
 
 
 Install default dependencies
 ----------------------------
 
-You can install in the virtual environment the basic packages to run a PyAEDT toolkit, like pyaedt or pyside6.
+You can install in the virtual environment the basic packages to run a PyAEDT toolkit, like pyaedt, flask or pyside6,
+the template toml file contains these dependencies and others needed for testing and documentation generation.
+
+Open the terminal console with the virtual environment activated:
 
 .. code:: bash
 
@@ -137,6 +165,8 @@ You can install in the virtual environment the basic packages to run a PyAEDT to
   pip install .[doc]
   pip install pre-commit
   pre-commit install
+
+You can do your first pull request to the repository.
 
 
 Create backend
@@ -147,18 +177,55 @@ The backend part controls all related to AEDT. It should contain code which coul
 On this repository you have a simple example, you can find in other toolkits more examples of how to develop a backend.
 It should be created in src/ansys/aedt/toolkits/new_toolkit_name/backend.
 
+The backend structure contains three files related to this specific toolkit, **properties.json, service.py and backend.py.**
+There is a **common folder** which contains generic methods useful for all toolkits, like the logger handler or launch and release AEDT services.
+
+
+properties.json
+~~~~~~~~~~~~~~~
+
+This file contains the data shared between methods in the backend. This toolkit is creating a box or an sphere in Hfss in random positions, and the dimensions are multiplied by a value.
+Then the only toolkit inputs are the geometry type and the multiplier.
+
+service.py
+~~~~~~~~~~
+
+This file contains all the logic needed. For this example is a simple python file, but it can be a more complex structure with classes if it is needed.
+
+This file must work independently, it means, you do not need a user interface to run the full workflow of the toolkit.
+As an example, you can see in the docstring of the ToolkitService class, how to use the toolkit in a python terminal.
+
+backend.py
+~~~~~~~~~~
+
+Once you have a service working, you need to define the entrypoints. It means, you need to create the url commands to allow the communication between frontend and backend.
+If you see this file, it contains only the entrypoint corresponding to this toolkit, but if you go to common backend_generic.py, you can find the generic entrypoints.
+
+Test backend
+~~~~~~~~~~~~
+
+You can test the backend using tools like Postman or directly the browser. You need to update the toolkit package modifications in the virtual environment:
+
+.. code:: bash
+
+  pip install .
+
+And run the file backend.py.
+
 Create unit test
 ----------------
 
-If the repository has a backend, you should create unit test for each different method, this increase
-the maintainability of your code. File tests/test_00_template.py contains unit test for the backend methods.
+If the repository has a backend, you should create unit test for each different methods, this increase the maintainability of your code.
+The tests are in the folder **tests**.
 
-Depending on the complexity of the unit tests, it could need AEDT or not to run the tests.
+This repository has two unit test defined, the first one **test_00_service_generic.py** is testing the generic services and you do not need to modify it.
+The second one, **test_01_service_toolkit.py** is an example of how you can create the unit test for your toolkit.
 
-If AEDT needs to be run, the GitHub actions try to connect to a runner called *pyaedt-toolkits*, please submit an issue
-on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page.
+You can run locally the unit tests if you installed the [tests] dependencies.
+If you push these modifications, GitHub actions try to connect to a runner called *pyaedt-toolkits*, please submit an issue
+on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page to give access to your repository to run the unit test remotely.
+If you want to use these runners, you need to change the ownership of the repository to ansys-internal.
 
-If the unit tests do not need AEDT, then you could modify the .GitHub/workflows/ci_cd.yml and remove line 63.
 
 Create user interface
 ---------------------
