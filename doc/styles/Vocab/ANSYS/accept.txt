@@ -10,5 +10,6 @@ pyaedt
 CPython
 rst
 GitHub
+.github
 UI
 new_toolkit_name
