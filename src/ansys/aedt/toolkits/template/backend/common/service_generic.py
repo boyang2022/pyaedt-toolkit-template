@@ -112,9 +112,7 @@ class ServiceGeneric(object):
             msg = "Backend running"
             logger.debug(msg)
             return 0, msg
-        elif (not thread_running and is_toolkit_busy) or (
-            thread_running and not is_toolkit_busy
-        ):  # pragma: no cover
+        elif (not thread_running and is_toolkit_busy) or (thread_running and not is_toolkit_busy):  # pragma: no cover
             msg = "Backend crashed"
             logger.error(msg)
             return 1, msg
@@ -177,9 +175,7 @@ class ServiceGeneric(object):
         installed_versions = []
         for ver in pyaedt.misc.list_installed_ansysem():
             installed_versions.append(
-                "20{}.{}".format(
-                    ver.replace("ANSYSEM_ROOT", "")[:2], ver.replace("ANSYSEM_ROOT", "")[-1]
-                )
+                "20{}.{}".format(ver.replace("ANSYSEM_ROOT", "")[:2], ver.replace("ANSYSEM_ROOT", "")[-1])
             )
         logger.debug(str(installed_versions))
         return installed_versions
@@ -316,9 +312,7 @@ class ServiceGeneric(object):
                 if oproject:
                     projectname = oproject.GetName()
                     project_path = self.desktop.odesktop.GetProjectDirectory()
-                    new_properties["project_name"] = os.path.join(
-                        project_path, projectname + ".aedt"
-                    )
+                    new_properties["project_name"] = os.path.join(project_path, projectname + ".aedt")
                     active_design = oproject.GetActiveDesign()
                     logger.debug("Project name: {}".format(projectname))
                     if active_design:

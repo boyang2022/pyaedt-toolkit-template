@@ -83,7 +83,8 @@ you can join the organization by visiting
 If you're external to Ansys but want to contribute to adding a new toolkit,
 please open an issue on `PyAEDT <https://aedt.docs.pyansys.com/version/stable//>`_.
 
-The naming convention for PyAEDT toolkits is pyaedt-toolkit-**new_toolkit_name**.
+The naming convention for PyAEDT toolkits is: pyaedt-toolkit-**new_toolkit_name**. In this example, the
+new toolkit is called: **amazing toolkit**.
 
 Choose the PyAEDT toolkit template as the repository template and include all branches.
 
@@ -91,17 +92,21 @@ Choose the PyAEDT toolkit template as the repository template and include all br
   :width: 800
   :alt: New PyAnsys repository
 
+You can change the owner later, Settings > Transfer Ownership. Once the repository is ready for the first pull request,
+You can move it to ansys-internal, and if it is ready to be public, you can move it to ansys organization.
+
 Clone the repository locally
 ----------------------------
 
 Duplicate the new repository in a local repository.
 
-#. Open Git Bash.
+#. Open Git Bash and run these commands:
 
     .. code:: bash
 
       cd Repo-Path
-      git clone https://github.com/pyansys/pyaedt-toolkit-new_toolkit_name.git
+      git clone https://github.com/Samuelopez-ansys/pyaedt-toolkit-amazing_toolkit.git
+
 
 
 Modify general settings
@@ -110,25 +115,56 @@ Modify general settings
 There are some parts in the repository which are specific for each different toolkit and must be modified manually.
 
 #. Modify the folder name src/ansys/aedt/toolkits/toolkit_name/template to
-src/ansys/aedt/toolkits/new_toolkit_name
+src/ansys/aedt/toolkits/amazing_toolkit
 
 #. Modify .GitHub/workflows/ci_cd.yml file, from line 16 to 20, with the specific toolkit name.
 
+#. Comment in .GitHub/workflows/ci_cd.yml file, from line 61 to 96, you need these lines to run the unit tests with GitHub actions.
+
+#. Delete tests word in .GitHub/workflows/ci_cd.yml file, line 137, you need this again once the remote tests are working.
+
 #. Modify .GitHub/workflows/ci_cd.yml file, line 89, with the specific toolkit name.
+
+#. Modify doc/source/conf.py file, line 16, with the specific toolkit name.
+
+#. Modify doc/source python files, the most important ones are doc/source/Toolkit/service.rst and doc/source/Toolkit/service_generic.rst.
 
 #. Modify .pre-commit-config.yml file, line 3, with the corresponding UI path.
 
 #. Modify pyproject.toml file, line 7 and 9, with the corresponding toolkit name and description.
 
-#. Modify pyproject.toml file, line 57, with the corresponding toolkit name.
+#. Modify pyproject.toml file, line 58, with the corresponding toolkit name.
 
-#. Modify pyproject.toml file, from line 60 to 62, with the corresponding toolkit name.
+#. Modify pyproject.toml file, from line 61 to 63, with the corresponding toolkit name.
+
+#. Modify run_toolkit.py, from line 12 and 13, with the corresponding toolkit name.
+
+#. Modify backend/backend.py, from line 1 and 6, with the corresponding toolkit name.
+
+#. Modify backend/service.py, from line 3 and 5, with the corresponding toolkit name.
+
+#. Modify backend/common/backend_generic.py, from line 5 and 6, with the corresponding toolkit name.
+
+#. Modify backend/common/logger_handler.py, line 3, with the corresponding toolkit name.
+
+#. Modify backend/common/service_generic.py, from line 6 and 8, with the corresponding toolkit name.
+
+#. Modify backend/common/service_generic.py, from line 5 and 6, with the corresponding toolkit name.
+
+#. Modify frontend/frontend.py, from line 7 and 9, with the corresponding toolkit name.
+
+#. Modify frontend/frontend_toolkit.py, from line 3 and 5, with the corresponding toolkit name.
+
+#. Modify frontend/frontend_generic.py, line 11, with the corresponding toolkit name.
 
 
 Install default dependencies
 ----------------------------
 
-You can install in the virtual environment the basic packages to run a PyAEDT toolkit, like pyaedt or pyside6.
+You can install in the virtual environment the basic packages to run a PyAEDT toolkit, like pyaedt, flask or pyside6,
+the template toml file contains these dependencies and others needed for testing and documentation generation.
+
+Open the terminal console with the virtual environment activated:
 
 .. code:: bash
 
@@ -138,34 +174,76 @@ You can install in the virtual environment the basic packages to run a PyAEDT to
   pip install pre-commit
   pre-commit install
 
+You can do your first pull request to the repository.
+
 
 Create backend
 --------------
 
-The backend part controls all related to AEDT. It should contain code which could be launched without a user interface.
+The backend part controls all tasks related to the workflow. It should contain code which could be launched without an user interface.
 
 On this repository you have a simple example, you can find in other toolkits more examples of how to develop a backend.
 It should be created in src/ansys/aedt/toolkits/new_toolkit_name/backend.
 
+The backend structure contains three files related to this specific toolkit, **properties.json, service.py and backend.py.**
+There is a **common folder** which contains generic methods useful for all toolkits, like the logger handler or launch and release AEDT services.
+
+
+Properties.json
+~~~~~~~~~~~~~~~
+
+This file contains the data shared between methods in the backend. This toolkit is creating a box or an sphere in HFSS in random positions, and the dimensions are multiplied by a value.
+Then the only toolkit inputs are the geometry type and the multiplier.
+
+Service.py
+~~~~~~~~~~
+
+This file contains all the logic needed. For this example is a simple python file, but it can be a more complex structure with classes if it is needed.
+
+This file must work independently, it means, you do not need a user interface to run the full workflow of the toolkit.
+As an example, you can see in the docstring of the ToolkitService class, how to use the toolkit in a python terminal.
+
+Backend.py
+~~~~~~~~~~
+
+Once you have a service working, you need to define the entrypoints. It means, you need to create the url commands to allow the communication between frontend and backend.
+If you see this file, it contains only the entrypoint corresponding to this toolkit, but if you go to common backend_generic.py, you can find the generic entrypoints.
+
+Test backend
+~~~~~~~~~~~~
+
+You can test the backend using tools like Postman or directly the browser.
+You need to update the toolkit package modifications in the virtual environment:
+
+.. code:: bash
+
+  pip install .
+
+And run the file backend.py.
+
 Create unit test
 ----------------
 
-If the repository has a backend, you should create unit test for each different method, this increase
-the maintainability of your code. File tests/test_00_template.py contains unit test for the backend methods.
+If the repository has a backend, you should create unit test for each different methods, this increase the maintainability of your code.
+The tests are in the folder **tests**.
 
-Depending on the complexity of the unit tests, it could need AEDT or not to run the tests.
+This repository has two unit test defined, the first one **test_00_service_generic.py** is testing the generic services and you do not need to modify it.
+The second one, **test_01_service_toolkit.py** is an example of how you can create the unit test for your toolkit.
 
-If AEDT needs to be run, the GitHub actions try to connect to a runner called *pyaedt-toolkits*, please submit an issue
-on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page.
+You can run locally the unit tests if you installed the [tests] dependencies.
 
-If the unit tests do not need AEDT, then you could modify the .GitHub/workflows/ci_cd.yml and remove line 63.
+If you push these modifications, GitHub actions try to connect to a runner called *pyaedt-toolkits*, please submit an issue
+on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page to give access to your repository to run the unit test remotely.
+If you want to use these runners, you need to change the ownership of the repository to ansys-internal.
+
 
 Create user interface
 ---------------------
 
 If you installed the default dependencies, you installed pyside6, which allows to create user interfaces.
-Please visit its website for more information.
-General guidelines for user interface implementation are:
+If you prefer other frontend libraries or even develop the frontend in a WebUI, you can do it because the backend is ready from the previous steps.
+
+If you use Pyside6, the general guidelines for user interface implementation are:
 
 #. Open the designer.
 
@@ -173,7 +251,7 @@ General guidelines for user interface implementation are:
 
        pyside6-designer
 
-#. Open the user interface template.
+#. Open the user interface template (frontend/common/toolkit).
 
 #. Modify it and save it.
 
@@ -183,21 +261,15 @@ General guidelines for user interface implementation are:
 
         pyside6-uic src\ansys\aedt\toolkits\new_toolkit_name\ui\toolkit.ui -o src\ansys\aedt\toolkits\new_toolkit_name\UI\ui_main.py
 
-#. Create your script to control this user interface.
+#. Create your script to control this user interface, you can use frontend\frontend.py as a template.
 
 
 Create documentation
 --------------------
 
-The documentation is created automatically using Sphinx. You need to define the structure in the doc/source/index.rst
+The documentation is created automatically using Sphinx.
 
-#. Modify doc/source/conf.py lines 16, 20, 31, 36, 46 and 57 with the toolkit name.
-
-#. Remove the file doc/source/Toolkit_template.py and line 12 from doc/source/index.rst.
-
-#. Modify README.rst, this is the first page when you open the documentation.
-
-#. Modify all rst files in doc/source
+You need to define the structure in doc/source/index.rst.
 
 #. You can build the documentation locally:
 
@@ -209,7 +281,16 @@ The documentation is created automatically using Sphinx. You need to define the 
 #. To publish the documentation online, you need to submit an issue on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page.
 
 
+Run the toolkit
+---------------
+
+In order to run the toolkit you need to run the backend and then run the frontend.
+
+You have the file run_toolkit.py which is doing this task. Then you can use this file to launch the toolkit directly.
+
+
 Add toolkit in PyAEDT
 ---------------------
 
-Create an issue on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page.
+You can be install the toolkit inside AEDT using PyAEDT.
+Create an issue on the `PyAEDT Issues <https://github.com/pyansys/PyAEDT/issues>`_ page and contributors can add it if the repository is public.

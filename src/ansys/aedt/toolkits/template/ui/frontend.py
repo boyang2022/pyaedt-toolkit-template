@@ -54,10 +54,7 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow, ToolkitFrontend):
         elif self.backend:
             self.aedt_version_combo.addItem("AEDT not installed")
 
-        if (
-            "aedt_version" in default_properties.keys()
-            and default_properties["aedt_version"] in installed_versions
-        ):
+        if "aedt_version" in default_properties.keys() and default_properties["aedt_version"] in installed_versions:
             self.aedt_version_combo.setCurrentText(default_properties["aedt_version"])
             self.find_process_ids()
 

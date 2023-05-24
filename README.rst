@@ -28,9 +28,9 @@ This template shows how to use `Flask <https://flask.palletsprojects.com/en/2.3.
 and `Pyside6 <https://doc.qt.io/qtforpython-6/quickstart.html>`_ for the frontend.
 
 
-If you want to start a new toolkit, go to :doc:`Toolkit_template` section.
+If you want to start a new toolkit, go to `New toolkit guidelines <https://aedt.toolkit.template.docs.pyansys.com/version/dev/Toolkit_template.html>`_ section.
 
-If you want to test the template, go to :doc:`Getting_started` section.
+If you want to test the template, go to `Getting Started <https://aedt.toolkit.template.docs.pyansys.com/version/dev/Getting_started.html>`_ section.
 
 
 Requirements
@@ -41,7 +41,7 @@ requires Ansys Electronics Desktop (AEDT) 2022 R2 or later. The AEDT Student Ver
 Documentation and issues
 ~~~~~~~~~~~~~~~~~~~~~~~~
 In addition to installation and wizard information, the toolkit
-documentation provides :doc:`Toolkit/index` and :doc:`Contributing` sections.
+documentation provides `API reference <https://aedt.toolkit.template.docs.pyansys.com/version/dev/Toolkit/index.html>`_ and `Contribute <https://aedt.toolkit.template.docs.pyansys.com/version/dev/Contributing.html>`_ sections.
 
 On the `Toolkit issues <https://github.com/ansys/pyaedt-toolkit-template/issues>`_ page, you can
 create issues to submit questions, report bugs, and request new features.
