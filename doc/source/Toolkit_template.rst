@@ -127,6 +127,9 @@ src/ansys/aedt/toolkits/amazing_toolkit
 
 #. Modify doc/source/conf.py file, line 16, with the specific toolkit name.
 
+#. Modify doc/source python files (Contributing.rst, Getting_Started.rst...), with references to the initial toolkit.
+The most important ones are doc/source/Toolkit/service.rst and doc/source/Toolkit/service_generic.rst.
+
 #. Modify .pre-commit-config.yml file, line 3, with the corresponding UI path.
 
 #. Modify pyproject.toml file, line 7 and 9, with the corresponding toolkit name and description.
