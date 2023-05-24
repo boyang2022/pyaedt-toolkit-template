@@ -119,7 +119,13 @@ src/ansys/aedt/toolkits/amazing_toolkit
 
 #. Modify .GitHub/workflows/ci_cd.yml file, from line 16 to 20, with the specific toolkit name.
 
+#. Comment in .GitHub/workflows/ci_cd.yml file, from line 61 to 96, we will need these lines to run the unit tests with GitHub actions.
+
+#. Delete tests word in .GitHub/workflows/ci_cd.yml file, line 137, we will need this again once the remote tests are working.
+
 #. Modify .GitHub/workflows/ci_cd.yml file, line 89, with the specific toolkit name.
+
+#. Modify doc/source/conf.py file, line 16, with the specific toolkit name.
 
 #. Modify .pre-commit-config.yml file, line 3, with the corresponding UI path.
 
@@ -204,7 +210,8 @@ If you see this file, it contains only the entrypoint corresponding to this tool
 Test backend
 ~~~~~~~~~~~~
 
-You can test the backend using tools like Postman or directly the browser. You need to update the toolkit package modifications in the virtual environment:
+You can test the backend using tools like Postman or directly the browser.
+You need to update the toolkit package modifications in the virtual environment:
 
 .. code:: bash
 
