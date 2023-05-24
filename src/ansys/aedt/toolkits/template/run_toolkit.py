@@ -88,7 +88,7 @@ while response.json() != "Backend free":
     time.sleep(1)
     response = requests.get(url_call + "/get_status")
 
-# User or tool could pass the desktop ID and version
+# User can pass the desktop ID and version
 if len(sys.argv) == 3:
     desktop_pid = sys.argv[1]
     desktop_version = sys.argv[2]
