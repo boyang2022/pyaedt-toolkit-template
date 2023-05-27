@@ -21,12 +21,15 @@ The toolkit features can be accessed from:
 How to install inside AEDT and run the UI
 -----------------------------------------
 
-This section shows how to install the toolkit inside AEDT using the base interpreter from AEDT installation.
+This section shows how to install the toolkit inside the Ansys Electronics Desktop (AEDT) using the base
+interpreter from AEDT installation.
 
-The toolkit could be installed inside AEDT using
+The toolkit can be installed inside AEDT using
 `PyAEDT <https://aedt.docs.pyansys.com/version/stable//>`_.
 
-#. Download and run the script from `PyAEDT documentation <https://aedt.docs.pyansys.com/version/stable//Getting_started/Installation.html>`_ to install PyAEDT.
+#. Download and run the install script from the `PyAEDT documentation <https://aedt.docs.pyansys.com/version/stable//Getting_started/Installation.html>`_.
+   Note that **AEDT must be restarted**
+   to update the **Tools** menu if this is the first time a Toolkit has been installed in AEDT.
 
 
 #. Open the console:
