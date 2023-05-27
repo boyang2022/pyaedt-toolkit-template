@@ -26,7 +26,8 @@ This section shows how to install the toolkit inside AEDT using the base interpr
 The toolkit could be installed inside AEDT using
 `PyAEDT <https://aedt.docs.pyansys.com/version/stable//>`_.
 
-#. Download and run the script from `PyAEDT documentation <https://https://aedt.docs.pyansys.com/version/stable/Getting_started/Installation.html#install-from-a-python-file>`_ to install PyAEDT.
+#. Download and run the script from `PyAEDT documentation <https://aedt.docs.pyansys.com/version/stable//Getting_started/Installation.html>`_ to install PyAEDT.
+
 
 #. Open the console:
 
