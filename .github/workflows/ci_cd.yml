@@ -44,7 +44,7 @@ jobs:
 
   smoke-tests:
     name: "Build and Smoke tests"
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
@@ -62,10 +62,9 @@ jobs:
     needs: [ smoke-tests ]
     strategy:
       matrix:
-        os: [self-hosted, pyaedt, toolkits, Windows]
         python-version: [ '3.7', '3.10' ]
       fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: [self-hosted, pyaedt, toolkits, Windows]
     steps:
       - uses: actions/checkout@v3
 
