@@ -115,5 +115,9 @@ ui_thread.start()
 # Wait for the UI thread to complete
 ui_thread.join()
 
+# Release desktop
+properties = {"close_projects": False, "close_on_exit": False}
+requests.post(url_call + "/close_aedt", json=properties)
+
 # Register the cleanup function to be called on script exit
 atexit.register(clean_python_processes)
