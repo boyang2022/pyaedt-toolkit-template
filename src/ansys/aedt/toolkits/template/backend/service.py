@@ -71,10 +71,10 @@ class ToolkitService(ServiceGeneric):
                 comp = self.draw_sphere()
             if comp:
                 self.comps.append(comp)
-            self.release_desktop()
-            return True
-        else:  # pragma: no cover
-            return False
+            if self.aedtapp:
+                self.aedtapp.release_desktop(False, False)
+                return True
+        return False
 
     def draw_box(self):
         """Draw a box.
