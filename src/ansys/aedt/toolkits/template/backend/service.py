@@ -72,7 +72,7 @@ class ToolkitService(ServiceGeneric):
             if comp:
                 self.comps.append(comp)
             if self.aedtapp:
-                self.aedtapp.release_desktop()
+                self.aedtapp.release_desktop(False, False)
                 return True
         return False
 

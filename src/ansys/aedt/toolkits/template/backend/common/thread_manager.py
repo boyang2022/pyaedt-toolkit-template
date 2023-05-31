@@ -24,7 +24,7 @@ class ThreadManager(object):
         process(*args)
 
         # waits for the thread closure
-        time.sleep(2)
+        time.sleep(1)
 
         # set the variable at process end
         properties.is_toolkit_busy = False
