@@ -678,7 +678,8 @@ class ServiceGeneric(object):
             return False
         oproject = None
         if properties.active_project_name != "No project":
-            oproject = self.desktop.odesktop.SetActiveProject(properties.active_project_name)
+            project_name = os.path.splitext(os.path.basename(properties.active_project_name))[0]
+            oproject = self.desktop.odesktop.SetActiveProject(project_name)
         design_list = self.desktop.design_list()
         if design_list and oproject:
             active_design = oproject.GetActiveDesign().GetName()

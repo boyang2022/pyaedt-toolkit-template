@@ -21,7 +21,7 @@ class TestClass(BasisTest, object):
     def test_02_get_properties(self):
         response = requests.get(self.url + "/get_properties")
         assert response.ok
-        assert len(response.json()) == 14
+        assert len(response.json()) == 16
 
     def test_03_set_properties(self):
         new_properties = {
@@ -56,7 +56,7 @@ class TestClass(BasisTest, object):
 
     def test_08_save_project(self):
         new_properties = {
-            "project_name": os.path.join(self.local_path.path, "Test.aedt"),
+            "active_project_name": os.path.join(self.local_path.path, "Test.aedt"),
         }
         response = requests.put(self.url + "/set_properties", json=new_properties)
         assert response.ok
@@ -66,3 +66,8 @@ class TestClass(BasisTest, object):
         while response.json() != "Backend free":
             time.sleep(1)
             response = requests.get(self.url + "/get_status")
+
+    def test_09_get_design_names(self):
+        response = requests.get(self.url + "/get_design_names")
+        assert response.ok
+        assert len(response.json()) == 1
