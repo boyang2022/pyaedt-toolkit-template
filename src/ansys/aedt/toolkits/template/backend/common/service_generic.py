@@ -412,6 +412,8 @@ class ServiceGeneric(object):
                 active_design = oproject.SetActiveDesign(properties.active_design_name)
             else:
                 active_design = oproject.GetActiveDesign()
+                if not active_design and self.desktop.design_list():
+                    active_design = self.desktop.design_list()[0]
 
             if projectname and "active_project_name" in properties.__dir__():
                 new_properties["project_list"] = self.desktop.project_list()
@@ -682,7 +684,11 @@ class ServiceGeneric(object):
             oproject = self.desktop.odesktop.SetActiveProject(project_name)
         design_list = self.desktop.design_list()
         if design_list and oproject:
-            active_design = oproject.GetActiveDesign().GetName()
+            active_design = oproject.GetActiveDesign()
+            if not active_design:
+                active_design = design_list[0]
+            else:
+                active_design = active_design.GetName()
             index = design_list.index(active_design)
             design_list.insert(0, design_list.pop(index))
         self.desktop.release_desktop(False, False)
