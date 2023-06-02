@@ -59,7 +59,7 @@ class ToolkitService(ServiceGeneric):
         >>>     response = service.get_thread_status()
         >>> service.release_desktop()
         """
-        if self.connect_design("Hfss"):
+        if self.connect_design():
             properties = self.get_properties()
             multiplier = properties["multiplier"]
             geometry = properties["geometry"]
