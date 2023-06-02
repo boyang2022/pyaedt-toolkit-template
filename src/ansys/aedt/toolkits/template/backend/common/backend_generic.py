@@ -123,29 +123,10 @@ def connect_design_call():
 
     body = request.json
 
-    aedt_apps = [
-        "Circuit",
-        "Hfss",
-        "Edb",
-        "Emit",
-        "Hfss3dLayout",
-        "Icepak",
-        "Maxwell2d",
-        "Maxwell3d",
-        "MaxwellCircuit",
-        "Q2d",
-        "Q3d",
-        "Rmxprt",
-        "Simplorer",
-    ]
     if not body:
         msg = "body is empty!"
         logger.error(msg)
         return jsonify("body is empty!"), 500
-    elif body["aedtapp"] not in aedt_apps:
-        msg = "body not correct"
-        logger.error(msg)
-        return jsonify(msg), 500
 
     response = service.connect_design(body["aedtapp"])
 
@@ -162,5 +143,17 @@ def save_project_call():
     response = service.save_project()
     if response:
         return jsonify("Project saved"), 200
+    else:
+        return jsonify(response), 500
+
+
+@app.route("/get_design_names", methods=["GET"])
+def get_design_names_call():
+    logger.info("[GET] /get_design_names (aedt designs for specific project)")
+
+    response = service.get_design_names()
+
+    if isinstance(response, list):
+        return jsonify(response), 200
     else:
         return jsonify(response), 500

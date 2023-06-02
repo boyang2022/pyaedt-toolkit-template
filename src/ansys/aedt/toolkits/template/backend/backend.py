@@ -11,7 +11,6 @@ from ansys.aedt.toolkits.template.backend.common.multithreading_server import Mu
 @app.route("/create_geometry", methods=["POST"])
 def create_geometry_call():
     logger.info("[POST] /create_geometry (create a box or sphere in HFSS)")
-
     response = service.create_geometry()
     if response:
         return jsonify("Geometry created"), 200

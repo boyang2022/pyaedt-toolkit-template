@@ -20,6 +20,8 @@ class ToolkitFrontend(FrontendThread, FrontendGeneric):
         properties = self.get_properties()
         properties["multiplier"] = float(self.multiplier.text())
         properties["geometry"] = self.geometry_combo.currentText()
+        properties["active_project_name"] = self.project_aedt_combo.currentText()
+        properties["active_design_name"] = self.design_aedt_combo.currentText()
         self.set_properties(properties)
 
         self.update_progress(0)

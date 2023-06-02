@@ -98,14 +98,14 @@ if len(sys.argv) == 3:
         "use_grpc": False,
     }
     requests.put(url_call + "/set_properties", json=properties)
-    requests.post(url_call + "/launch_aedt", json=properties)
+    requests.put(url_call + "/connect_aedt")
 
     response = requests.get(url_call + "/get_status")
     while response.json() != "Backend free":
         time.sleep(1)
         response = requests.get(url_call + "/get_status")
-    requests.put(url_call + "/connect_aedt")
-
+    properties = {"close_projects": False, "close_on_exit": False}
+    requests.post(url_call + "/close_aedt", json=properties)
 
 # Create a thread to run the PySide6 UI
 ui_thread = threading.Thread(target=run_command, args=frontend_command)
@@ -115,9 +115,6 @@ ui_thread.start()
 # Wait for the UI thread to complete
 ui_thread.join()
 
-# Release desktop
-properties = {"close_projects": False, "close_on_exit": False}
-requests.post(url_call + "/close_aedt", json=properties)
 
 # Register the cleanup function to be called on script exit
 atexit.register(clean_python_processes)

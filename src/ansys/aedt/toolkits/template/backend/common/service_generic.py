@@ -295,9 +295,10 @@ class ServiceGeneric(object):
             if self.desktop:
                 msg = "AEDT launched"
                 logger.debug(msg)
-                if properties.project_name:  # pragma: no cover
-                    # Check if project is already opened ----
-                    self.open_project(properties.project_name)
+                if properties.active_project_name and not os.path.exists(
+                    properties.active_project_name + ".lock"
+                ):  # pragma: no cover
+                    self.open_project(properties.active_project_name)
 
                 # After launching AEDT we need to release the desktop because
                 # this method is launched in a thread.
@@ -312,13 +313,20 @@ class ServiceGeneric(object):
                 if oproject:
                     projectname = oproject.GetName()
                     project_path = self.desktop.odesktop.GetProjectDirectory()
-                    new_properties["project_name"] = os.path.join(project_path, projectname + ".aedt")
+                    new_properties["active_project_name"] = os.path.join(project_path, projectname + ".aedt")
                     active_design = oproject.GetActiveDesign()
                     logger.debug("Project name: {}".format(projectname))
+
+                    if projectname and "active_project_name" in properties.__dir__():
+                        new_properties["project_list"] = self.desktop.project_list()
+
                     if active_design:
                         design_name = active_design.GetName()
-                        new_properties["design_name"] = design_name
+                        new_properties["active_design_name"] = design_name
                         logger.debug("Design name: {}".format(design_name))
+                        if "active_design_name" in properties.__dir__():
+                            new_properties["active_design_name"] = design_name
+                            new_properties["design_list"] = self.desktop.design_list()
 
                 self.set_properties(new_properties)
 
@@ -386,18 +394,54 @@ class ServiceGeneric(object):
         if not self.desktop:
             logger.debug("AEDT not connected")
             return False
+
+        active_project_name = properties.active_project_name
+        if active_project_name != "No project" and active_project_name in self.desktop.project_list():
+            oproject = self.desktop.odesktop.SetActiveProject(properties.active_project_name)
+        else:
+            oproject = self.desktop.odesktop.GetActiveProject()
+
+        new_properties = {}
+        if oproject:
+            projectname = oproject.GetName()
+            logger.debug("Project name: {}".format(projectname))
+            project_path = self.desktop.odesktop.GetProjectDirectory()
+            new_properties["active_project_name"] = os.path.join(project_path, projectname + ".aedt")
+            active_design = properties.active_design_name
+            if active_design != "No design" and active_design != "":
+                active_design = oproject.SetActiveDesign(properties.active_design_name)
+            else:
+                active_design = oproject.GetActiveDesign()
+
+            if projectname and "active_project_name" in properties.__dir__():
+                new_properties["project_list"] = self.desktop.project_list()
+
+            if active_design:
+                design_name = active_design.GetName()
+                new_properties["active_design_name"] = design_name
+                logger.debug("Design name: {}".format(design_name))
+                if "active_design_name" in properties.__dir__():
+                    new_properties["active_design_name"] = design_name
+                    new_properties["design_list"] = self.desktop.design_list()
+        elif not self.desktop.project_list():
+            project = self.desktop.odesktop.NewProject()
+            new_properties["active_project_name"] = os.path.join(project.GetPath(), project.GetName() + ".aedt")
+            new_properties["project_list"] = self.desktop.project_list()
+
+        self.set_properties(new_properties)
         logger.debug("AEDT connected")
         return True
 
-    def connect_design(self, app_name="Hfss"):
+    def connect_design(self, app_name=None):
         """Connect to an application design. If a design exists,
-        it takes the active project and design, if not, it creates a new design. If a design name and project name
-        is specified in the properties, it tries to connect to this design.
+        it takes the active project and design, if not, it creates a new design of the specified type.
+        If a design name and project name is specified in the properties, it tries to connect to this design.
+        If an app_name is specified the active design must have the same type, if not, it will create a new design.
 
         Parameters
         ----------
         app_name : str
-            Aedt application name. The default is ``"Hfss"``. Application available are:
+            Aedt application name. The default is connecting to active design. Application available are:
 
             * Circuit
             * Hfss
@@ -446,70 +490,46 @@ class ServiceGeneric(object):
             "Simplorer",
         ]
 
-        if app_name not in aedt_apps:
-            logger.error("Wrong application name: {}".format(app_name))
-            return False
-
         if self.connect_aedt():
-            project_name = properties.project_name
-            design_name = properties.design_name
+            project_name = properties.active_project_name
+            design_name = properties.active_design_name
 
-            if project_name:
-                # Take only the name
-                project_name = os.path.splitext(os.path.basename(project_name))[0]
-
-            # If there is an existing project and project and design name are not passed.
-            # It will connect to the  active one.
-            oproject = None
-            if project_name:
-                oproject = self.desktop.odesktop.SetActiveProject(project_name)
-            if not oproject:
-                oproject = self.desktop.odesktop.GetActiveProject()
-            if not project_name and oproject:
-                project_name = oproject.GetName()
-            design_list = self.desktop.design_list()
-            if design_list and not design_name and oproject:
-                design_name = oproject.GetActiveDesign().GetName()
+            # Take only the name
+            project_name = os.path.splitext(os.path.basename(project_name))[0]
 
             # Check in the project if the application exists
-            design_type_flag = False
-            if project_name:
-                design_type_flag = False
-                if design_list:
-                    if design_name and design_name in design_list:
-                        # If the design name specified is in the project.
-                        aedtapp = self.desktop[[project_name, design_name]]
-                        if type(aedtapp).__name__ == app_name:
-                            # If the design is of type 'aedtapp_name' connect to this design.
-                            design_type_flag = True
-                        else:
-                            # If the design is not type 'aedtapp_name' create a new design name.
-                            design_name = pyaedt.generate_unique_name(app_name)
 
-            if not design_type_flag:
+            design_list = self.desktop.design_list()
+            if design_name and design_name in design_list:
+                # If the design name specified is in the project.
+                aedtapp = self.desktop[[project_name, design_name]]
+                design_type = type(aedtapp).__name__
+                if app_name and app_name in aedt_apps and design_type != app_name:
+                    aedt_app_attr = getattr(pyaedt, app_name)
+                    design_name = design_name + "_" + app_name
+                else:
+                    aedt_app_attr = getattr(pyaedt, design_type)
+            elif app_name in aedt_apps:
+                design_name = pyaedt.generate_unique_name()
                 aedt_app_attr = getattr(pyaedt, app_name)
-                self.aedtapp = aedt_app_attr(
-                    specified_version=properties.aedt_version,
-                    aedt_process_id=properties.selected_process,
-                    non_graphical=properties.non_graphical,
-                    new_desktop_session=False,
-                    projectname=project_name,
-                    designname=design_name,
-                )
+            else:
+                design_name = pyaedt.generate_unique_name()
+                aedt_app_attr = getattr(pyaedt, "Hfss")
 
-            elif not design_name and not project_name:
-                oproject = self.desktop.odesktop.GetActiveProject()
-                project_name = oproject.GetName()
-                design_name = oproject.GetActiveDesign().GetName()
-                self.aedtapp = self.desktop[[project_name, design_name]]
-
-            else:  # pragma: no cover
-                self.aedtapp = self.desktop[[project_name, design_name]]
+            self.aedtapp = aedt_app_attr(
+                specified_version=properties.aedt_version,
+                aedt_process_id=properties.selected_process,
+                non_graphical=properties.non_graphical,
+                new_desktop_session=False,
+                projectname=project_name,
+                designname=design_name,
+            )
 
             if self.aedtapp:
                 new_properties = {
-                    "project_name": self.aedtapp.project_file,
-                    "design_name": self.aedtapp.design_name,
+                    "active_project_name": self.aedtapp.project_file,
+                    "active_design_name": self.aedtapp.design_name,
+                    "design_list": self.desktop.design_list(),
                 }
                 self.set_properties(new_properties)
                 return True
@@ -545,8 +565,15 @@ class ServiceGeneric(object):
         >>> service.release_desktop(True, True)
 
         """
+        released = True
+        if self.desktop:
+            try:
+                released = self.desktop.release_desktop(close_projects, close_on_exit)
+            except:
+                logger.error("Desktop not released")
+                return False
 
-        if self.connect_aedt():
+        if not released and self.connect_aedt():
             try:
                 self.desktop.release_desktop(close_projects, close_on_exit)
                 self.desktop = None
@@ -555,6 +582,8 @@ class ServiceGeneric(object):
             except:
                 logger.error("Desktop not released")
                 return False
+        elif released:
+            return True
         else:
             logger.error("Desktop not released")
             return False
@@ -592,6 +621,73 @@ class ServiceGeneric(object):
         else:
             return False
 
+    def get_design_names(self):
+        """Get design names for a specific project, the first one is the active.
+
+        Returns
+        -------
+        bool
+            ``True`` when successful, ``False`` when failed.
+
+        Examples
+        --------
+        >>> import time
+        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> service = ToolkitService()
+        >>> service.launch_aedt()
+        >>> while response[0] == 0:
+        >>>     time.sleep(1)
+        >>>     response = service.get_thread_status()
+        >>> service.get_design_names()
+        """
+        if properties.selected_process == 0:
+            logger.error("Process ID not defined")
+            return False
+        connected, msg = self.aedt_connected()
+        if connected:
+            self.desktop.release_desktop(False, False)
+
+        self.desktop = None
+        self.aedtapp = None
+        version = properties.aedt_version
+        non_graphical = properties.non_graphical
+        selected_process = properties.selected_process
+        use_grpc = properties.use_grpc
+
+        pyaedt.settings.use_grpc_api = use_grpc
+        logger.debug("Connecting AEDT")
+        if use_grpc:
+            # Launch AEDT with GRPC
+            self.desktop = pyaedt.Desktop(
+                specified_version=version,
+                non_graphical=non_graphical,
+                port=selected_process,
+                new_desktop_session=False,
+            )
+
+        else:  # pragma: no cover
+            self.desktop = pyaedt.Desktop(
+                specified_version=version,
+                non_graphical=non_graphical,
+                aedt_process_id=selected_process,
+                new_desktop_session=False,
+            )
+
+        if not self.desktop:
+            logger.debug("AEDT not connected")
+            return False
+        oproject = None
+        if properties.active_project_name != "No project":
+            project_name = os.path.splitext(os.path.basename(properties.active_project_name))[0]
+            oproject = self.desktop.odesktop.SetActiveProject(project_name)
+        design_list = self.desktop.design_list()
+        if design_list and oproject:
+            active_design = oproject.GetActiveDesign().GetName()
+            index = design_list.index(active_design)
+            design_list.insert(0, design_list.pop(index))
+        self.desktop.release_desktop(False, False)
+        return design_list
+
     @thread.launch_thread
     def save_project(self):
         """Save project. It uses the properties to get the project path. This method is launched in a thread.
@@ -614,8 +710,10 @@ class ServiceGeneric(object):
         >>> service.save_project()
         """
         if self.connect_aedt():
-            new_project_name = properties.project_name
+            new_project_name = properties.active_project_name
             self.desktop.save_project(project_path=new_project_name)
+            self.desktop.release_desktop(False, False)
+            self.desktop = None
             logger.debug("Project saved: {}".format(new_project_name))
             return True
         else:  # pragma: no cover
