@@ -1,14 +1,15 @@
 import numpy as np
 
 from ansys.aedt.toolkits.template.backend.common.logger_handler import logger
+from ansys.aedt.toolkits.template.backend.common.properties import properties
 from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
 from ansys.aedt.toolkits.template.backend.common.service_generic import thread
 
 
 class ToolkitService(ServiceGeneric):
-    """Toolkit class to control the toolkit workflow.
+    """Template API to control the toolkit workflow.
 
-    This class provides methods to connect to HFSS and create geometries.
+    This class provides methods to connect to a selected design and create geometries.
 
     Examples
     --------
@@ -25,7 +26,6 @@ class ToolkitService(ServiceGeneric):
     >>> while response[0] == 0:
     >>>     time.sleep(1)
     >>>     response = service.get_thread_status()
-    >>> service.release_desktop()
     """
 
     def __init__(self):
@@ -35,7 +35,7 @@ class ToolkitService(ServiceGeneric):
 
     @thread.launch_thread
     def create_geometry(self):
-        """Create a box or a sphere in design.
+        """Create a box or a sphere in design. If the toolkit is using Grpc, it is launched in a thread.
 
         Returns
         -------
@@ -57,23 +57,22 @@ class ToolkitService(ServiceGeneric):
         >>> while response[0] == 0:
         >>>     time.sleep(1)
         >>>     response = service.get_thread_status()
-        >>> service.release_desktop()
         """
-        if self.connect_design():
-            properties = self.get_properties()
-            multiplier = properties["multiplier"]
-            geometry = properties["geometry"]
+
+        # Connect to AEDT design
+        self.connect_design()
+
+        if self.aedtapp:
+            multiplier = properties.multiplier
+            geometry = properties.geometry
             self.multiplier = multiplier
-            comp = None
             if geometry == "Box":
-                comp = self.draw_box()
+                self.draw_box()
             elif geometry == "Sphere":
-                comp = self.draw_sphere()
-            if comp:
-                self.comps.append(comp)
-            if self.aedtapp:
-                self.aedtapp.release_desktop(False, False)
-                return True
+                self.draw_sphere()
+            self.aedtapp.release_desktop(False, False)
+            self.aedtapp = None
+            return True
         return False
 
     def draw_box(self):
@@ -96,7 +95,7 @@ class ToolkitService(ServiceGeneric):
         >>>     response = service.get_thread_status()
         >>> service.connect_design()
         >>> service.draw_box()
-        >>> service.release_desktop()
+        >>> service.release_aedt()
         """
         props = self._comp_props()
         pos_x = props[0][0]
@@ -132,7 +131,6 @@ class ToolkitService(ServiceGeneric):
         >>>     response = service.get_thread_status()
         >>> service.connect_design()
         >>> service.draw_sphere()
-        >>> service.release_desktop()
         """
 
         props = self._comp_props()
@@ -149,7 +147,8 @@ class ToolkitService(ServiceGeneric):
         logger.debug("Sphere {} created".format(sp.name))
         return sp
 
-    def _comp_props(self):
+    @staticmethod
+    def _comp_props():
         """Return a random position and color.
 
         Returns

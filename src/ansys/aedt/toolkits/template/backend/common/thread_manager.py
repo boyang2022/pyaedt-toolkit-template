@@ -24,7 +24,7 @@ class ThreadManager(object):
         process(*args)
 
         # waits for the thread closure
-        time.sleep(1)
+        time.sleep(0.5)
 
         # set the variable at process end
         properties.is_toolkit_busy = False
@@ -35,21 +35,27 @@ class ThreadManager(object):
 
         @wraps(process)
         def inner_function(*args):
-            # process_name = process.__name__
             thread_name = "Toolkit_Thread"
             if not properties.is_toolkit_busy:
-                logger.debug("Starting thread: {}".format(thread_name))
-                running_thread = threading.Thread(
-                    target=cls.process_exe,
-                    name=thread_name,
-                    args=(
-                        process,
-                        *args,
-                    ),
-                    daemon=True,
-                )
-                running_thread.start()
-                return True
+                # Multithreading fails with COM
+                if properties.use_grpc:
+                    logger.debug("Starting thread: {}".format(thread_name))
+                    running_thread = threading.Thread(
+                        target=cls.process_exe,
+                        name=thread_name,
+                        args=(
+                            process,
+                            *args,
+                        ),
+                        daemon=True,
+                    )
+                    running_thread.start()
+                    return True
+                else:
+                    logger.debug("Starting direct process: {}".format(thread_name))
+                    cls.process_exe(process, *args)
+                    return True
+
             else:
                 return False
 

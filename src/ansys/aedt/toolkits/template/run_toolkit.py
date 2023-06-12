@@ -1,7 +1,6 @@
 import atexit
 import json
 import os
-import signal
 import sys
 import threading
 import time
@@ -41,9 +40,8 @@ frontend_command = [python_path, frontend_file]
 
 # Clean up python processes
 def clean_python_processes():
-    # Terminate all remaining Python processes
-    current_process = psutil.Process()
-    for process in current_process.children(recursive=True):
+    # Terminate backend processes
+    for process in flask_pids:
         if process.name() == "python.exe" or process.name() == "python":
             process.terminate()
 
@@ -62,33 +60,36 @@ def run_command(*command):
     print(stderr.decode())
 
 
-# Define the Flask process variable
-flask_process = None
-
-
-# Define a function to terminate the Flask process
-def terminate_flask_process():
-    if flask_process and flask_process.poll() is None:
-        if is_linux:
-            os.killpg(os.getpgid(flask_process.pid), signal.SIGTERM)
-        else:
-            flask_process.terminate()
-        flask_process.wait()
-        clean_python_processes()
-
+# Take initial running processes
+initial_pids = psutil.Process().children(recursive=True)
 
 # Create a thread to run the Flask application
-flask_thread = threading.Thread(target=run_command, args=backend_command)
+flask_process = None
+flask_thread = threading.Thread(target=run_command, args=backend_command, name="backend")
 flask_thread.daemon = True
 flask_thread.start()
 
-# Wait for the Flask application to start
+# Wait until flask processes are running
+current_process = len(psutil.Process().children(recursive=True))
+count = 0
+while current_process < 3 and count < 10:
+    time.sleep(1)
+    current_process = len(psutil.Process().children(recursive=True))
+    count += 1
+
+if current_process < 3:
+    raise "Backend not running"
+
+# Take backend running processes
+flask_pids = [element for element in psutil.Process().children(recursive=True) if element not in initial_pids]
+
+# Check if the backend is running
 response = requests.get(url_call + "/get_status")
 while response.json() != "Backend free":
     time.sleep(1)
     response = requests.get(url_call + "/get_status")
 
-# User can pass the desktop ID and version
+# User can pass the desktop ID and version to connect to a specific AEDT session
 if len(sys.argv) == 3:
     desktop_pid = sys.argv[1]
     desktop_version = sys.argv[2]
@@ -98,25 +99,19 @@ if len(sys.argv) == 3:
         "use_grpc": False,
     }
     requests.put(url_call + "/set_properties", json=properties)
-    requests.put(url_call + "/connect_aedt")
+    requests.post(url_call + "/launch_aedt")
 
     response = requests.get(url_call + "/get_status")
     while response.json() != "Backend free":
         time.sleep(1)
         response = requests.get(url_call + "/get_status")
-    properties = {"close_projects": False, "close_on_exit": False}
-    requests.post(url_call + "/close_aedt", json=properties)
 
 # Create a thread to run the PySide6 UI
-ui_thread = threading.Thread(target=run_command, args=frontend_command)
+ui_thread = threading.Thread(target=run_command, args=frontend_command, name="frontend")
 ui_thread.start()
-
 
 # Wait for the UI thread to complete
 ui_thread.join()
 
-properties = {"close_projects": False, "close_on_exit": False}
-requests.post(url_call + "/close_aedt", json=properties)
-
-# Register the cleanup function to be called on script exit
+# When the script closes, it terminates all flask processes
 atexit.register(clean_python_processes)

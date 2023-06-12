@@ -1,3 +1,5 @@
+import os
+
 import requests
 
 from ansys.aedt.toolkits.template.ui.common.frontend_generic import FrontendGeneric
@@ -20,8 +22,19 @@ class ToolkitFrontend(FrontendThread, FrontendGeneric):
         properties = self.get_properties()
         properties["multiplier"] = float(self.multiplier.text())
         properties["geometry"] = self.geometry_combo.currentText()
-        properties["active_project_name"] = self.project_aedt_combo.currentText()
-        properties["active_design_name"] = self.design_aedt_combo.currentText()
+        project_selected = self.project_aedt_combo.currentText()
+        for project in properties["project_list"]:
+            if os.path.splitext(os.path.basename(project))[0] == project_selected and project_selected != "No project":
+                properties["active_project"] = project
+                design_selected = self.design_aedt_combo.currentText()
+                if project_selected in list(properties["design_list"].keys()):
+                    designs = properties["design_list"][project_selected]
+                    for design in designs:
+                        if design_selected in list(design.values())[0]:
+                            properties["active_design"] = design
+                            break
+                break
+
         self.set_properties(properties)
 
         self.update_progress(0)
