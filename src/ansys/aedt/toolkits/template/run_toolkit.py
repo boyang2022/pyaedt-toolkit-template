@@ -4,6 +4,7 @@ import os
 import sys
 import threading
 import time
+import signal
 
 import psutil
 import requests
@@ -20,10 +21,7 @@ url_call = "http://" + url + ":" + str(port)
 
 is_linux = os.name == "posix"
 
-if is_linux:
-    import subprocessdotnet as subprocess
-else:
-    import subprocess
+import subprocess
 
 # Path to Python interpreter with Flask and Pyside6 installed
 python_path = sys.executable
@@ -41,47 +39,74 @@ frontend_command = [python_path, frontend_file]
 # Clean up python processes
 def clean_python_processes():
     # Terminate backend processes
-    for process in flask_pids:
-        if process.name() == "python.exe" or process.name() == "python":
-            process.terminate()
+    if is_linux:
+        for process in flask_pids:
+            os.kill(process, signal.SIGKILL)
+    else:
+        for process in flask_pids:
+            if process.name() == "python.exe" or process.name() == "python":
+                process.terminate()
 
 
 # Define a function to run the subprocess command
 def run_command(*command):
-    CREATE_NO_WINDOW = 0x08000000
-    process = subprocess.Popen(
-        " ".join(command),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        creationflags=CREATE_NO_WINDOW,
-    )
+    if is_linux:
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    else:
+        CREATE_NO_WINDOW = 0x08000000
+        process = subprocess.Popen(
+            " ".join(command),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            creationflags=CREATE_NO_WINDOW,
+        )
     stdout, stderr = process.communicate()
     print(stdout.decode())
     print(stderr.decode())
 
 
 # Take initial running processes
-initial_pids = psutil.Process().children(recursive=True)
+if is_linux:
+    initial_pids = psutil.pids()
+else:
+    initial_pids = psutil.Process().children(recursive=True)
 
 # Create a thread to run the Flask application
 flask_process = None
 flask_thread = threading.Thread(target=run_command, args=backend_command, name="backend")
 flask_thread.daemon = True
 flask_thread.start()
+time.sleep(1)
 
 # Wait until flask processes are running
-current_process = len(psutil.Process().children(recursive=True))
-count = 0
-while current_process < 3 and count < 10:
-    time.sleep(1)
+if is_linux:
+    current_process = len(psutil.pids())
+    count = 0
+    while current_process < len(initial_pids) and count < 10:
+        time.sleep(1)
+        current_process = len(psutil.pids())
+        count += 1
+else:
     current_process = len(psutil.Process().children(recursive=True))
-    count += 1
+    count = 0
+    while current_process < len(initial_pids) and count < 10:
+        time.sleep(1)
+        current_process = len(psutil.Process().children(recursive=True))
+        count += 1
 
-if current_process < 3:
+if current_process <= len(initial_pids):
     raise "Backend not running"
 
 # Take backend running processes
-flask_pids = [element for element in psutil.Process().children(recursive=True) if element not in initial_pids]
+if is_linux:
+    flask_pids = [element for element in psutil.pids() if element not in initial_pids]
+else:
+    flask_pids = [element for element in psutil.Process().children(recursive=True) if element not in initial_pids]
+
 
 # Check if the backend is running
 response = requests.get(url_call + "/get_status")
