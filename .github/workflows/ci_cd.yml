@@ -115,13 +115,13 @@ jobs:
 
       - name: Create Python venv
         run: |
-          python -m venv .pyaedt_test_env
+          python -m venv .venv_linux
           export ANSYSEM_ROOT231=/apps/AnsysEM/v231/Linux64
           export LD_LIBRARY_PATH=$ANSYSEM_ROOT231/common/mono/Linux64/lib64:$ANSYSEM_ROOT231/Delcross:$LD_LIBRARY_PATH
 
       - name: Install packages for testing
         run: |
-          source .pyaedt_test_env/bin/activate
+          source .venv_linux/bin/activate
           python -m pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org pip -U
           python -m pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org wheel setuptools -U
           python -c "import sys; print(sys.executable)"
@@ -136,7 +136,7 @@ jobs:
           export ANS_NODEPCHECK=1
           export ANSYSEM_ROOT231=/apps/AnsysEM/v231/Linux64
           export LD_LIBRARY_PATH=$ANSYSEM_ROOT231/common/mono/Linux64/lib64:$ANSYSEM_ROOT231/Delcross:$LD_LIBRARY_PATH
-          source .pyaedt_test_env/bin/activate
+          source .venv_linux/bin/activate
           pytest -v --cov=pyaedt-toolkit-template --cov-report=xml --junitxml=junit/test-results.xml --cov-report=html tests
 
       - name: Upload Coverage Results

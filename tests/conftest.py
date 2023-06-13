@@ -3,6 +3,7 @@ import gc
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import threading
@@ -19,13 +20,6 @@ settings.enable_error_handler = False
 settings.enable_desktop_logs = False
 local_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(local_path)
-
-is_linux = os.name == "posix"
-
-if is_linux:
-    import subprocessdotnet as subprocess
-else:
-    import subprocess
 
 from ansys.aedt.toolkits.template import backend
 
