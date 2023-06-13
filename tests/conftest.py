@@ -3,12 +3,12 @@ import gc
 import json
 import os
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
 import threading
 import time
-import signal
 
 import psutil
 from pyaedt import pyaedt_logger
@@ -135,6 +135,7 @@ def desktop_init():
     flask_thread = threading.Thread(target=run_command, args=backend_command)
     flask_thread.daemon = True
     flask_thread.start()
+
     time.sleep(1)
 
     if is_linux:
