@@ -1,10 +1,10 @@
 import atexit
 import json
 import os
+import signal
 import sys
 import threading
 import time
-import signal
 
 import psutil
 import requests
