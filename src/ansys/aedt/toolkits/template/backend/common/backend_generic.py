@@ -26,7 +26,7 @@ def get_health():
 
 @app.route("/get_status", methods=["GET"])
 def get_status_call():
-    logger.info("[GET] /get_status (check if the step is running)")
+    logger.info("[GET] /get_status (check if the thread is running)")
     exit_code, msg = service.get_thread_status()
     if exit_code <= 0:
         return jsonify(msg), 200
@@ -75,22 +75,10 @@ def launch_aedt_call():
     logger.info("[POST] /launch_aedt (launch or connect AEDT)")
 
     response = service.launch_aedt()
-
     if response:
-        return jsonify("AEDT launched"), 200
+        return jsonify("AEDT properties loaded"), 200
     else:
         return jsonify("Fail to launch to AEDT"), 500
-
-
-@app.route("/connect_aedt", methods=["PUT"])
-def connect_aedt_call():
-    logger.info("[PUT] /connect_aedt (connect to an existing AEDT session)")
-
-    response = service.connect_aedt()
-    if response:
-        return jsonify("AEDT session connected"), 200
-    else:
-        return jsonify("AEDT session not connected"), 500
 
 
 @app.route("/close_aedt", methods=["POST"])
@@ -110,7 +98,8 @@ def close_aedt_call():
 
     close_projects = body["close_projects"]
     close_on_exit = body["close_on_exit"]
-    response = service.release_desktop(close_projects, close_on_exit)
+    response = service.release_aedt(close_projects, close_on_exit)
+
     if response:
         return jsonify("AEDT correctly released"), 200
     else:
@@ -140,9 +129,17 @@ def connect_design_call():
 def save_project_call():
     logger.info("[POST] /save_project (Save AEDT project)")
 
-    response = service.save_project()
+    body = request.json
+
+    if not body:
+        msg = "body is empty!"
+        logger.error(msg)
+        return jsonify("body is empty!"), 500
+
+    response = service.save_project(body)
+
     if response:
-        return jsonify("Project saved"), 200
+        return jsonify("Project saved: {}".format(body)), 200
     else:
         return jsonify(response), 500
 

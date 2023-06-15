@@ -49,4 +49,4 @@ The API can be used as in the following example:
         response = service.get_thread_status()
 
     # Desktop is released here
-    service.release_desktop()
+    service.release_aedt()

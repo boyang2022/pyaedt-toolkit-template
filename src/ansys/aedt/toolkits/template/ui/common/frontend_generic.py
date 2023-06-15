@@ -73,38 +73,12 @@ class FrontendGeneric(object):
             logger.debug("Check backend connection")
             count = 0
             response = False
-            while not response and count < 2:
+            while not response and count < 10:
                 time.sleep(1)
                 response = requests.get(self.url + "/health")
                 count += 1
+
             if response.ok:
-                self.write_log_line(f"Backend running: {self.url}")
-                self.write_log_line(response.json())
-                if response.json() != "Toolkit not connected to AEDT":
-                    self.toolkit_tab.removeTab(0)
-
-                    properties = self.get_properties()
-                    if properties["active_project_name"] and "project_aedt_combo" in self.__dir__():
-                        self.project_aedt_combo.clear()
-                        cont = 0
-                        for project in properties["project_list"]:
-                            self.project_aedt_combo.addItem(project)
-                            project_name = os.path.splitext(os.path.basename(properties["active_project_name"]))[0]
-                            if project_name == project:
-                                self.project_aedt_combo.setCurrentIndex(cont)
-                            cont += 1
-                    if properties["active_design_name"] and "design_aedt_combo" in self.__dir__():
-                        self.design_aedt_combo.clear()
-                        cont = 0
-                        design_name = properties["active_design_name"]
-                        for design in properties["design_list"]:
-                            self.design_aedt_combo.addItem(design)
-                            if design_name == design:
-                                self.design_aedt_combo.setCurrentIndex(cont)
-                            cont += 1
-                    properties = {"close_projects": False, "close_on_exit": False}
-                    requests.post(self.url + "/close_aedt", json=properties)
-
                 logger.debug(response.json())
                 return True
             logger.error(response.json())
@@ -168,7 +142,7 @@ class FrontendGeneric(object):
         if fileName:
             self.project_name.setText(fileName)
             properties = self.get_properties()
-            properties["active_project_name"] = fileName
+            properties["active_project"] = fileName
             self.set_properties(properties)
 
     def find_process_ids(self):
@@ -194,23 +168,30 @@ class FrontendGeneric(object):
             return False
 
     def find_design_names(self):
-        self.design_aedt_combo.clear()
-        try:
-            # Modify selected version
-            properties = self.get_properties()
-            properties["active_project_name"] = self.project_aedt_combo.currentText()
-            self.set_properties(properties)
+        response = requests.get(self.url + "/get_status")
 
-            response = requests.get(self.url + "/get_design_names")
-            if response.ok:
-                designs = response.json()
-                for design in designs:
-                    self.design_aedt_combo.addItem(design)
+        if response.ok and response.json() == "Backend running":
+            self.write_log_line("Please wait, toolkit running")
+        elif response.ok and response.json() == "Backend free":
+            self.design_aedt_combo.clear()
+            try:
+                # Modify selected version
+                properties = self.get_properties()
+                properties["active_project"] = self.project_aedt_combo.currentText()
+                self.set_properties(properties)
 
-            return True
-        except requests.exceptions.RequestException:
-            self.write_log_line(f"Find AEDT designs failed")
-            return False
+                response = requests.get(self.url + "/get_design_names")
+                if response.ok:
+                    designs = response.json()
+                    for design in designs:
+                        self.design_aedt_combo.addItem(list(design.values())[0])
+                    if not designs:
+                        self.design_aedt_combo.addItem("No design")
+
+                return True
+            except requests.exceptions.RequestException:
+                self.write_log_line(f"Find AEDT designs failed")
+                return False
 
     def launch_aedt(self):
         response = requests.get(self.url + "/get_status")
@@ -227,7 +208,8 @@ class FrontendGeneric(object):
                 if self.non_graphical_combo.currentText() == "False":
                     properties["non_graphical"] = False
                 if self.process_id_combo.currentText() == "Create New Session":
-                    properties["selected_process"] = 0
+                    if not properties["active_project"]:
+                        properties["selected_process"] = 0
                 else:
                     text_splitted = self.process_id_combo.currentText().split(" ")
                     if len(text_splitted) == 5:
@@ -277,10 +259,10 @@ class FrontendGeneric(object):
             elif response.ok and response.json() == "Backend free":
                 self.project_name.setText(file_name)
                 properties = self.get_properties()
-                properties["active_project_name"] = file_name
-                self.set_properties(properties)
+                # properties["active_project"] = file_name
+                # self.set_properties(properties)
                 self.update_progress(0)
-                response = requests.post(self.url + "/save_project")
+                response = requests.post(self.url + "/save_project", json=file_name)
                 if response.ok:
                     self.update_progress(50)
                     # Start the thread
@@ -296,17 +278,25 @@ class FrontendGeneric(object):
 
     def release_only(self):
         """Release desktop."""
+        response = requests.get(self.url + "/get_status")
 
-        properties = {"close_projects": False, "close_on_exit": False}
-        if self.close():
-            requests.post(self.url + "/close_aedt", json=properties)
+        if response.ok and response.json() == "Backend running":
+            self.write_log_line("Please wait, toolkit running")
+        else:
+            properties = {"close_projects": False, "close_on_exit": False}
+            if self.close():
+                requests.post(self.url + "/close_aedt", json=properties)
 
     def release_and_close(self):
         """Release and close desktop."""
+        response = requests.get(self.url + "/get_status")
 
-        properties = {"close_projects": True, "close_on_exit": True}
-        if self.close():
-            requests.post(self.url + "/close_aedt", json=properties)
+        if response.ok and response.json() == "Backend running":
+            self.write_log_line("Please wait, toolkit running")
+        elif response.ok and response.json() == "Backend free":
+            properties = {"close_projects": True, "close_on_exit": True}
+            if self.close():
+                requests.post(self.url + "/close_aedt", json=properties)
 
     def on_cancel_clicked(self):
         self.close()

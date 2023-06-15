@@ -1,4 +1,5 @@
 import logging
+import os.path
 
 from ansys.aedt.toolkits.template.backend.common.properties import properties
 
@@ -9,16 +10,16 @@ if properties.debug:
     logger.setLevel(logging.DEBUG)
 
     # Create a file handler for the logger
-    log_file = properties.log_file
+    if os.path.exists(properties.log_file):
+        log_file = properties.log_file
+        file_handler = logging.FileHandler(log_file)
 
-    file_handler = logging.FileHandler(log_file)
+        # Set the log format
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+        file_handler.setFormatter(formatter)
 
-    # Set the log format
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-    file_handler.setFormatter(formatter)
-
-    # Add the file handler to the logger
-    logger.addHandler(file_handler)
+        # Add the file handler to the logger
+        logger.addHandler(file_handler)
 
     # Create a stream handler for logging to the console
     console_handler = logging.StreamHandler()
