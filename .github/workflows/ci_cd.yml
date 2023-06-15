@@ -84,6 +84,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade build wheel
           pip install .[tests]
+        env:
+          ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
 
       - name: Testing
         timeout-minutes: 30
