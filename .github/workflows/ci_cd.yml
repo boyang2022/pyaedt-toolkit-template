@@ -116,7 +116,7 @@ jobs:
       - name: Create Python venv
         run: |
           python -m venv .venv_linux
-          export ANSYSEM_ROOT231=/apps/AnsysEM/v231/Linux64
+          export ANSYSEM_ROOT231=/ansys_inc/v231/Linux64
           export LD_LIBRARY_PATH=$ANSYSEM_ROOT231/common/mono/Linux64/lib64:$ANSYSEM_ROOT231/Delcross:$LD_LIBRARY_PATH
 
       - name: Install packages for testing
@@ -129,15 +129,19 @@ jobs:
           pip install --upgrade build wheel
           pip install .[tests]
           pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org pytest-azurepipelines
+        env:
+          ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
 
       - name: Testing
         timeout-minutes: 30
         run: |
           export ANS_NODEPCHECK=1
-          export ANSYSEM_ROOT231=/apps/AnsysEM/v231/Linux64
+          export ANSYSEM_ROOT231=/ansys_inc/v231/Linux64
           export LD_LIBRARY_PATH=$ANSYSEM_ROOT231/common/mono/Linux64/lib64:$ANSYSEM_ROOT231/Delcross:$LD_LIBRARY_PATH
           source .venv_linux/bin/activate
           pytest -v --cov=pyaedt-toolkit-template --cov-report=xml --junitxml=junit/test-results.xml --cov-report=html tests
+        env:
+          ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
 
       - name: Upload Coverage Results
         uses: actions/upload-artifact@v3
