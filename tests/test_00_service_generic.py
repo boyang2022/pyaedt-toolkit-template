@@ -46,28 +46,20 @@ class TestClass(BasisTest, object):
         assert response.ok
         assert isinstance(response.json(), list)
 
-    def test_06_connect_aedt(self):
-        response = requests.put(self.url + "/connect_aedt")
-        assert response.ok
-
-    def test_07_connect_design(self):
+    def test_06_connect_design(self):
         response = requests.post(self.url + "/connect_design", json={"aedtapp": "Icepak"})
         assert response.ok
 
-    def test_08_save_project(self):
-        new_properties = {
-            "active_project_name": os.path.join(self.local_path.path, "Test.aedt"),
-        }
-        response = requests.put(self.url + "/set_properties", json=new_properties)
-        assert response.ok
-        response = requests.post(self.url + "/save_project")
+    def test_07_save_project(self):
+        file_name = os.path.join(self.local_path.path, "Test.aedt")
+        response = requests.post(self.url + "/save_project", json=file_name)
         assert response.ok
         response = requests.get(self.url + "/get_status")
         while response.json() != "Backend free":
             time.sleep(1)
             response = requests.get(self.url + "/get_status")
 
-    def test_09_get_design_names(self):
+    def test_08_get_design_names(self):
         response = requests.get(self.url + "/get_design_names")
         assert response.ok
         assert len(response.json()) == 1

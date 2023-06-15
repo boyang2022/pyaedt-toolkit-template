@@ -165,4 +165,4 @@ This section shows how to install the toolkit in an specific python environment 
       len(service.comps)
 
       # Desktop is released here
-      service.release_desktop()
+      service.release_aedt()

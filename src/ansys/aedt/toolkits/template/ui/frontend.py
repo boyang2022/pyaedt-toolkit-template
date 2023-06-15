@@ -81,6 +81,9 @@ class ApplicationWindow(QtWidgets.QMainWindow, Ui_MainWindow, ToolkitFrontend):
         self.project_aedt_combo.currentTextChanged.connect(self.find_design_names)
 
         # Launch AEDT
+        if default_properties["selected_process"]:
+            self.launch_aedt()
+
         self.connect_aedtapp.clicked.connect(self.launch_aedt)
 
         # Toolkit Settings
