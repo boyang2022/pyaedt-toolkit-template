@@ -44,6 +44,6 @@ you can create an object as in the following example to use both classes:
         response = service.get_thread_status()
 
     # Desktop is released here
-    service_generic.release_desktop()
+    service_generic.release_aedt()
 
 

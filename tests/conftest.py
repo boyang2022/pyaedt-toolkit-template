@@ -1,9 +1,10 @@
-import atexit
 import datetime
 import gc
 import json
 import os
 import shutil
+import signal
+import subprocess
 import sys
 import tempfile
 import threading
@@ -21,14 +22,9 @@ settings.enable_desktop_logs = False
 local_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(local_path)
 
-is_linux = os.name == "posix"
-
-if is_linux:
-    import subprocessdotnet as subprocess
-else:
-    import subprocess
-
 from ansys.aedt.toolkits.template import backend
+
+is_linux = os.name == "posix"
 
 # Initialize default configuration
 config = {
@@ -81,6 +77,7 @@ class BasisTest(object):
         except Exception as e:
             oDesktop = None
             proj_list = []
+
         for proj in proj_list:
             oDesktop.CloseProject(proj)
 
@@ -103,24 +100,22 @@ non_graphical = config["non_graphical"]
 local_scratch = Scratch(scratch_path)
 
 
-# Clean up python processes
-def clean_python_processes():
-    # Terminate all remaining Python processes
-    current_process = psutil.Process()
-    for process in current_process.children(recursive=True):
-        if process.name() == "python.exe" or process.name() == "python":
-            process.terminate()
-
-
 # Define a function to run the subprocess command
 def run_command(*command):
-    CREATE_NO_WINDOW = 0x08000000
-    process = subprocess.Popen(
-        " ".join(command),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        creationflags=CREATE_NO_WINDOW,
-    )
+    if is_linux:
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    else:
+        CREATE_NO_WINDOW = 0x08000000
+        process = subprocess.Popen(
+            " ".join(command),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            creationflags=CREATE_NO_WINDOW,
+        )
     stdout, stderr = process.communicate()
     print(stdout.decode())
     print(stderr.decode())
@@ -128,6 +123,11 @@ def run_command(*command):
 
 @pytest.fixture(scope="session", autouse=True)
 def desktop_init():
+    if is_linux:
+        initial_pids = psutil.pids()
+    else:
+        initial_pids = psutil.Process().children(recursive=True)
+
     # Define the command to start the Flask application
     backend_file = os.path.join(backend.__path__[0], "backend.py")
     backend_command = [python_path, backend_file]
@@ -135,6 +135,32 @@ def desktop_init():
     flask_thread = threading.Thread(target=run_command, args=backend_command)
     flask_thread.daemon = True
     flask_thread.start()
+
+    time.sleep(1)
+
+    if is_linux:
+        current_process = len(psutil.pids())
+        count = 0
+        while current_process < len(initial_pids) and count < 10:
+            time.sleep(1)
+            current_process = len(psutil.pids())
+            count += 1
+    else:
+        current_process = len(psutil.Process().children(recursive=True))
+        count = 0
+        while current_process < len(initial_pids) and count < 10:
+            time.sleep(1)
+            current_process = len(psutil.Process().children(recursive=True))
+            count += 1
+
+    if current_process <= len(initial_pids):
+        raise "Backend not running"
+
+    if is_linux:
+        flask_pids = [element for element in psutil.pids() if element not in initial_pids]
+    else:
+        flask_pids = [element for element in psutil.Process().children(recursive=True) if element not in initial_pids]
+
     # Wait for the Flask application to start
     response = requests.get(url_call + "/get_status")
 
@@ -161,5 +187,12 @@ def desktop_init():
     shutil.rmtree(scratch_path, ignore_errors=True)
 
     # Register the cleanup function to be called on script exit
-    atexit.register(clean_python_processes)
     gc.collect()
+
+    if is_linux:
+        for process in flask_pids:
+            os.kill(process, signal.SIGKILL)
+    else:
+        for process in flask_pids:
+            if process.name() == "python.exe" or process.name() == "python":
+                process.terminate()
