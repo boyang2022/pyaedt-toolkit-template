@@ -24,18 +24,18 @@ you can create an object as in the following example to use both classes:
     service = ToolkitService()
 
     # Get the default properties loaded from json file
-    properties = service_generic.get_properties()
+    properties = service.get_properties()
 
     # Set properties
     new_properties = {"aedt_version": "2022.2"}
-    service_generic.set_properties(new_properties)
-    properties = service_generic.get_properties()
+    service.set_properties(new_properties)
+    properties = service.get_properties()
 
     # Get AEDT sessions
     sessions = service.aedt_sessions()
 
     # Launch AEDT
-    msg = service_generic.launch_aedt()
+    msg = service.launch_aedt()
 
     # Wait until thread is finished
     response = service.get_thread_status()
@@ -44,6 +44,6 @@ you can create an object as in the following example to use both classes:
         response = service.get_thread_status()
 
     # Desktop is released here
-    service_generic.release_aedt()
+    service.release_aedt()
 
 
