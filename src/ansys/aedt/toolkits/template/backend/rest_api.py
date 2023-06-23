@@ -1,11 +1,11 @@
-from ansys.aedt.toolkits.template.backend.common.backend_generic import app
-from ansys.aedt.toolkits.template.backend.common.backend_generic import jsonify
-from ansys.aedt.toolkits.template.backend.common.backend_generic import logger
-from ansys.aedt.toolkits.template.backend.common.backend_generic import service
-from ansys.aedt.toolkits.template.backend.common.backend_generic import settings
 from ansys.aedt.toolkits.template.backend.common.multithreading_server import MultithreadingServer
+from ansys.aedt.toolkits.template.backend.common.rest_api_generic import app
+from ansys.aedt.toolkits.template.backend.common.rest_api_generic import jsonify
+from ansys.aedt.toolkits.template.backend.common.rest_api_generic import logger
+from ansys.aedt.toolkits.template.backend.common.rest_api_generic import service
+from ansys.aedt.toolkits.template.backend.common.rest_api_generic import settings
 
-# Toolkit services
+# Toolkit entrypoints
 
 
 @app.route("/create_geometry", methods=["POST"])

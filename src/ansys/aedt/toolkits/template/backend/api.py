@@ -1,21 +1,21 @@
 import numpy as np
 
+from ansys.aedt.toolkits.template.backend.common.api_generic import ToolkitGeneric
+from ansys.aedt.toolkits.template.backend.common.api_generic import thread
 from ansys.aedt.toolkits.template.backend.common.logger_handler import logger
 from ansys.aedt.toolkits.template.backend.common.properties import properties
-from ansys.aedt.toolkits.template.backend.common.service_generic import ServiceGeneric
-from ansys.aedt.toolkits.template.backend.common.service_generic import thread
 
 
-class ToolkitService(ServiceGeneric):
+class Toolkit(ToolkitGeneric):
     """Template API to control the toolkit workflow.
 
     This class provides methods to connect to a selected design and create geometries.
 
     Examples
     --------
-    >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+    >>> from ansys.aedt.toolkits.template.backend.api import Toolkit
     >>> import time
-    >>> service = ToolkitService()
+    >>> service = Toolkit()
     >>> msg1 = service.launch_aedt()
     >>> response = service.get_thread_status()
     >>> while response[0] == 0:
@@ -29,7 +29,7 @@ class ToolkitService(ServiceGeneric):
     """
 
     def __init__(self):
-        ServiceGeneric.__init__(self)
+        ToolkitGeneric.__init__(self)
         self.multiplier = 1.0
         self.comps = []
 
@@ -44,9 +44,9 @@ class ToolkitService(ServiceGeneric):
 
         Examples
         --------
-        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> from ansys.aedt.toolkits.template.backend.api import Toolkit
         >>> import time
-        >>> service = ToolkitService()
+        >>> service = Toolkit()
         >>> msg1 = service.launch_aedt()
         >>> response = service.get_thread_status()
         >>> while response[0] == 0:
@@ -85,9 +85,9 @@ class ToolkitService(ServiceGeneric):
 
         Examples
         --------
-        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> from ansys.aedt.toolkits.template.backend.api import Toolkit
         >>> import time
-        >>> service = ToolkitService()
+        >>> service = Toolkit()
         >>> msg1 = service.launch_aedt()
         >>> response = service.get_thread_status()
         >>> while response[0] == 0:
@@ -121,9 +121,9 @@ class ToolkitService(ServiceGeneric):
 
         Examples
         --------
-        >>> from ansys.aedt.toolkits.template.backend.service import ToolkitService
+        >>> from ansys.aedt.toolkits.template.backend.api import Toolkit
         >>> import time
-        >>> service = ToolkitService()
+        >>> service = Toolkit()
         >>> msg1 = service.launch_aedt()
         >>> response = service.get_thread_status()
         >>> while response[0] == 0:
