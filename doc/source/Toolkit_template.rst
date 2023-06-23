@@ -42,14 +42,14 @@ Toolkit architecture is defined with the following structure of folders and file
    │    └──template
    │       ├── backend
    │       │   ├── common
-   │       │   ├── backend.py
+   │       │   ├── rest_api.py
    │       │   ├── properties.json
-   │       │   └── service.py
+   │       │   └── api.py
    │       ├── UI
    │       │   ├── common
    │       │   │   └── toolkit.ui
-   │       │   ├── frontend.py
-   │       │   └── frontend_toolkit.py
+   │       │   ├── frontend_api.py
+   │       │   └── frontend_actions.py
    │       └── run_toolkit.py
    ├── tests
    │   └── tests_files
@@ -62,12 +62,17 @@ Toolkit architecture is defined with the following structure of folders and file
 
 3. `template <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template>`_ contains the toolkit code. It is split in backend and frontend. It contains a script called "run_toolkit.py" which launches backend and frontend in two threads.
 
-    3.1 `backend <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/backend>`_: you can find two main files, **backend.py** where the entrypoints are defined and **services.py** which has toolkit API.
+    3.1 `backend <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/backend>`_: you can find two main files, **rest_api.py** where the HTTP entrypoints are defined and **api.py** which has the toolkit API.
 
     3.2 `UI <https://github.com/ansys/pyaedt-toolkit-template/tree/main/src/ansys/aedt/toolkits/template/ui>`_: you can find two main files, **frontend.py** and **frontend_toolkit.py**.
 
 4. `tests <https://github.com/ansys/pyaedt-toolkit-template/tree/main/tests>`_: folder contains the unit test of the backend.
 
+The architecture is defined in the following picture:
+
+.. image:: ./_static/architecture.png
+  :width: 800
+  :alt: Toolkit architecture
 
 Create a new repository in GitHub
 ---------------------------------
@@ -194,16 +199,16 @@ Properties.json
 This file contains the data shared between methods in the backend. This toolkit is creating a box or an sphere in HFSS in random positions, and the dimensions are multiplied by a value.
 Then the only toolkit inputs are the geometry type and the multiplier.
 
-Service.py
+Api.py
 ~~~~~~~~~~
 
 This file contains all the logic needed. For this example is a simple python file, but it can be a more complex structure with classes if it is needed.
 
 This file must work independently, it means, you do not need a user interface to run the full workflow of the toolkit.
-As an example, you can see in the docstring of the ToolkitService class, how to use the toolkit in a python terminal.
+As an example, you can see in the docstring of the Toolkit class, how to use the toolkit in a python terminal.
 
-Backend.py
-~~~~~~~~~~
+Rest_api.py
+~~~~~~~~~~~
 
 Once you have a service working, you need to define the entrypoints. It means, you need to create the url commands to allow the communication between frontend and backend.
 If you see this file, it contains only the entrypoint corresponding to this toolkit, but if you go to common backend_generic.py, you can find the generic entrypoints.

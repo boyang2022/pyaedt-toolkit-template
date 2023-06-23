@@ -2,10 +2,10 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 
+from ansys.aedt.toolkits.template.backend.api import Toolkit
 from ansys.aedt.toolkits.template.backend.common.logger_handler import logger
-from ansys.aedt.toolkits.template.backend.service import ToolkitService
 
-service = ToolkitService()
+service = Toolkit()
 settings = service.get_properties()
 
 app = Flask(__name__)

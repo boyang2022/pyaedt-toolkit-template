@@ -27,12 +27,12 @@ import subprocess
 python_path = sys.executable
 
 # Define the command to start the Flask application
-backend_file = os.path.join(backend.__path__[0], "backend.py")
+backend_file = os.path.join(backend.__path__[0], "rest_api.py")
 backend_command = [python_path, backend_file]
 
 
 # Define the command to start the PySide6 UI
-frontend_file = os.path.join(ui.__path__[0], "frontend.py")
+frontend_file = os.path.join(ui.__path__[0], "frontend_actions.py")
 frontend_command = [python_path, frontend_file]
 
 
@@ -110,9 +110,14 @@ else:
 
 # Check if the backend is running
 response = requests.get(url_call + "/get_status")
-while response.json() != "Backend free":
+count = 0
+while response.json() != "Backend free" and count < 10:
     time.sleep(1)
     response = requests.get(url_call + "/get_status")
+    count += 1
+
+if count > 10:
+    raise "Backend not running"
 
 # User can pass the desktop ID and version to connect to a specific AEDT session
 if len(sys.argv) == 3:
@@ -127,9 +132,13 @@ if len(sys.argv) == 3:
     requests.post(url_call + "/launch_aedt")
 
     response = requests.get(url_call + "/get_status")
-    while response.json() != "Backend free":
+    count = 0
+    while response.json() != "Backend free" and count < 10:
         time.sleep(1)
         response = requests.get(url_call + "/get_status")
+        count += 1
+    if count > 10:
+        raise "AEDT not connected"
 
 # Create a thread to run the PySide6 UI
 ui_thread = threading.Thread(target=run_command, args=frontend_command, name="frontend")

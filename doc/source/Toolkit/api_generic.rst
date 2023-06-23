@@ -1,15 +1,15 @@
-Generic service
-===============
+Generic API
+===========
 This section list the available generic methods in the backend, these methods are the same for all toolkits:
 
-.. currentmodule:: ansys.aedt.toolkits.template.backend.common.service_generic
+.. currentmodule:: ansys.aedt.toolkits.template.backend.common.api_generic
 
 .. autosummary::
    :toctree: _autosummary
 
-   ServiceGeneric
+   ToolkitGeneric
 
-**ServiceGeneric** class is accessible directly from :doc:`service` because it is inherited, then
+**ToolkitGeneric** class is accessible directly from :doc:`api` because it is inherited, then
 you can create an object as in the following example to use both classes:
 
 .. code:: python
@@ -18,10 +18,10 @@ you can create an object as in the following example to use both classes:
     import time
 
     # Import backend services
-    from ansys.aedt.toolkits.template.backend.service import ToolkitService
+    from ansys.aedt.toolkits.template.backend.api import Toolkit
 
     # Backend object
-    service = ToolkitService()
+    service = Toolkit()
 
     # Get the default properties loaded from json file
     properties = service.get_properties()

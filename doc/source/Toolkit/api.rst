@@ -1,13 +1,13 @@
-Toolkit service
-===============
+Toolkit API
+===========
 This section list the available toolkit methods in the backend:
 
-.. currentmodule:: ansys.aedt.toolkits.template.backend.service
+.. currentmodule:: ansys.aedt.toolkits.template.backend.api
 
 .. autosummary::
    :toctree: _autosummary
 
-   ToolkitService
+   Toolkit
 
 The API can be used as in the following example:
 
@@ -17,10 +17,10 @@ The API can be used as in the following example:
     import time
 
     # Import backend
-    from ansys.aedt.toolkits.template.backend.service import ToolkitService
+    from ansys.aedt.toolkits.template.backend.api import Toolkit
 
     # Initialize generic service
-    service = ToolkitService()
+    service = Toolkit()
 
     # Get the default properties loaded from json file
     properties = service.get_properties()

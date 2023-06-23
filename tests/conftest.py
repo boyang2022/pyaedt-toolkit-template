@@ -129,7 +129,7 @@ def desktop_init():
         initial_pids = psutil.Process().children(recursive=True)
 
     # Define the command to start the Flask application
-    backend_file = os.path.join(backend.__path__[0], "backend.py")
+    backend_file = os.path.join(backend.__path__[0], "rest_api.py")
     backend_command = [python_path, backend_file]
     # Create a thread to run the Flask application
     flask_thread = threading.Thread(target=run_command, args=backend_command)
